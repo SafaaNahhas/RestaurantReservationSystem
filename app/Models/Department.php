@@ -20,7 +20,7 @@ class Department extends Model
      */
     public function image()
     {
-        return $this->belongsTo(Image::class);
+        return $this->morphOne(Image::class, 'imagable');
     }
     /**
      * Relationship: A department has many tables.

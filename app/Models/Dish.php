@@ -20,7 +20,7 @@ class Dish extends Model
      */
     public function image()
     {
-        return $this->belongsTo(Image::class);
+        return $this->morphOne(Image::class, 'imagable');
     }
     /**
      * Relationship: A dish belongs to a food category.

@@ -16,11 +16,11 @@ class Dish extends Model
     // Mass-assignable attributes
     protected $fillable = ['name', 'description', 'image_id', 'category_id'];
     /**
-     * Relationship: A dish belongs to an image.
+     * Relationship: A department has one image (Morph One).
      */
     public function image()
     {
-        return $this->belongsTo(Image::class);
+        return $this->morphOne(Image::class, 'imagable');
     }
     /**
      * Relationship: A dish belongs to a food category.

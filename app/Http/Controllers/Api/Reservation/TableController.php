@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
-use App\Models\Department;
+use App\Models\Table;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class DepartmentController extends Controller
+class TableController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class DepartmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Department $department)
+    public function show(Table $table)
     {
         //
     }
@@ -35,7 +35,7 @@ class DepartmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Department $department)
+    public function update(Request $request, Table $table)
     {
         //
     }
@@ -43,7 +43,7 @@ class DepartmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Department $department)
+    public function destroy(Table $table)
     {
         //
     }

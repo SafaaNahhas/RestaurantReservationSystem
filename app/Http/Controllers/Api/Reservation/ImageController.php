@@ -1,25 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
-use App\Models\Rating;
+use App\Models\Image;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class RatingController extends Controller
+class ImageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
     {
         //
     }
@@ -35,15 +27,7 @@ class RatingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Rating $rating)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rating $rating)
+    public function show(Image $image)
     {
         //
     }
@@ -51,7 +35,7 @@ class RatingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Rating $rating)
+    public function update(Request $request, Image $image)
     {
         //
     }
@@ -59,7 +43,7 @@ class RatingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rating $rating)
+    public function destroy(Image $image)
     {
         //
     }

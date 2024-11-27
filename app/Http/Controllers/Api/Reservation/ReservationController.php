@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
 use App\Models\Reservation;
 use Illuminate\Http\Request;

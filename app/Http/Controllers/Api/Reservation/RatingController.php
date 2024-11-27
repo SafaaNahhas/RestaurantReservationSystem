@@ -1,17 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
-use App\Models\Table;
+use App\Models\Rating;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class TableController extends Controller
+class RatingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
         //
     }
@@ -27,7 +35,15 @@ class TableController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Table $table)
+    public function show(Rating $rating)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Rating $rating)
     {
         //
     }
@@ -35,7 +51,7 @@ class TableController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Table $table)
+    public function update(Request $request, Rating $rating)
     {
         //
     }
@@ -43,7 +59,7 @@ class TableController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Table $table)
+    public function destroy(Rating $rating)
     {
         //
     }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
+use App\Models\Dish;
 use Illuminate\Http\Request;
-use App\Models\ReservationLog;
 use App\Http\Controllers\Controller;
 
-class ReservationLogController extends Controller
+class DishController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class ReservationLogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ReservationLog $reservationLog)
+    public function show(Dish $dish)
     {
         //
     }
@@ -35,7 +35,7 @@ class ReservationLogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ReservationLog $reservationLog)
+    public function update(Request $request, Dish $dish)
     {
         //
     }
@@ -43,7 +43,7 @@ class ReservationLogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ReservationLog $reservationLog)
+    public function destroy(Dish $dish)
     {
         //
     }

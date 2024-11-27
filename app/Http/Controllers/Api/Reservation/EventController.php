@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
-use App\Models\EmailLog;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class EmailLogController extends Controller
+class EventController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class EmailLogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(EmailLog $emailLog)
+    public function show(Event $event)
     {
         //
     }
@@ -35,7 +35,7 @@ class EmailLogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, EmailLog $emailLog)
+    public function update(Request $request, Event $event)
     {
         //
     }
@@ -43,7 +43,7 @@ class EmailLogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(EmailLog $emailLog)
+    public function destroy(Event $event)
     {
         //
     }

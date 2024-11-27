@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Reservation;
 
-use App\Models\Image;
+use App\Models\EmailLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class ImageController extends Controller
+class EmailLogController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class ImageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Image $image)
+    public function show(EmailLog $emailLog)
     {
         //
     }
@@ -35,7 +35,7 @@ class ImageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Image $image)
+    public function update(Request $request, EmailLog $emailLog)
     {
         //
     }
@@ -43,7 +43,7 @@ class ImageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Image $image)
+    public function destroy(EmailLog $emailLog)
     {
         //
     }

@@ -15,12 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->foreignId('image_id')->nullable()->constrained('images')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */

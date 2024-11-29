@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
-     /**
+    /**
      * Return a success JSON response.
      *
      * @param mixed $data
@@ -18,11 +18,11 @@ class Controller extends BaseController
      * @param int $status
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function success($data = null, $message = 'Operation successful', $status = 200)
+    protected function success($data = null, $message = '', $status = 200)
     {
         return response()->json([
             'status' => 'success',
-            'message' => trans($message),
+            'message' => "$message Successful",
             'data' => $data,
         ], $status);
     }
@@ -35,11 +35,11 @@ class Controller extends BaseController
      * @param mixed $data
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function error($message = 'Operation failed', $status = 400, $data = null)
+    protected function error($message = '', $status = 400, $data = null)
     {
         return response()->json([
             'status' => 'error',
-            'message' => trans($message),
+            'message' => "$message Failed",
             'data' => $data,
         ], $status);
     }
@@ -52,11 +52,11 @@ class Controller extends BaseController
      * @param int $status
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function paginated(LengthAwarePaginator $paginator, $message = 'Operation successful', $status = 200)
+    protected function paginated(LengthAwarePaginator $paginator, $message = '', $status = 200)
     {
         return response()->json([
             'status' => 'success',
-            'message' => trans($message),
+            'message' => "$message Successful",
             'data' => $paginator->items(),
             'pagination' => [
                 'total' => $paginator->total(),

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\User;
@@ -40,7 +41,7 @@ class AuthService
         $user = new User();
         $user->name = $data['name'];
         $user->email = $data['email'];
-        $user->password=Hash::make($data['password']);
+        $user->password = Hash::make($data['password']);
         $user->save();
         $token = Auth::login($user);
 

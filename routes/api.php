@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Reservation\TableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,4 +15,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
- 
+Route::prefix('admin')->group(function () {
+    Route::apiResource('departments.tables', TableController::class);
+    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
+    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
+    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
+});
+
+
+Route::prefix('customer')->group(function () {
+    Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
+});

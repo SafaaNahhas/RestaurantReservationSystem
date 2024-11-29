@@ -32,6 +32,8 @@ class User extends Authenticatable implements JWTSubject
         'is_active',
     ];
 
+    protected $dates = ['deleted_at'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -49,6 +51,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
+        'phone' => 'string',
     ];
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

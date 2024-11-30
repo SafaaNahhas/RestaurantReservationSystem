@@ -4,6 +4,8 @@ use App\Enums\RoleUser;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Models\User;
 use App\Http\Controllers\Api\Reservation\RatingController;
+use App\Http\Controllers\Api\Reservation\DishController;
+use App\Http\Controllers\Api\Reservation\FoodCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -42,5 +44,24 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
     Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+
+
+
+
+    Route::post('categories', [FoodCategoryController::class, 'store']);
+    Route::put('category/{category}', [FoodCategoryController::class, 'update']);
+    Route::delete('category/{category}', [FoodCategoryController::class, 'destroy']);
+    Route::get('categories', [FoodCategoryController::class, 'index']);
+    Route::get('category/{category}', [FoodCategoryController::class, 'show']);
+
+    Route::post('dishes', [DishController::class, 'store']);
+    Route::put('dish/{dish}', [DishController::class, 'update']);
+    Route::delete('dish/{dish}', [DishController::class, 'destroy']);
+    Route::get('dishes', [DishController::class, 'index']);
+    Route::get('dish/{dish}', [DishController::class, 'show']);
 });
+
+
+
+
 

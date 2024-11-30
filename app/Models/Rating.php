@@ -12,8 +12,8 @@ class Rating extends Model
     use HasFactory;
     use SoftDeletes;
 
-   // Mass-assignable attributes
-    protected $fillable = ['user_id', 'rating', 'comment'];
+    // Mass-assignable attributes
+    protected $fillable = ['user_id', 'reservation_id', 'rating', 'comment'];
     /**
      * Relationship: A rating belongs to a user.
      */
@@ -21,4 +21,10 @@ class Rating extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function reservation()
+    {
+        return $this->belongsTo(Reservation::class);
+    }
+    
 }

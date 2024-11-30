@@ -52,4 +52,12 @@ class Reservation extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    public function rating(){
+        return $this->hasOne(Rating::class);
+    }
+
+
+
+
 }

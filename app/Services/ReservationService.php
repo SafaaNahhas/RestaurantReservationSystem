@@ -95,7 +95,7 @@ class ReservationService
             ];
         }
     }
-  
+
 
     /**
      * Get reserved tables during a specific time period.
@@ -206,7 +206,7 @@ class ReservationService
                     ];
                 }),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log any errors and return an error message
             Log::error('Error canceling unconfirmed reservations: ' . $e->getMessage());
             return ['error' => true, 'message' => 'An unexpected error occurred.'];
@@ -248,7 +248,7 @@ class ReservationService
             'error' => false,
             'reservation' => $reservation,
         ];
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         // Log the error and return a generic error message
         Log::error('Error confirming reservation: ' . $e->getMessage());
         return ['error' => true, 'message' => 'An unexpected error occurred.'];
@@ -282,7 +282,7 @@ public function cancelReservation($reservationId)
             'error' => false,
             'message' => 'Reservation cancelled successfully',
         ];
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         // Log any errors and return an error message
         Log::error('Error canceling reservation: ' . $e->getMessage());
         return ['error' => true, 'message' => 'An unexpected error occurred.'];
@@ -319,7 +319,7 @@ public function startService($reservationId)
             'error' => false,
             'reservation' => $reservation,
         ];
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         // Log any errors and return an error message
         Log::error('Error starting service: ' . $e->getMessage());
         return ['error' => true, 'message' => 'An unexpected error occurred.'];
@@ -387,7 +387,7 @@ public function completeService($reservationId)
                 'error' => false,
                 'message' => 'Reservation permanently deleted successfully',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log any errors
             Log::error('Error hard deleting reservation: ' . $e->getMessage());
             return ['error' => true, 'message' => 'An unexpected error occurred.'];

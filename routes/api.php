@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Reservation\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::get('/me', [AuthController::class, 'me']);
+
+    Route::post('reservations', [ReservationController::class, 'storeReservation']);
+    Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
+    Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancelReservation']);
+    Route::post('/reservations/{id}/start-service', [ReservationController::class, 'startService']);
+    Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
+    Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
+    Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
+
 });

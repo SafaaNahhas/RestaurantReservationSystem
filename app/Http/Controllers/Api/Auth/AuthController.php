@@ -3,8 +3,11 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Services\AuthService;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Request;
 use App\Http\Requests\AuthRequest\LoginRequest;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Http\Requests\AuthRequest\RegisterRequest;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 
 /**
  * Class AuthController
@@ -80,5 +83,25 @@ class AuthController extends Controller
         $response = $this->authService->refresh();
 
         return response()->json($response);
+    }
+      /**
+     * Get the authenticated user.
+     */
+    public function me(Request $request)
+    {
+        try {
+            // استرجاع المستخدم الذي تم توثيقه بناءً على التوكن
+            $user = JWTAuth::parseToken()->authenticate();
+
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            // إرجاع بيانات المستخدم مع الـ 200 OK
+            return response()->json(['user' => $user], 200);
+        } catch (JWTException $e) {
+            // في حال حدوث أي خطأ في التوكن
+            return response()->json(['error' => 'Token is invalid'], 401);
+        }
     }
 }

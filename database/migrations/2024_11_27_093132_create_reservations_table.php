@@ -20,10 +20,13 @@ return new class extends Migration
             $table->timestamp('end_date')->nullable();
             $table->integer('guest_count');
             $table->text('services')->nullable();
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            // $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed'])->default('pending');
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
-            $table->softDeletes();
+            // $table->softDeletes();
+            $table->index(['start_date', 'end_date']);
+
 
         });
     }

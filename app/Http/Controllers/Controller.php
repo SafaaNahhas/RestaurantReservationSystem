@@ -19,7 +19,6 @@ class Controller extends BaseController
      * @param int $status The HTTP status code.
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function success($data = null, $message = '', $status = 200)
     public static function success($data = null, $message = '', $status = 200)
     {
         return response()->json([

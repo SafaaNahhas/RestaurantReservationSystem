@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api\Reservation;
 
 use App\Models\Dish;
-use App\Services\DishService as DishService ;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Services\DishService as DishService ;
 use App\Http\Requests\DishRequest\StoreDishRequest;
 use App\Http\Requests\DishRequest\UpdateDishRequest;
 
@@ -40,7 +41,7 @@ class DishController extends Controller
     /**
      * Store a new Dish.
      *
-     * @param StorebookRequest $request
+     * @param StoreDishRequest $request
      * @return JsonResponse
      */
     public function store(StoreDishRequest $request)

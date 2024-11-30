@@ -7,6 +7,7 @@ use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 
 class Table extends Model
 {
@@ -31,4 +32,26 @@ class Table extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function scopeByTableNumber(Builder $query, $table_number)
+    {
+        if ($table_number)
+            return $query->where('table_number', 'like', "%$table_number%");
+        else
+            return $query;
+    }
+    public function scopeBySeatCount(Builder $query, $seat_count)
+    {
+        if ($seat_count)
+            return $query->where('seat_count', '=', $seat_count);
+        else
+            return $query;
+    }
+
+    public function scopeByLocation(Builder $query, $location)
+    {
+        if ($location)
+            return $query->where('location', '=', "%$location%");
+        else
+            return $query;
+    }
 }

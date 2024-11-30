@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Http\Controllers\Api\Reservation\RatingController;
 use App\Http\Controllers\Api\Reservation\DishController;
 use App\Http\Controllers\Api\Reservation\FoodCategoryController;
+use App\Http\Controllers\Api\Reservation\TableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -59,7 +60,18 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('dish/{dish}', [DishController::class, 'destroy']);
     Route::get('dishes', [DishController::class, 'index']);
     Route::get('dish/{dish}', [DishController::class, 'show']);
+
+    Route::prefix('admin')->group(function () {
+    Route::apiResource('departments.tables', TableController::class);
+    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
+    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
+    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 });
+
+
+Route::prefix('customer')->group(function () {
+    Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
+});});
 
 
 

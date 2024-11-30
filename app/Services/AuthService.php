@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Enums\RoleUser;
@@ -41,7 +42,7 @@ class AuthService
         $user = new User();
         $user->name = $data['name'];
         $user->email = $data['email'];
-        $user->password=Hash::make($data['password']);
+        $user->password = Hash::make($data['password']);
         $user->save();
         // assign customer role to user
         $user->assignRole(RoleUser::Customer);

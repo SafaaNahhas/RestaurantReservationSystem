@@ -32,5 +32,4 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
     Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
     Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
-
 });

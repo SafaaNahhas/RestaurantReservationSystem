@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Reservation\ReservationController;
+use App\Http\Controllers\Api\Reservation\EventController;
+// use app\Http\Controllers\Api\Reservation\DepartmentController;
+
+use App\Http\Controllers\Api\Reservation\DepartmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +72,19 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 });
 
+// Route::apiResource('departments', DepartmentController::class);
+// use App\Http\Controllers\Api\Reservation\DepartmentController;
+// Route::apiResource('event', EventController::class);
+
+Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+Route::apiResource('event', EventController::class);
+
+Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
+Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
+Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
+Route::apiResource('department', DepartmentController::class);
 
 Route::prefix('customer')->group(function () {
     Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);

@@ -1,7 +1,12 @@
 <?php
 
+use App\Enums\RoleUser;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Models\User;
 use App\Http\Controllers\Api\Reservation\RatingController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Reservation\ReservationController;

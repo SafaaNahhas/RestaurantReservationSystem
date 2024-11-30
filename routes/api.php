@@ -70,7 +70,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
     Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
     Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
-});
+
 
 // Route::apiResource('departments', DepartmentController::class);
 // use App\Http\Controllers\Api\Reservation\DepartmentController;
@@ -86,11 +86,12 @@ Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDele
 Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
 Route::apiResource('department', DepartmentController::class);
 
-Route::prefix('customer')->group(function () {
-    Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
-});});
+// Route::prefix('customer')->group(function () {
+//     Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
+// });
+});
 
 
-
+});
 
 

@@ -26,7 +26,7 @@ class ReservationController extends Controller
     {
         $this->reservationService = $reservationService;
     }
-    
+
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
         $result = $this->reservationService->storeReservation($request->validated());

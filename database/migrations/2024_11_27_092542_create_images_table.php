@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('images', function (Blueprint $table) {
-            $table->id();
-            $table->string('image_path');
-            $table->morphs('imagable'); 
-            $table->softDeletes();
-            $table->timestamps();
-        });
+       Schema::create('images', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->string('mime_type');
+    $table->string('image_path');
+    $table->morphs('imagable');
+    $table->softDeletes();
+    $table->timestamps();
+});
+
     }
 
     /**

@@ -14,10 +14,10 @@ class Department extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['name', 'description', 'image_id'];
-  /**
-     * Relationship: A department has one image (Morph One).
-     */
+    protected $fillable = ['name', 'description'];
+    /**
+       * Relationship: A department has one image (Morph One).
+       */
     public function image()
     {
         return $this->morphOne(Image::class, 'imagable');
@@ -29,4 +29,5 @@ class Department extends Model
     {
         return $this->hasMany(Table::class);
     }
+
 }

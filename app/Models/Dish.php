@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Image;
 use App\Models\FoodCategory;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,4 +30,8 @@ class Dish extends Model
     {
         return $this->belongsTo(FoodCategory::class, 'category_id');
     }
+
+
+
 }
+

@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Services;
 
+use App\Enums\RoleUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -40,8 +42,10 @@ class AuthService
         $user = new User();
         $user->name = $data['name'];
         $user->email = $data['email'];
-        $user->password=Hash::make($data['password']);
+        $user->password = Hash::make($data['password']);
         $user->save();
+        // assign customer role to user
+        $user->assignRole(RoleUser::Customer);
         $token = Auth::login($user);
 
         return [

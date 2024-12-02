@@ -10,6 +10,7 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+
     /**
      * Return a successful JSON response.
      *
@@ -29,7 +30,7 @@ class Controller extends BaseController
 
 
     /**
-     * Return an error JSON response.
+  * Return an error JSON response.
      *
      * @param mixed $data The data to be returned in the response.
      * @param string $message The error message.
@@ -75,4 +76,10 @@ class Controller extends BaseController
             ],
         ], $status);
     }
+
 }
+
+
+
+
+

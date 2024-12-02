@@ -1,0 +1,349 @@
+{
+	"info": {
+		"_postman_id": "05f8a5d8-b51a-4524-8a81-96126dacb352",
+		"name": "Table",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26735916"
+	},
+	"item": [
+		{
+			"name": "allTables",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables"
+					],
+					"query": [
+						{
+							"key": "table_number",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "seat_count",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "location",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "showTable",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/8/tables/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"8",
+						"tables",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createTable",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "table_number",
+							"value": "hr32",
+							"type": "text"
+						},
+						{
+							"key": "location",
+							"value": "hhhhhhhhhhh",
+							"type": "text"
+						},
+						{
+							"key": "seat_count",
+							"value": "6",
+							"type": "text"
+						},
+						{
+							"key": "department_id",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateTable",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "table_number",
+							"value": "hr32",
+							"type": "text"
+						},
+						{
+							"key": "location",
+							"value": "dsvsdv",
+							"type": "text"
+						},
+						{
+							"key": "seat_count",
+							"value": "8",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteTable",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables/2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "allDeletedTables",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/allDeletedTables?table_number&seat_count&location",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"allDeletedTables"
+					],
+					"query": [
+						{
+							"key": "table_number",
+							"value": null
+						},
+						{
+							"key": "seat_count",
+							"value": null
+						},
+						{
+							"key": "location",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "restoreTable",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables/2/restore",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables",
+						"2",
+						"restore"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "finalDeleteTable",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/admin/departments/1/tables/2/forceDelete",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"admin",
+						"departments",
+						"1",
+						"tables",
+						"2",
+						"forceDelete"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

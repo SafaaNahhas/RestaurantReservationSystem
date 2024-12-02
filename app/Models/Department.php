@@ -14,7 +14,7 @@ class Department extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['name', 'description', 'image_id'];
+    protected $fillable = ['name', 'description'];
   /**
      * Relationship: A department has one image (Morph One).
      */

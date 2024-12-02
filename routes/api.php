@@ -37,7 +37,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
     Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
     Route::apiResource('rating', RatingController::class);
-    Route::get('test', [RatingController::class, 'test']);
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
     Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating

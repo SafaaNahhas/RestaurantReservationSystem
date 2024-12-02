@@ -18,8 +18,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/view', [RatingController::class, 'show_rating']);
 Route::apiResource('rating', RatingController::class);
-Route::get('test', [RatingController::class, 'test']);
+
+// Route::get('test', [RatingController::class, 'test']);
 
 
 

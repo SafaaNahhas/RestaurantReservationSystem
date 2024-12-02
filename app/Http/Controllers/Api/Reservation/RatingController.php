@@ -54,17 +54,29 @@ class RatingController extends Controller
             return $this->success($response, 'rating created successfully', 201);
         }
     }
+    // public function show(){
+    //     dd(333);
+    // }
 
     /** 
      * Display the specified rating.
      * @param Rating $rating
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Rating $rating)
+    public function show_rating(Request $request)
     {
-
+        $reservationId = $request->query('reservation_id');
+        $userId = $request->query('user_id');
+    
+        $rating = $this->ratingService->getRatingByReservationAndUser($reservationId, $userId);
+    
+        if (!$rating) {
+            return $this->error();
+        }
+    
         return $this->success($rating);
     }
+    
 
 
     /** 

@@ -1,7 +1,6 @@
-<p>Dear {{$user->name}}</p>
-
-<p>Thank you for your reservation! We would appreciate it if you could rate your experience.</p>
-
-<a href="{{ $link }}">Click here to rate</a>
-
-<p>Best regards,<br>Restaurant Team</p>
+<body>
+    <?php Log::info('Rating email template loaded.'); ?>
+    <p>Dear Guest</p>
+    <p>Thank you for using our service! Please take a moment to rate your reservation:</p>
+    <p>Thank you for your feedback!</p>
+</body>

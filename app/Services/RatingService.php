@@ -8,6 +8,30 @@ use Illuminate\Support\Facades\Log;
 class RatingService
 {
 
+
+    /**
+     * Fetch a rating based on reservation ID and user ID.
+     *
+     * @param int $reservationId
+     * @param int $userId
+     * @return Rating|null
+     */
+    public function getRatingByReservationAndUser($reservationId, $userId)
+    {
+        try {
+
+            $rating=Rating::where('reservation_id', $reservationId)
+                ->where('user_id', $userId)
+                ->first();
+            return $rating;
+        } catch (\Exception $e) {
+            Log::error('Error in ratingService@create_rating: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
     /**
      * store the rating
      * @param Rating $rating

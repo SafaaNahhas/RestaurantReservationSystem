@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Jobs;
 
 use App\Models\Reservation;
@@ -31,14 +32,33 @@ class SendRatingRequestJob implements ShouldQueue
     public function handle()
     {
         $user = $this->reservation->user;
-    Log::info('$this->reservation->user'. $this->reservation->user);
-        $ratingApiLink = url('/api/ratings?reservation_id=' . $this->reservation->id . '&user_id=' . $user->id);
-
-        Mail::to($user->email)->send(new RatingRequestMail($ratingApiLink,$user));
-
-        Log::info('Rating email dispatched.', [
-            'user_id' => $user->id,
+    
+        // تسجيل البيانات لمعرفة تفاصيل الحجز والمستخدم
+        Log::info('Job started for sending rating email.', [
             'reservation_id' => $this->reservation->id,
+            'user_id' => $user->id,
+            'user_email' => $user->email,
         ]);
+    
+        try {
+            // تسجيل محاولة الإرسال
+            Log::info('Attempting to send email to user.', ['email' => $user->email]);
+    
+            Mail::to($user->email)->send(new RatingRequestMail());
+    
+            // إذا نجح الإرسال
+            Log::info('Rating email sent successfully.', [
+                'user_id' => $user->id,
+                'reservation_id' => $this->reservation->id,
+            ]);
+        } catch (\Exception $e) {
+            // إذا فشل الإرسال
+            Log::error('Failed to send rating email.', [
+                'error_message' => $e->getMessage(),
+                'user_id' => $user->id,
+                'reservation_id' => $this->reservation->id,
+            ]);
+        }
     }
+    
 }

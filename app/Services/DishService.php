@@ -2,16 +2,18 @@
 
 namespace App\Services;
 
-
-
-use App\Models\Dish;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Models\Dish;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
+use Illuminate\Support\Str;
 
-class DishService{
+class DishService
+{
 
 
     /**
@@ -22,63 +24,87 @@ class DishService{
         try {
             return Dish::with('category')->paginate($per_page);
         } catch (Exception $e) {
-         Log::error('Error in Get all Dishes'. $e->getMessage());
-         throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
+            Log::error('Error in Get all Dishes'. $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                   'status' => 'error',
+                   'message' => "there is something wrong in server",
             ],
-            500
-        ));
+                500
+            ));
         }
     }
-
-
-   
-    
-
-     /**
-     * Create a new Dish.
-     *
-     * @param array $Dish
-     * @return \App\Models\Dish
-     */
+    /**
+    * Create a new Dish.
+    *
+    * @param array $Dish
+    * @return \App\Models\Dish
+    */
     public function createDish(array $data)
     {
         try {
+            DB::beginTransaction();
             // Create a new Dish record with the provided data
-            return Dish::create([
-                'name'=> $data['name'],
-                'description'=> $data['description'] ?? null, 
-                'category_id'=>$data['category_id'], 
+            $dish = Dish::create([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'category_id' => $data['category_id'],
             ]);
+            // Handle images if they exist
+            if (isset($data['images']) && !empty($data['images'])) {
+                $images = $data['images'];
+                foreach ($images as $image) {
+                    $imageName = Str::random(32);
+                    // Get the file extension (e.g., .jpg, .png)
+                    $extension = $image->getClientOriginalExtension();
+                    // Define the file path for storing the image
+                    $filePath = "Images/{$imageName}.{$extension}";
+                    // Store the image securely in the 'public' disk storage
+                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    // Get the full URL to the stored image
+                    $url = Storage::disk('public')->url($path);
+                    // Get the MIME type of the image
+                    $mime_type = $image->getClientMimeType();
+                    // Associate the image with the department and store it in the 'images' table
+                    $dish->image()->create([
+                        'mime_type' => $mime_type,
+                        'image_path' => $url, // Full path to the image
+                        'name' => $imageName, // Randomly generated image name
+                    ]);
+                }
+            }
+            // Commit the transaction if all is well
+            DB::commit();
+            // Return the created dish
+            return $dish;
         } catch (Exception $e) {
-          Log::error('Error creating Dish: ' . $e->getMessage());
-          throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
-            ],
-            500
-        ));
+            DB::rollBack(); // Rollback the transaction on error
+            Log::error('Error creating Dish: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "There is something wrong with the server",
+                ],
+                500
+            ));
         }
     }
 
-     /**
-     * Get the details of a specific Dish by its ID.
-     *
-     * @param int $id
-     * @return \App\Models\Dish
-     */
+    /**
+    * Get the details of a specific Dish by its ID.
+    *
+    * @param int $id
+    * @return \App\Models\Dish
+    */
     public function getDish(int $id)
     {
         try {
+            DB::beginTransaction();
             // Find the Dish by ID or fail with a 404 error if not found
             $dish= Dish::findOrFail($id);
             return $dish->load('category');
         } catch (ModelNotFoundException $e) {
             Log::error("error in get a Dish" . $e->getMessage());
-
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
@@ -86,10 +112,9 @@ class DishService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in get a Dish" . $e->getMessage());
-
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
@@ -101,13 +126,13 @@ class DishService{
     }
 
 
-     /**
-     * Update the details of a specific book.
-     *
-     * @param array $data
-     * @param int $id
-     * @return \App\Models\Book
-     */
+    /**
+    * Update the details of a specific book.
+    *
+    * @param array $data
+    * @param int $id
+    * @return \App\Models\Book
+    */
     public function updateDish(array $data, int $id)
     {
         try {
@@ -120,7 +145,32 @@ class DishService{
                 'description'=> $data['description'] ?? $dish->description,
                 'category_id'=> $data['category_id'] ?? $dish->category_id,
             ]));
-           
+            // Handle images if they exist
+            if (isset($data['images']) && !empty($data['images'])) {
+                $images = $data['images'];
+                foreach ($images as $image) {
+                    $imageName = Str::random(32);
+                    // Get the file extension (e.g., .jpg, .png)
+                    $extension = $image->getClientOriginalExtension();
+                    // Define the file path for storing the image
+                    $filePath = "Images/{$imageName}.{$extension}";
+                    // Store the image securely in the 'public' disk storage
+                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    // Get the full URL to the stored image
+                    $url = Storage::disk('public')->url($path);
+                    // Get the MIME type of the image
+                    $mime_type = $image->getClientMimeType();
+                    // Associate the image with the department and store it in the 'images' table
+                    $dish->image()->create([
+                        'mime_type' => $mime_type,
+                        'image_path' => $url, // Full path to the image
+                        'name' => $imageName, // Randomly generated image name
+                    ]);
+                }
+            }
+            // Commit the transaction if all is well
+            DB::commit();
+
             // Return the updated dish
             return $dish;
         } catch (ModelNotFoundException $e) {
@@ -133,7 +183,7 @@ class DishService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in update Dish" . $e->getMessage());
 
@@ -146,8 +196,8 @@ class DishService{
             ));
         }
     }
-    
-   
+
+
     /**
      * Delete a specific Dish by its ID.
      *
@@ -159,7 +209,7 @@ class DishService{
         try {
             // Find the Dish by ID or fail with a 404 error if not found
             $Dish = Dish::findOrFail($id);
-
+            $Dish->image()->delete();
             // Delete the Dish
             $Dish->delete();
         } catch (ModelNotFoundException $e) {
@@ -172,7 +222,7 @@ class DishService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in delete a Dish" . $e->getMessage());
 
@@ -185,14 +235,14 @@ class DishService{
             ));
         }
     }
-     /**
-     * Display a paginated listing of the trashed (soft deleted) resources.
-     */
+    /**
+    * Display a paginated listing of the trashed (soft deleted) resources.
+    */
     public function trashedListDish($perPage)
     {
         try {
             return Dish::onlyTrashed()->paginate($perPage);
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error("error in display list of trashed Dish" . $e->getMessage());
 
             throw new HttpResponseException(response()->json(
@@ -202,7 +252,7 @@ class DishService{
                 ],
                 500
             ));
-    }
+        }
     }
     /**
      * Restore a trashed (soft deleted) resource by its ID.
@@ -216,12 +266,12 @@ class DishService{
     public function restoreDish($id)
     {
         try {
-            $$Dish = Dish::onlyTrashed()->findOrFail($id);
-            $$Dish->restore();
+            $Dish = Dish::onlyTrashed()->findOrFail($id);
+            $Dish->restore();
+            $Dish->image()->restore();
             return $$Dish;
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
-
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
@@ -229,7 +279,7 @@ class DishService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in restore a Dish" . $e->getMessage());
 
@@ -255,9 +305,10 @@ class DishService{
     public function forceDeleteDish($id)
     {
         try {
-            $Task = Dish::onlyTrashed()->findOrFail($id);
+            $Dish = Dish::onlyTrashed()->findOrFail($id);
+            $Dish->image()->forceDelete();
 
-            $Task->forceDelete();
+            $Dish->forceDelete();
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
 
@@ -268,7 +319,7 @@ class DishService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error  in forceDelete Dish" . $e->getMessage());
 
@@ -279,6 +330,150 @@ class DishService{
                 ],
                 500
             ));
+        }
+    }
+
+
+    /**
+ * Soft delete an image associated with a dish.
+ *
+ * @param  string  $imageId  The ID of the image to be deleted.
+ * @param  string  $dishId  The ID of the dish the image belongs to.
+ * @return bool  Indicates whether the deletion was successful.
+ */
+    public function softDeleteDishImage(string $imageId, string $dishId)
+    {
+        try {
+            // Find the dish by its ID
+            $dish = Dish::findOrFail($dishId);
+            // Find the image associated with the dish by its ID
+            $image = $dish->image()->find($imageId);
+            // If the image is not found, return a clear error response
+            if (!$image) {
+                throw new HttpResponseException(response()->json([
+                    'status' => 'error',
+                    'message' => "Image not found",
+                ], 404));
+            }
+            // Soft delete the image
+            $image->delete();
+            // Return true to indicate the operation was successful
+            return true;
+        } catch (ModelNotFoundException $e) {
+            Log::error('Dish not found: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => "Dish not found",
+            ], 404));
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error soft deleting image: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => 'Error soft deleting image',
+            ], 500));
+        }
+    }
+    /**
+     * Get all images (including permanently deleted) associated with all dishes.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDeletedImage()
+    {
+        try {
+            $dishes = Dish::with(['image' => function ($query) {
+                $query->onlyTrashed(); // Retrieve soft deleted images
+            }])->get();
+            return $dishes;
+        } catch (Exception $e) {
+            Log::error('Error fetching images including deleted images for all dishes: ' . $e->getMessage());
+            throw new \RuntimeException('Unable to fetch images including deleted images for all dishes.');
+        }
+    }
+    /**
+     * Restore a soft-deleted image associated with a dish.
+     *
+     * @param  string  $imageId  The ID of the image to be restored.
+     * @param  string  $dishId  The ID of the dish the image belongs to.
+     * @return bool  Indicates whether the restoration was successful.
+     */
+    public function restoreDishImage(string $imageId, string $dishId)
+    {
+        try {
+            // Find the dish by its ID
+            $dish = Dish::findOrFail($dishId);
+            // Find the image associated with the dish by its ID
+            $image = $dish->image()->onlyTrashed()->find($imageId);
+            // If the image is not found, return a clear error response
+            if (!$image) {
+                throw new HttpResponseException(response()->json([
+                    'status' => 'error',
+                    'message' => "Image not found",
+                ], 404));
+            }
+            // Restore the soft-deleted image
+            $image->restore();
+            // Return true to indicate the operation was successful
+            return true;
+        } catch (ModelNotFoundException $e) {
+            Log::error('Dish not found: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => "Dish not found",
+            ], 404));
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error restoring image: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => 'Error restoring image',
+            ], 500));
+        }
+    }
+
+
+    /**
+     * Permanently delete an image associated with a dish.
+     *
+     * @param  string  $imageId  The ID of the image to be permanently deleted.
+     * @param  string  $dishId  The ID of the dish the image belongs to.
+     * @return bool  Indicates whether the permanent deletion was successful.
+     */
+    public function permanentlyDeleteImage(string $imageId, string $dishId)
+    {
+        try {
+            // Find the dish by its ID
+            $dish = Dish::findOrFail($dishId);
+            // Find the image associated with the dish by its ID
+            $image = $dish->image()->onlyTrashed()->find($imageId);
+            // If the image is not found, return a clear error response
+            if (!$image) {
+                throw new HttpResponseException(response()->json([
+                    'status' => 'error',
+                    'message' => "Image not found",
+                ], 404));
+            }
+            // Permanently delete the image
+            $image->forceDelete();
+            // Return true to indicate the operation was successful
+            return true;
+        } catch (ModelNotFoundException $e) {
+            Log::error('Dish not found: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => "Dish not found",
+            ], 404));
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error permanently deleting image: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => 'Error permanently deleting image',
+            ], 500));
         }
     }
 

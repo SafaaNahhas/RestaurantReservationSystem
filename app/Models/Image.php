@@ -12,7 +12,7 @@ class Image extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['image_path'];
+    protected $fillable = ['image_path','mime_type','name'];
     /**
      * Relationship: Supports morphable relations with multiple models.
      */

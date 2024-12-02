@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\DishRequest;
 
+use App\Rules\ImageNumeCheck;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreDishRequest extends FormRequest
 {
@@ -24,9 +25,19 @@ class StoreDishRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255', 
-            'description' => 'nullable|string', 
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'category_id' => 'required|exists:food_categories,id',
+           'images' => [
+                'sometimes',
+                'array', // Make sure 'images' is an array
+                'max:5', // Optional: limit the maximum number of images
+            ],
+            'images.*' => [ // Validate each image in the array
+                'image', // The file must be an image
+                'mimes:jpeg,png,gif,webp', // Must be of type jpeg, png, gif, or webp
+                new ImageNumeCheck(), // Using a custom rule to check the file name
+            ],
         ];
     }
 
@@ -50,5 +61,5 @@ class StoreDishRequest extends FormRequest
     }
 
 
-    
+
 }

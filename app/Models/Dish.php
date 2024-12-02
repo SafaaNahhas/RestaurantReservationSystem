@@ -15,7 +15,7 @@ class Dish extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['name', 'description', 'image_id', 'category_id'];
+    protected $fillable = ['name', 'description', 'category_id'];
     /**
      * Relationship: A department has one image (Morph One).
      */

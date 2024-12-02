@@ -17,10 +17,10 @@ class DishController extends Controller
      */
     protected $dishService;
 
-     /**
-     *  DishController constructor
-     * @param DishService $DishService
-     */
+    /**
+    *  DishController constructor
+    * @param DishService $DishService
+    */
     public function __construct(DishService $dishService)
     {
         $this->dishService = $dishService;
@@ -35,7 +35,7 @@ class DishController extends Controller
     {
         $perPage = $request->input('per_page', 10);
         $Dish=$this->dishService->listDish($perPage);
-        return $this->success($Dish,'All Dish retrieved successfully');
+        return $this->success($Dish, 'All Dish retrieved successfully');
     }
 
     /**
@@ -73,7 +73,7 @@ class DishController extends Controller
     public function update(UpdateDishRequest $request, int $id)
     {
         $validatedRequest = $request->validated();
-        $updatedDish=$this->dishService->updateDish($validatedRequest,$id);
+        $updatedDish=$this->dishService->updateDish($validatedRequest, $id);
         return $this->success($updatedDish, 'Dish uopdated successfully.', 200);
     }
 
@@ -89,9 +89,9 @@ class DishController extends Controller
         return $this->success([], 'Dish deleted successfully.', 200);
     }
 
-     /**
-     * Display a paginated listing of the trashed (soft deleted) resources.
-     */
+    /**
+    * Display a paginated listing of the trashed (soft deleted) resources.
+    */
     public function trashed(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -99,9 +99,9 @@ class DishController extends Controller
         return $this->success($trashedDish);
     }
 
-     /**
-     * Restore a trashed (soft deleted) resource by its ID.
-     */
+    /**
+    * Restore a trashed (soft deleted) resource by its ID.
+    */
     public function restore($id)
     {
         $Dish = $this->dishService->restoreDish($id);
@@ -117,4 +117,61 @@ class DishController extends Controller
         $this->dishService->forceDeleteDish($id);
         return $this->success(null, "Dish deleted Permanently");
     }
+
+
+    /**
+ * Soft delete an image associated with a dish.
+ *
+ * @param  string  $dishId  The ID of the dish the image belongs to.
+ * @param  string  $imageId  The ID of the image to be soft deleted.
+ * @return \Illuminate\Http\JsonResponse
+ */
+    public function softDeleteImage($dishId, $imageId)
+    {
+        // Call the service method to soft delete the image
+        $this->dishService->softDeleteDishImage($imageId, $dishId);
+        // Return a success response
+        return self::success(null, 'Image soft deleted.');
+    }
+    /**
+     * Show all soft deleted images.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showDeletedImage()
+    {
+        // Get all deleted images from the service
+        $images = $this->dishService->getDeletedImage();
+        // Return a success response with the retrieved images
+        return self::success($images, 'Images deleted.', 200);
+    }
+    /**
+     * Restore a soft-deleted image associated with a dish.
+     *
+     * @param  string  $dishId  The ID of the dish the image belongs to.
+     * @param  string  $imageId  The ID of the image to be restored.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restoreImage($dishId, $imageId)
+    {
+        // Call the service method to restore the soft-deleted image
+        $this->dishService->restoreDishImage($imageId, $dishId);
+        // Return a success response
+        return self::success(null, 'Image restored.');
+    }
+    /**
+     * Permanently delete an image associated with a dish.
+     *
+     * @param  string  $dishId  The ID of the dish the image belongs to.
+     * @param  string  $imageId  The ID of the image to be permanently deleted.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteImage($dishId, $imageId)
+    {
+        // Call the service method to permanently delete the image
+        $this->dishService->permanentlyDeleteImage($imageId, $dishId);
+        // Return a success response
+        return self::success(null, 'Image permanently deleted.');
+    }
+
 }

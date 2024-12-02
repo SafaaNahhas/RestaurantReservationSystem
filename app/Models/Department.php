@@ -15,9 +15,9 @@ class Department extends Model
 
     // Mass-assignable attributes
     protected $fillable = ['name', 'description'];
-  /**
-     * Relationship: A department has one image (Morph One).
-     */
+    /**
+       * Relationship: A department has one image (Morph One).
+       */
     public function image()
     {
         return $this->morphOne(Image::class, 'imagable');
@@ -29,4 +29,5 @@ class Department extends Model
     {
         return $this->hasMany(Table::class);
     }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Department;
 
+use App\Rules\ImageNumeCheck;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDepartmentRequest extends FormRequest
@@ -24,15 +25,28 @@ class UpdateDepartmentRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255|unique:departments,name,' . $this->route('department')->id,
             'description' => 'sometimes|string|max:1000',
+              'images' => [
+                'sometimes',
+                'array', // Make sure 'images' is an array
+                'max:5', // Optional: limit the maximum number of images
+            ],
+            'images.*' => [ // Validate each image in the array
+                'image', // The file must be an image
+                'mimes:jpeg,png,gif,webp', // Must be of type jpeg, png, gif, or webp
+                new ImageNumeCheck(), // Using a custom rule to check the file name
+            ],
+
+
         ];
     }
 
 
-     /**
-     * رسائل التحقق المخصصة.
-     *
-     * @return array
-     */
+
+    /**
+    * رسائل التحقق المخصصة.
+    *
+    * @return array
+    */
     public function messages()
     {
         return [
@@ -42,7 +56,7 @@ class UpdateDepartmentRequest extends FormRequest
             'name.unique' => 'The category name already exists.',
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description must not exceed 1000 characters.',
-          
+
         ];
     }
 }

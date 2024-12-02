@@ -9,46 +9,43 @@ use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\TableReservationResource;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ReservationService
 {
 
 
 
+        /**
+         * Store a new reservation.
+         * @param array $data
+         * @return array
+         */
+        public function storeReservation(array $data)
+            {
+            try {
+                $startDate = Carbon::parse($data['start_date']);
+                $endDate = Carbon::parse($data['end_date']);
+                $services = $data['services'] ?? null;
 
-    /**
-     * Store a new reservation.
-     * @param array $data
-     * @return array
-     */
-    public function storeReservation(array $data)
-    {
-        try {
-            $startDate = Carbon::parse($data['start_date']);
-            $endDate = Carbon::parse($data['end_date']);
-            $services = $data['services'] ?? null;
+                if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
+                    ];
+                }
 
-            if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
-                return [
-                    'status_code' => 422,
-                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
-                ];
-            }
+                $tablesWithEnoughSeats = Table::where('seat_count', '>=', $data['guest_count'])->exists();
 
-            $availableTable = Table::where('seat_count', '>=', $data['guest_count'])
-                ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                            $nestedQuery->where('start_date', '<', $startDate)
-                                        ->where('end_date', '>', $endDate);
-                        });
-                })
-                ->first();
+                if (!$tablesWithEnoughSeats) {
+                    return [
+                        'status_code' => 404,
+                        'message' => 'No tables available with enough seats for the guest count.'
+                    ];
+                }
 
-            if (!$availableTable) {
-                $reservedTables = Table::where('seat_count', '>=', $data['guest_count'])
-                    ->whereHas('reservations', function ($query) use ($startDate, $endDate) {
+                $availableTable = Table::where('seat_count', '>=', $data['guest_count'])
+                    ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
                         $query->whereBetween('start_date', [$startDate, $endDate])
                             ->orWhereBetween('end_date', [$startDate, $endDate])
                             ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
@@ -56,46 +53,52 @@ class ReservationService
                                             ->where('end_date', '>', $endDate);
                             });
                     })
-                    ->with('reservations')
-                    ->get();
+                    ->first();
 
-                $response = [
-                    'status_code' => 409,
-                    'message' => 'No available tables for the selected time period.',
-                ];
+                if (!$availableTable) {
+                    $reservedTables = Table::where('seat_count', '>=', $data['guest_count'])
+                        ->whereHas('reservations', function ($query) use ($startDate, $endDate) {
+                            $query->whereBetween('start_date', [$startDate, $endDate])
+                                ->orWhereBetween('end_date', [$startDate, $endDate])
+                                ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                                    $nestedQuery->where('start_date', '<', $startDate)
+                                                ->where('end_date', '>', $endDate);
+                                });
+                        })
+                        ->with('reservations')
+                        ->paginate(10);
 
-                if ($reservedTables->isNotEmpty()) {
-                    $response['reserved_tables'] = $reservedTables;
+                    return [
+                        'status_code' => 409,
+                        'message' => 'No available tables for the selected time.',
+                        'reserved_tables' => $reservedTables
+                    ];
                 }
 
-                return $response;
+                $reservation = Reservation::with('table')->create([
+                    'user_id' => auth()->id(),
+                    'table_id' => $availableTable->id,
+                    'start_date' => $data['start_date'],
+                    'end_date' => $data['end_date'],
+                    'guest_count' => $data['guest_count'],
+                    'services' => $services,
+                    'status' => 'pending',
+                ]);
+                Log::debug('Reservation table:', ['table' => $reservation->table]);
+
+                return [
+                    'status_code' => 201,
+                    'message' => 'Reservation created successfully',
+                    'reservation' => $reservation
+                ];
+            } catch (Exception $e) {
+                Log::error('Error storing reservation: ' . $e->getMessage());
+                return [
+                    'status_code' => 500,
+                    'message' => 'An unexpected error occurred.'
+                ];
             }
-
-            $reservation = Reservation::with('table')->create([
-                'user_id' => auth()->id(),
-                'table_id' => $availableTable->id,
-                'start_date' => $data['start_date'],
-                'end_date' => $data['end_date'],
-                'guest_count' => $data['guest_count'],
-                'services' => $services,
-                'status' => 'pending',
-            ]);
-            Log::debug('Reservation table:', ['table' => $reservation->table]);
-
-            return [
-                'status_code' => 201,
-                'message' => 'Reservation created successfully',
-                'reservation' => $reservation
-            ];
-        } catch (Exception $e) {
-            Log::error('Error storing reservation: ' . $e->getMessage());
-            return [
-                'status_code' => 500,
-                'message' => 'An unexpected error occurred.'
-            ];
-        }
     }
-
 
     /**
      * Get reserved tables during a specific time period.

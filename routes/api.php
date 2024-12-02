@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\Reservation\EventController;
 use App\Http\Controllers\Api\Reservation\DepartmentController;
 
 
-
+Route::get('ratings', [RatingController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -100,7 +100,4 @@ Route::middleware('auth:api')->group(function () {
 
 
 });
-Route::apiResource('rating', RatingController::class);
-Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
-Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
-Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+

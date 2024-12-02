@@ -27,35 +27,6 @@ class ReservationController extends Controller
         $this->reservationService = $reservationService;
     }
 
-    // /**
-    //  * Store a new reservation.
-    //  *
-    //  * @param StoreReservationRequest $request
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
-
-    // public function storeReservation(StoreReservationRequest $request): JsonResponse
-    // {
-    //     $result = $this->reservationService->storeReservation($request->validated());
-
-    //     if ($result['status_code'] !== 201) {
-    //         $reservedTables = isset($result['reserved_tables']) ?
-    //         FaildTableReservationResource::collection(collect($result['reserved_tables'])) : null;
-
-    //     return self::error(
-    //         $reservedTables,
-    //         $result['message'],
-    //         $result['status_code']
-    //     );
-    //     }
-
-
-    //     return self::success(
-    //         new TableReservationResource($result['reservation']),
-    //         $result['message'],
-    //         $result['status_code']
-    //     );
-    // }
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
         $result = $this->reservationService->storeReservation($request->validated());

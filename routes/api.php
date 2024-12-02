@@ -58,46 +58,49 @@ Route::middleware('auth:api')->group(function () {
     Route::get('dish/{dish}', [DishController::class, 'show']);
 
     Route::prefix('admin')->group(function () {
-    Route::apiResource('departments.tables', TableController::class);
-    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
-    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
-    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
+        Route::apiResource('departments.tables', TableController::class);
+        Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
+        Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
+        Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 
 
-// Route::apiResource('departments', DepartmentController::class);
-// use App\Http\Controllers\Api\Reservation\DepartmentController;
-// Route::apiResource('event', EventController::class);
+        // Route::apiResource('departments', DepartmentController::class);
+        // use App\Http\Controllers\Api\Reservation\DepartmentController;
+        // Route::apiResource('event', EventController::class);
 
-Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-Route::apiResource('event', EventController::class);
+        Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+        Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+        Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+        Route::apiResource('event', EventController::class);
 
-Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
-Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
-Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
-Route::apiResource('department', DepartmentController::class);
+        Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
+        Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
+        Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
+        Route::apiResource('department', DepartmentController::class);
 
-// Route::prefix('customer')->group(function () {
-//     Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
-// });
-Route::prefix('v1')->group(function (){
-    Route::apiResource('users', UserController::class);
-    Route::post('users/restore/{id}', [UserController::class, 'restore']);
-    Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
-    Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
+        // Route::prefix('customer')->group(function () {
+        //     Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
+        // });
+        Route::prefix('v1')->group(function () {
+            Route::apiResource('users', UserController::class);
+            Route::post('users/restore/{id}', [UserController::class, 'restore']);
+            Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
+            Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
+        });
+    });
+
+
+    // Route::prefix('auth/v1')->group(function (){
+    //     Route::post('register', [AuthController::class, 'register']);
+    //     Route::post('login', [AuthController::class, 'login']);
+    //     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
+    //     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
+    // });
+
+
+
 });
-
-});
-
-
-// Route::prefix('auth/v1')->group(function (){
-//     Route::post('register', [AuthController::class, 'register']);
-//     Route::post('login', [AuthController::class, 'login']);
-//     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-//     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
-// });
-
-
-
-});
+Route::apiResource('rating', RatingController::class);
+Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
+Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
+Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating

@@ -16,7 +16,7 @@ class Reservation extends Model
     // use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'cancelled_at'];
+    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'cancelled_at', 'email_sent_at',];
     /**
      * Relationship: A reservation belongs to a user.
      */
@@ -53,11 +53,8 @@ class Reservation extends Model
         return $this->hasMany(Event::class);
     }
 
-    public function rating(){
+    public function rating()
+    {
         return $this->hasOne(Rating::class);
     }
-
-
-
-
 }

@@ -27,15 +27,26 @@ class EndReservation extends Command
         $startOfMinute = now()->setTimezone('Asia/Damascus')->startOfMinute();
         $endOfMinute = now()->setTimezone('Asia/Damascus')->endOfMinute();
 
+        Log::info('Fetching reservations for rating emails.', [
+            'start_of_minute' => $startOfMinute,
+            'end_of_minute' => $endOfMinute,
+        ]);
+
         $reservations = Reservation::whereBetween('end_date', [$startOfMinute, $endOfMinute])
             ->where('status', 'confirmed')
+            ->whereNull('email_sent_at') 
             ->get();
 
+        if ($reservations->isEmpty()) {
+            Log::info('No reservations found for the specified time range.');
+        }
 
         foreach ($reservations as $reservation) {
+            Log::info('Dispatching job for reservation.', ['reservation_id' => $reservation->id]);
+
             SendRatingRequestJob::dispatch($reservation);
 
-            Log::info('Rating email dispatched.', [
+            Log::info('Job dispatched for reservation.', [
                 'reservation_id' => $reservation->id,
                 'user_email' => $reservation->user->email,
             ]);

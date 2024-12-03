@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Jobs;
 
 use App\Models\Reservation;
@@ -31,14 +32,33 @@ class SendRatingRequestJob implements ShouldQueue
     public function handle()
     {
         $user = $this->reservation->user;
-    Log::info('$this->reservation->user'. $this->reservation->user);
-        $ratingApiLink = url('/api/ratings?reservation_id=' . $this->reservation->id . '&user_id=' . $user->id);
 
-        Mail::to($user->email)->send(new RatingRequestMail($ratingApiLink,$user));
-
-        Log::info('Rating email dispatched.', [
-            'user_id' => $user->id,
+        Log::info('Job started for sending rating email.', [
             'reservation_id' => $this->reservation->id,
+            'user_id' => $user->id,
+            'user_email' => $user->email,
         ]);
+
+        try {
+            Log::info('Attempting to send email to user.', ['email' => $user->email]);
+
+            $createLink = url("/api/rating?reservation_id={$this->reservation->id}&user_id={$user->id}");
+            $viewLink = url("/api/rating/{$this->reservation->id}");
+            Mail::to($user->email)->send(new RatingRequestMail($createLink, $viewLink));
+
+            Log::info('Rating email sent successfully.', [
+                'user_id' => $user->id,
+                'reservation_id' => $this->reservation->id,
+            ]);
+            $this->reservation->update(['email_sent_at' => now()]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send email.', [
+                'reservation_id' => $this->reservation->id,
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(), 
+            ]);
+        }
     }
 }

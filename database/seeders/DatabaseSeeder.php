@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Reservation::factory()->count(10)->create();
         \App\Models\Table::factory()->count(10)->create();
-        Rating::factory()->count(10)->create();
+         Rating::factory()->count(10)->create();
 
         $user = User::create([
             'name' => 'Admin User',

@@ -2,20 +2,18 @@
 
 namespace Database\Factories;
 
-use App\Models\Rating;
 use App\Models\User;
+use App\Models\Rating;
 use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Rating>
+ */
 class RatingFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Rating::class;
 
+    protected $model = Rating::class;
     /**
      * Define the model's default state.
      *
@@ -24,12 +22,10 @@ class RatingFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(), // يولد مستخدمًا جديدًا باستخدام Factory
-            'reservation_id' => Reservation::factory(), // يولد حجزًا جديدًا باستخدام Factory
-            'rating' => $this->faker->numberBetween(1, 5), // قيمة التقييم بين 1 و5
+            'user_id' => User::factory(), // إنشاء مستخدم جديد عشوائي
+            'reservation_id' => Reservation::factory(), // إنشاء حجز جديد عشوائي
+            'rating' => $this->faker->numberBetween(1, 5), // تصنيف عشوائي بين 1 و 5
             'comment' => $this->faker->sentence(), // تعليق عشوائي
-            'created_at' => now(),
-            'updated_at' => now(),
         ];
     }
 }

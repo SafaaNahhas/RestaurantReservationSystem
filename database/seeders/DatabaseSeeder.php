@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             UserSeeder::class
         ]);
+//
 
         \App\Models\Reservation::factory()->count(10)->create();
         \App\Models\Table::factory()->count(10)->create();

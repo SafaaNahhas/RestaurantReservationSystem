@@ -11,19 +11,10 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-/**
- * Class AuthService
- *
- * This service class handles the core authentication logic for user login, registration, logout, and token refresh operations.
- *
- * @package App\Services
- */
-
 class TableService
 {
     /**
      * get all  tables
-     * 
      * @param array  $fillters 
      * @param int department_id
      * @return  LengthAwarePaginator  tables 
@@ -31,7 +22,7 @@ class TableService
     public function allTables(array $fillters, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
+            Department::findOrFail($department_id);
 
             $tables = Table::byTableNumber($fillters['table_number'])
                 ->bySeatCount($fillters['seat_count'])
@@ -39,7 +30,7 @@ class TableService
                 ->paginate(4);
             return $tables;
         } catch (ModelNotFoundException $e) {
-            Log::error("error in force delete  a table" . $e->getMessage());
+            Log::error("error in  get all tables" . $e->getMessage());
 
             throw new HttpResponseException(response()->json(
                 [
@@ -112,7 +103,7 @@ class TableService
     public function showTable($table_id, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
+            Department::findOrFail($department_id);
 
             $table = Table::findOrFail($table_id);
             $table = TableResource::make($table);
@@ -150,7 +141,7 @@ class TableService
     public function updateTable(array $tableData, $table_id, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
+            Department::findOrFail($department_id);
 
             $table = Table::findOrFail($table_id);
 
@@ -191,7 +182,7 @@ class TableService
     public function deleteTable($table_id, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
+            Department::findOrFail($department_id);
 
             $table = Table::findOrFail($table_id);
             $table->delete();
@@ -201,7 +192,7 @@ class TableService
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any relation",
+                    'message' => "we didn't find any thing",
                 ],
                 404
             ));
@@ -226,7 +217,7 @@ class TableService
     public function allDeletedTables($fillters, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
+            Department::findOrFail($department_id);
 
             $tables = Table::onlyTrashed()
                 ->byTableNumber($fillters['table_number'])
@@ -236,12 +227,12 @@ class TableService
             $tables = TableResource::collection($tables);
             return $tables;
         } catch (ModelNotFoundException $e) {
-            Log::error("error in force delete  a table" . $e->getMessage());
+            Log::error("error in get all deleted tables" . $e->getMessage());
 
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any relation",
+                    'message' => "we didn't find any thing",
                 ],
                 404
             ));
@@ -266,9 +257,7 @@ class TableService
     public function restoreTable($table_id, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
-
-            $table = Table::findOrFail($table_id);
+            Department::findOrFail($department_id);
 
             $table = Table::onlyTrashed()->findOrFail($table_id);
             $table->restore();
@@ -280,7 +269,7 @@ class TableService
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any relation",
+                    'message' => "we didn't find any thing",
                 ],
                 404
             ));
@@ -304,8 +293,7 @@ class TableService
     public function forceDeleteTable($table_id, $department_id)
     {
         try {
-            $department = Department::findOrFail($department_id);
-
+            Department::findOrFail($department_id);
             $table = Table::findOrFail($table_id);
 
             $table->forceDelete();
@@ -315,7 +303,7 @@ class TableService
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any relation",
+                    'message' => "we didn't find any thing",
                 ],
                 404
             ));

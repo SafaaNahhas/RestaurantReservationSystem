@@ -4,20 +4,19 @@ namespace App\Services;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class TableRequestService
+class ForgetPasswordRequestService
 {
     /**
-     *  get array of  TableRequestService attributes 
+     *  get array of  ForgetPasswordRequestService attributes 
      *
      * @return array   of attributes
      */
     public function attributes()
     {
         return  [
-            'table_number',
-            'location',
-            'seat_count',
-            'department_id',
+            'password',
+            'email',
+            'code',
         ];
     }
     /**

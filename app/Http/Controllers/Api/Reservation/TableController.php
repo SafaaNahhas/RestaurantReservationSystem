@@ -7,6 +7,7 @@ use App\Services\TableService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TableRequest\FillterTabelRequest;
 use App\Http\Requests\TableRequest\UpdateTableRequest;
+use App\Http\Resources\TableResource;
 
 class TableController extends Controller
 {
@@ -31,7 +32,7 @@ class TableController extends Controller
         $location = $request->input('location');
         $fillters = ["seat_count" => $seat_count, "table_number" => $table_number, "location" =>  $location];
         $tables = $this->tableService->allTables($fillters,  $department_id);
-        return $this->paginated($tables, 'Get All Tables', 200);
+        return $this->paginated($tables, TableResource::class ,'Get All Tables', 200);
     }
 
     /**

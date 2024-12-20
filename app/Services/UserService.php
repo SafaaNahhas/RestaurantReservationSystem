@@ -27,7 +27,6 @@ class UserService extends Controller
             return User::query()
                 ->latest()
                 ->paginate($perPage);
-
         } catch (Exception $e) {
             Log::error('Error listing users: ' . $e->getMessage());
             throw new HttpResponseException(
@@ -49,7 +48,6 @@ class UserService extends Controller
             $data['password'] = Hash::make($data['password']);
 
             return User::create($data)->fresh();
-
         } catch (Exception $e) {
             Log::error('Failed to create user', [
                 'error' => $e->getMessage(),
@@ -73,7 +71,6 @@ class UserService extends Controller
     {
         try {
             return $user;
-
         } catch (Exception $e) {
             Log::error('Failed to retrieve user', [
                 'user_id' => $user->id,
@@ -111,7 +108,6 @@ class UserService extends Controller
             ]);
 
             return $user->fresh();
-
         } catch (Exception $e) {
             Log::error('Failed to update user', [
                 'user_id' => $user->id,
@@ -141,7 +137,6 @@ class UserService extends Controller
                 'user_id' => $user->id,
                 'user_email' => $user->email
             ]);
-
         } catch (Exception $e) {
             Log::error('Failed to delete user', [
                 'user_id' => $user->id,
@@ -176,7 +171,6 @@ class UserService extends Controller
             ]);
 
             return $user->fresh();
-
         } catch (ModelNotFoundException $e) {
             Log::error('User not found for restoration', [
                 'id' => $id,
@@ -185,7 +179,6 @@ class UserService extends Controller
             throw new HttpResponseException(
                 $this->error('User not found', 404, null)
             );
-
         } catch (Exception $e) {
             Log::error('Failed to restore user', [
                 'id' => $id,
@@ -219,7 +212,6 @@ class UserService extends Controller
             }
 
             return $deletedUsers;
-
         } catch (Exception $e) {
             Log::error('Error retrieving deleted users:', [
                 'per_page' => $perPage,
@@ -253,7 +245,6 @@ class UserService extends Controller
 
             Log::info('User permanently deleted:', $userDetails);
             return true;
-
         } catch (ModelNotFoundException $e) {
             Log::error('Error force deleting user - user not found:', [
                 'user_id' => $id,
@@ -263,7 +254,6 @@ class UserService extends Controller
             throw new HttpResponseException(
                 $this->error('User not found.', 404, null)
             );
-
         } catch (Exception $e) {
             Log::error('Error force deleting user:', [
                 'user_id' => $id,

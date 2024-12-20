@@ -32,7 +32,7 @@ class StoreTableRequest extends FormRequest
             'table_number' => ['required', 'string', 'min:2', 'max:255', 'unique:tables,table_number'],
             'location' => ['required', 'string', 'min:6', 'max:255'],
             'seat_count' => ['required', 'integer', 'gt:0'],
-            'department_id' => ['required', 'exists:departments,id', 'gt:0']
+            //  'department_id' => ['required', 'exists:departments,id', 'gt:0']
         ];
     }
     public function attributes(): array

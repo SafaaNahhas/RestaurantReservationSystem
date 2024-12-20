@@ -11,7 +11,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
 use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
 
-class FoodCategoryService{
+class FoodCategoryService
+{
 
 
     /**
@@ -22,22 +23,22 @@ class FoodCategoryService{
         try {
             return FoodCategory::paginate($per_page);
         } catch (Exception $e) {
-         Log::error('Error in Get all FoodCategory'. $e->getMessage());
-         throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
-            ],
-            500
-        ));
+            Log::error('Error in Get all FoodCategory' . $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
 
-   
-    
 
-     /**
+
+
+    /**
      * Create a new Category.
      *
      * @param array $category
@@ -48,23 +49,23 @@ class FoodCategoryService{
         try {
             // Create a new Category record with the provided data
             return FoodCategory::create([
-                'category_name'=> $data['category_name'],
-                'description'=> $data['description'] ?? null, 
-                'user_id'=>Auth()->id(), 
+                'category_name' => $data['category_name'],
+                'description' => $data['description'] ?? null,
+                'user_id' => Auth()->id(),
             ]);
         } catch (Exception $e) {
-          Log::error('Error creating Category: ' . $e->getMessage());
-          throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
-            ],
-            500
-        ));
+            Log::error('Error creating Category: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
-     /**
+    /**
      * Get the details of a specific Category by its ID.
      *
      * @param int $id
@@ -75,7 +76,6 @@ class FoodCategoryService{
         try {
             // Find the Category by ID or fail with a 404 error if not found
             return FoodCategory::findOrFail($id);
-             
         } catch (ModelNotFoundException $e) {
             Log::error("error in get a FoodCategory" . $e->getMessage());
 
@@ -86,7 +86,6 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
         } catch (Exception $e) {
             Log::error("error in get a FoodCategory" . $e->getMessage());
 
@@ -101,7 +100,7 @@ class FoodCategoryService{
     }
 
 
-     /**
+    /**
      * Update the details of a specific book.
      *
      * @param array $data
@@ -116,10 +115,10 @@ class FoodCategoryService{
 
             // Update the category with the provided data, filtering out null values
             $foodCategory->update(array_filter([
-                'category_name'=> $data['category_name'] ?? $foodCategory->category_name,
-                'description'=> $data['description'] ?? $foodCategory->description,
+                'category_name' => $data['category_name'] ?? $foodCategory->category_name,
+                'description' => $data['description'] ?? $foodCategory->description,
             ]));
-           
+
             // Return the updated food category
             return $foodCategory;
         } catch (ModelNotFoundException $e) {
@@ -132,7 +131,6 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
         } catch (Exception $e) {
             Log::error("error in update FoodCategory" . $e->getMessage());
 
@@ -145,8 +143,8 @@ class FoodCategoryService{
             ));
         }
     }
-    
-   
+
+
     /**
      * Delete a specific Category by its ID.
      *
@@ -171,7 +169,6 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
         } catch (Exception $e) {
             Log::error("error in delete a FoodCategory" . $e->getMessage());
 
@@ -184,14 +181,14 @@ class FoodCategoryService{
             ));
         }
     }
-     /**
+    /**
      * Display a paginated listing of the trashed (soft deleted) resources.
      */
     public function trashedListFoodCategory($perPage)
     {
         try {
             return FoodCategory::onlyTrashed()->paginate($perPage);
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error("error in display list of trashed FoodCategory" . $e->getMessage());
 
             throw new HttpResponseException(response()->json(
@@ -201,7 +198,7 @@ class FoodCategoryService{
                 ],
                 500
             ));
-    }
+        }
     }
     /**
      * Restore a trashed (soft deleted) resource by its ID.
@@ -215,8 +212,8 @@ class FoodCategoryService{
     public function restoreFoodCategory($id)
     {
         try {
-            $$category = FoodCategory::onlyTrashed()->findOrFail($id);
-            $$category->restore();
+            $category = FoodCategory::onlyTrashed()->findOrFail($id);
+            $category->restore();
             return $$category;
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
@@ -228,7 +225,6 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
         } catch (Exception $e) {
             Log::error("error in restore a FoodCategory" . $e->getMessage());
 
@@ -267,7 +263,6 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
         } catch (Exception $e) {
             Log::error("error  in forceDelete FoodCategory" . $e->getMessage());
 
@@ -280,5 +275,4 @@ class FoodCategoryService{
             ));
         }
     }
-
 }

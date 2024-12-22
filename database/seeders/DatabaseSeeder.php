@@ -7,10 +7,12 @@ namespace Database\Seeders;
 use App\Models\Dish;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\Restaurant;
 use App\Models\Reservation;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\RestaurantSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,7 +24,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndPermissionSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
+            RestaurantSeeder::class,
         ]);
 
         \App\Models\Reservation::factory()->count(10)->create();

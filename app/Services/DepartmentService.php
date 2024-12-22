@@ -3,14 +3,15 @@
 namespace App\Services;
 
 use Exception;
+use App\Models\Image;
 use App\Models\Department;
-use Illuminate\Support\Str;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 /**
  * DepartmentService - Provides functionality for managing Department.
@@ -39,12 +40,12 @@ class DepartmentService
     }
 
     /**
- * Create a new department.
- *
- * @param array $data
- * @param array|null $images
- * @return Department
- */
+     * Create a new department.
+     *
+     * @param array $data
+     * @param array|null $images
+     * @return Department
+     */
     public function createDepartment(array $data)
     {
 
@@ -64,10 +65,10 @@ class DepartmentService
                     // Define the file path for storing the image
                     $filePath = "Images/{$imageName}.{$extension}";
                     // Store the image securely in the 'public' disk storage
-                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    $path = Storage::putFileAs('Images', $image, "{$imageName}.{$extension}");
                     // Get the full URL to the stored image
 
-                    $url = Storage::disk('public')->url($path);
+                    $url = Storage::url($path);
                     // Get the MIME type of the image
                     $mime_type = $image->getClientMimeType();
                     // Associate the image with the department and store it in the 'images' table
@@ -82,8 +83,6 @@ class DepartmentService
             DB::commit();
             // Return the created department
             return $department;
-
-
         } catch (Exception $e) {
             DB::rollBack(); // Roll back the transaction if any error occurs
 
@@ -95,17 +94,17 @@ class DepartmentService
 
 
     /**
- * Update an existing department.
- *
- * This method updates the department's basic details (such as name, description, etc.)
+     * Update an existing department.
+     *
+     * This method updates the department's basic details (such as name, description, etc.)
 
- *
- * @param Department $department The department object to be updated.
- * @param array $data The validated data to update the department's attributes.
- * @param array|null $images Optional array of image files to be added to the department.
- * @return Department The updated department object.
- * @throws \RuntimeException If there is an error during the update process.
- */
+     *
+     * @param Department $department The department object to be updated.
+     * @param array $data The validated data to update the department's attributes.
+     * @param array|null $images Optional array of image files to be added to the department.
+     * @return Department The updated department object.
+     * @throws \RuntimeException If there is an error during the update process.
+     */
     public function updateDepartment(Department $department, array $data)
     {
         try {
@@ -123,10 +122,10 @@ class DepartmentService
                     // Define the file path for storing the image
                     $filePath = "Images/{$imageName}.{$extension}";
                     // Store the image securely in the 'public' disk storage
-                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    $path = Storage::putFileAs('Images', $image, "{$imageName}.{$extension}");
                     // Get the full URL to the stored image
 
-                    $url = Storage::disk('public')->url($path);
+                    $url = Storage::url($path);
                     // Get the MIME type of the image
                     $mime_type = $image->getClientMimeType();
                     // Associate the image with the department and store it in the 'images' table
@@ -136,11 +135,11 @@ class DepartmentService
                         'name' => $imageName, // Randomly generated image name
                     ]);
                 }
-                DB::commit(); // Commit the transaction if all is well
                 // Return the updated department
                 return $department;
-
             }
+            DB::commit(); // Commit the transaction if all is well
+
         } catch (Exception $e) {
             // Log any errors during the process
             Log::error('Error updating department: ' . $e->getMessage());
@@ -221,29 +220,23 @@ class DepartmentService
             // Find the department by its ID
             $department = Department::findOrFail($departmentId);
             // Find the image associated with the department by its ID
-            $image = $department->image()->find($imageId);
-            // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
+            $image = $department->image()->findOrFail($imageId);
             // Soft delete the image
             $image->delete();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            // Log the error when the department is not found
-            Log::error('Department not found: ' . $e->getMessage());
-            // Return a JSON error response
+            if ($e->getModel() === Department::class) {
+                $errorMessage = 'Department not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Department not found",
+                'message' => $errorMessage,
             ], 404));
-        } catch (HttpResponseException $e) {
-            // Rethrow the HttpResponseException
-            throw $e;
         } catch (\Exception $e) {
             // Log any unexpected errors
             Log::error('Error soft deleting image: ' . $e->getMessage());
@@ -264,7 +257,7 @@ class DepartmentService
     {
         try {
             // Retrieve all images associated with all departments, including soft deleted images
-            $department= Department::with(['image' => function ($query) {
+            $department = Department::with(['image' => function ($query) {
                 $query->onlyTrashed(); // Retrieve soft deleted and permanently deleted images
             }])->get();
             return $department;
@@ -286,29 +279,23 @@ class DepartmentService
             // Find the department by its ID
             $department = Department::findOrFail($departmentId);
             // Find the image associated with the department by its ID
-            $image = $department->image()->onlyTrashed()->find($imageId);
-            // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
+            $image = $department->image()->onlyTrashed()->findOrFail($imageId);
             // Restore the soft-deleted image
             $image->restore();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            // Log the error when the department is not found
-            Log::error('Department not found: ' . $e->getMessage());
-            // Return a JSON error response
+            if ($e->getModel() === Department::class) {
+                $errorMessage = 'Department not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Department not found",
+                'message' => $errorMessage,
             ], 404));
-        } catch (HttpResponseException $e) {
-            // Rethrow the HttpResponseException
-            throw $e;
         } catch (\Exception $e) {
             // Log any unexpected errors
             Log::error('Error restoring image: ' . $e->getMessage());
@@ -333,29 +320,24 @@ class DepartmentService
             // Find the department by its ID
             $department = Department::findOrFail($departmentId);
             // Find the image associated with the department by its ID
-            $image = $department->image()->onlyTrashed()->find($imageId);
+            $image = $department->image()->onlyTrashed()->findOrFail($imageId);
             // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
             // Permanently delete the image
             $image->forceDelete();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            // Log the error when the department is not found
-            Log::error('Department not found: ' . $e->getMessage());
-            // Return a JSON error response
+            if ($e->getModel() === Department::class) {
+                $errorMessage = 'Department not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Department not found",
+                'message' => $errorMessage,
             ], 404));
-        } catch (HttpResponseException $e) {
-            // Rethrow the HttpResponseException
-            throw $e;
         } catch (\Exception $e) {
             // Log any unexpected errors
             Log::error('Error permanently deleting image: ' . $e->getMessage());

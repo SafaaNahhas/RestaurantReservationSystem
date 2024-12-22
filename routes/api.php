@@ -18,7 +18,8 @@ use App\Http\Controllers\Api\Reservation\EventController;
 // use app\Http\Controllers\Api\Reservation\DepartmentController;
 
 use App\Http\Controllers\Api\Reservation\DepartmentController;
-
+use App\Http\Controllers\Api\Restaurant\RestaurantController;
+use App\Models\Restaurant;
 
 Route::get('ratings', [RatingController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,17 +30,17 @@ Route::post('logout', [AuthController::class, 'logout']);
 Route::post('refresh', [AuthController::class, 'refresh']);
 Route::get('/me', [AuthController::class, 'me']);
 
-    Route::post('reservations', [ReservationController::class, 'storeReservation']);
-    Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
-    Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancelReservation']);
-    Route::post('/reservations/{id}/start-service', [ReservationController::class, 'startService']);
-    Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
-    Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
-    Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
-    Route::apiResource('rating', RatingController::class);
-    Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
-    Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
-    Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+Route::post('reservations', [ReservationController::class, 'storeReservation']);
+Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
+Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancelReservation']);
+Route::post('/reservations/{id}/start-service', [ReservationController::class, 'startService']);
+Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
+Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
+Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
+Route::apiResource('rating', RatingController::class);
+Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
+Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
+Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
 
 
 
@@ -78,14 +79,14 @@ Route::post('departments/{department}/tables/{table}/restore', [TableController:
 Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 
 
-        // Route::apiResource('departments', DepartmentController::class);
-        // use App\Http\Controllers\Api\Reservation\DepartmentController;
-        // Route::apiResource('event', EventController::class);
+// Route::apiResource('departments', DepartmentController::class);
+// use App\Http\Controllers\Api\Reservation\DepartmentController;
+// Route::apiResource('event', EventController::class);
 
-        Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-        Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-        Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-        Route::apiResource('event', EventController::class);
+Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+Route::apiResource('event', EventController::class);
 
 Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
 Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
@@ -112,6 +113,21 @@ Route::prefix('v1')->group(function () {
 });
 
 
+
+// soft delete
+Route::delete('restaurant/{restaurantId}/imageSoftDelet/{imageId}', [RestaurantController::class, 'softdeletImage']);
+// restore
+Route::post('restaurant/{restaurantId}/imageRestore/{imageId}', [RestaurantController::class, 'restoreImage']);
+// permanent delete
+Route::delete('restaurant/{restaurantId}/imageDdelet/{imageId}', [RestaurantController::class, 'deletImage']);
+// show deleted image
+Route::get('restaurant/showDeletedImage', [RestaurantController::class, 'showDeletedImage']);
+
+
+//restaurant
+Route::delete('restaurant/email/{id}', [RestaurantController::class, 'deleteEmail']);
+Route::delete('restaurant/phone-number/{id}', [RestaurantController::class, 'deletePhoneNumber']);
+Route::apiResource('restaurant', RestaurantController::class);
 
 
 // Route::prefix('auth/v1')->group(function (){

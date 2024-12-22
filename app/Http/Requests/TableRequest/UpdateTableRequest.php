@@ -2,46 +2,69 @@
 
 namespace App\Http\Requests\TableRequest;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use App\Services\TableRequestService;
+use Illuminate\Support\Facades\Log;
 
-class UpdateTableRequest extends FormRequest
+class UpdateTableRequest extends BaseTableRequest
 {
-    protected $tableRequestService;
-    public function __construct(TableRequestService $tableRequestService)
-    {
-        $this->tableRequestService = $tableRequestService;
-    }
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules that apply to the request
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Merges common table rules with update-specific rules:
+     * - All fields are optional (sometimes)
+     * - table_number must be unique except for current table
+     * - Maintains existing values if fields are not provided
+     *
+     * @return array<string, array> Array of validation rules
      */
     public function rules(): array
     {
-        $id = $this->route('table');
+        $commonRules = $this->tableRequestService->getCommonRules();
+        $tableId = $this->route('table');
+
         return [
-            'table_number' => ['sometimes', 'string', 'min:2', 'max:255', 'unique:tables,table_number,' . $id],
-            'location' => ['sometimes', 'string', 'min:6', 'max:255'],
-            'seat_count' => ['sometimes', 'integer', 'gt:0'],
+            'table_number' => array_merge(
+                $commonRules['table_number'],
+                ['sometimes', "unique:tables,table_number,{$tableId}"]  // Unique except current
+            ),
+            'location' => array_merge(
+                $commonRules['location'],
+                ['sometimes']
+            ),
+            'seat_count' => array_merge(
+                $commonRules['seat_count'],
+                ['sometimes']
+            ),
         ];
     }
-    public function attributes(): array
+
+    /**
+     * Handle successful validation for table update.
+     *
+     * This method is automatically called by Laravel form request
+     * when all validation rules pass successfully. It logs the update
+     * attempt for monitoring and auditing purposes.
+     *
+     * @return void
+     */
+    protected function passedValidation(): void
     {
-        return  $this->tableRequestService->attributes();
+        Log::info('Update Table form validation passed', [
+            'table_id' => $this->route('table'),                // Target table identifier
+            'department_id' => $this->route('department'),      // Associated department
+            'table_number' => $this->table_number,                     // Updated table number
+            'location' => $this->location,                             // Updated location
+            'seat_count' => $this->seat_count,                         // Updated seat count
+            'ip' => $this->ip(),                                       // Client IP for audit trail
+            'user_agent' => $this->userAgent(),                        // Browser/device information
+            'updated_fields' => array_keys($this->only(                // Fields being modified
+                ['table_number', 'location', 'seat_count']
+            )),
+            'updated_by' => auth()->id(),                              // User who made the update
+
+            // Requires authentication: Returns the name of the authenticated user
+            // If user is not authenticated, accessing name will cause an error
+            // Make sure to check auth()->user() is not null before accessing
+            //    'updated_by_name' => auth()->user()->name
+        ]);
     }
-    public function failedValidation(Validator $validator)
-    {
-        $this->tableRequestService->failedValidation($validator);
-    }
- 
 }

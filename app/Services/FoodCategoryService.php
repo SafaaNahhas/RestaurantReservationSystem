@@ -34,8 +34,8 @@ class FoodCategoryService{
     }
 
 
-   
-    
+
+
 
      /**
      * Create a new Category.
@@ -49,8 +49,8 @@ class FoodCategoryService{
             // Create a new Category record with the provided data
             return FoodCategory::create([
                 'category_name'=> $data['category_name'],
-                'description'=> $data['description'] ?? null, 
-                'user_id'=>Auth()->id(), 
+                'description'=> $data['description'] ?? null,
+                'user_id'=>Auth()->id(),
             ]);
         } catch (Exception $e) {
           Log::error('Error creating Category: ' . $e->getMessage());
@@ -75,7 +75,7 @@ class FoodCategoryService{
         try {
             // Find the Category by ID or fail with a 404 error if not found
             return FoodCategory::findOrFail($id);
-             
+
         } catch (ModelNotFoundException $e) {
             Log::error("error in get a FoodCategory" . $e->getMessage());
 
@@ -86,7 +86,7 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in get a FoodCategory" . $e->getMessage());
 
@@ -119,7 +119,7 @@ class FoodCategoryService{
                 'category_name'=> $data['category_name'] ?? $foodCategory->category_name,
                 'description'=> $data['description'] ?? $foodCategory->description,
             ]));
-           
+
             // Return the updated food category
             return $foodCategory;
         } catch (ModelNotFoundException $e) {
@@ -132,7 +132,7 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in update FoodCategory" . $e->getMessage());
 
@@ -145,8 +145,8 @@ class FoodCategoryService{
             ));
         }
     }
-    
-   
+
+
     /**
      * Delete a specific Category by its ID.
      *
@@ -171,7 +171,7 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in delete a FoodCategory" . $e->getMessage());
 
@@ -215,8 +215,8 @@ class FoodCategoryService{
     public function restoreFoodCategory($id)
     {
         try {
-            $$category = FoodCategory::onlyTrashed()->findOrFail($id);
-            $$category->restore();
+            $category = FoodCategory::onlyTrashed()->findOrFail($id);
+            $category->restore();
             return $$category;
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
@@ -228,7 +228,7 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error in restore a FoodCategory" . $e->getMessage());
 
@@ -267,7 +267,7 @@ class FoodCategoryService{
                 ],
                 404
             ));
-        
+
         } catch (Exception $e) {
             Log::error("error  in forceDelete FoodCategory" . $e->getMessage());
 

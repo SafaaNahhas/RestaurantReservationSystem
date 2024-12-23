@@ -25,6 +25,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 
+Route::middleware('auth:api')->group(function () {
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('refresh', [AuthController::class, 'refresh']);
 Route::get('/me', [AuthController::class, 'me']);
@@ -36,6 +37,9 @@ Route::get('/me', [AuthController::class, 'me']);
     Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
     Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
     Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
+    Route::get('/tables-with-reservations', [ReservationController::class, 'getAllTablesWithReservations']);
+
+
     Route::apiResource('rating', RatingController::class);
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
@@ -120,3 +124,4 @@ Route::prefix('v1')->group(function () {
 //     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 //     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
 // });
+});

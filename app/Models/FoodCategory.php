@@ -13,9 +13,9 @@ class FoodCategory extends Model
     use HasFactory;
     use SoftDeletes;
 
-   // Mass-assignable attributes
+    // Mass-assignable attributes
     protected $fillable = ['category_name', 'description', 'user_id'];
-     /**
+    /**
      * Relationship: A category belongs to a user.
      */
     public function user()
@@ -30,5 +30,8 @@ class FoodCategory extends Model
         return $this->hasMany(Dish::class);
     }
 
-   
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favorable');
+    }
 }

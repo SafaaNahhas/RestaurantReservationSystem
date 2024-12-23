@@ -1,23 +1,24 @@
 <?php
 
 
-use App\Enums\RoleUser;
-use App\Http\Controllers\Api\Auth\AuthController;
 use App\Models\User;
-use App\Http\Controllers\Api\Reservation\RatingController;
-use App\Http\Controllers\Api\Reservation\DishController;
-use App\Http\Controllers\Api\Reservation\FoodCategoryController;
-use App\Http\Controllers\Api\Reservation\TableController;
+use App\Enums\RoleUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Reservation\ReservationController;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\User\UserController;
+use App\Http\Controllers\Api\Reservation\DishController;
 use App\Http\Controllers\Api\Reservation\EventController;
+use App\Http\Controllers\Api\Reservation\TableController;
+use App\Http\Controllers\Api\Reservation\RatingController;
+use App\Http\Controllers\Api\Reservation\FavoriteController;
+use App\Http\Controllers\Api\Reservation\DepartmentController;
 // use app\Http\Controllers\Api\Reservation\DepartmentController;
 
-use App\Http\Controllers\Api\Reservation\DepartmentController;
+use App\Http\Controllers\Api\Reservation\ReservationController;
+use App\Http\Controllers\Api\Reservation\FoodCategoryController;
 
 
 Route::get('ratings', [RatingController::class, 'index']);
@@ -98,4 +99,9 @@ Route::middleware('auth:api')->group(function () {
 
 
 
+});Route::middleware('auth:api')->group(function () {
+    Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
+    Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
+    Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
 });
+

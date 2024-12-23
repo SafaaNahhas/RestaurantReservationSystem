@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Favorite;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class UpdateRatingRequest extends FormRequest
+
+class AddToFavoritesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,14 +22,13 @@ class UpdateRatingRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'rating' => 'nullable |integer|in:1,2,3,4,5',
-            'comment' => 'nullable |string|max:255',
+            'type' => 'required|in:tables,food_categories', 
+            'id' => 'required|integer',          
         ];
     }
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
@@ -42,15 +42,15 @@ class UpdateRatingRequest extends FormRequest
     public function attributes()
     {
         return [
-            'rating' => 'rating',
-            'comment' => 'comment',
+            'type' => 'type',
+            'id' => 'id',
         ];
     }
     public function messages()
     {
         return [
             'required' => ':attribute is required',
-            'rating.in' => 'The rating must be one of the following values:1,2,3,4,5',
+            'type.in' => 'The type must be tables or food_categories',
         ];
     }
 }

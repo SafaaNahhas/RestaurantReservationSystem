@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Rating;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-
-class StoreRatingRequest extends FormRequest
+class UpdateRatingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +24,8 @@ class StoreRatingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rating' => 'required|integer|in:1,2,3,4,5',
-            'comment' => 'required|string|max:255',
+            'rating' => 'nullable |integer|in:1,2,3,4,5',
+            'comment' => 'nullable |string|max:255',
         ];
     }
 

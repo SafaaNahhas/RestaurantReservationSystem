@@ -18,6 +18,7 @@ class DepartmentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'image' => $this->image,
             // 'image' => new ImageResource($this->whenLoaded('image')),  
             // 'tables' => TableResource::collection($this->whenLoaded('tables')),  
             'created_at' => $this->created_at,

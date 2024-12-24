@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Event;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use App\Models\User;
+use App\Models\Event;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use App\Jobs\SendCustomerCreateEvent;
 
 /**
  * EventService - Provides functionality for managing events.
@@ -50,10 +53,13 @@ class EventService
     public function createEvent(array $data)
     {
         try {
-            // Create and return the newly created event.
-            return Event::create($data);
+            $event = Event::create($data);
+            // get all email to customer 
+            $customers = Role::findByName('Customer')->users;
+            // send email
+            SendCustomerCreateEvent::dispatch($event, $customers);
+            return $event;
         } catch (Exception $e) {
-            // Log the error and throw a runtime exception.
             Log::error('Error creating event: ' . $e->getMessage());
             throw new \RuntimeException('Unable to create event.');
         }

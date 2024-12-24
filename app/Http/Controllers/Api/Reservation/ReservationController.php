@@ -15,6 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Resources\TableReservationResource;
 use App\Http\Resources\FaildTableReservationResource;
 use App\Http\Requests\ReservationRequest\StoreReservationRequest;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class ReservationController extends Controller
 {
@@ -29,8 +30,10 @@ class ReservationController extends Controller
 
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
+        if ($request->user()->cannot('store', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
         $result = $this->reservationService->storeReservation($request->validated());
-
         if ($result['status_code'] !== 201) {
             $reservedTables = isset($result['reserved_tables']) ?
                 $result['reserved_tables'] : null;
@@ -62,174 +65,134 @@ class ReservationController extends Controller
 
 
 
-        /**
-         * Cancel unconfirmed reservations that are older than an hour.
-         *
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function cancelUnconfirmedReservations()
-        {
-            try {
-                // Call the cancel logic from the service
-                $result = $this->reservationService->cancelUnconfirmedReservations();
+    /**
+     * Cancel unconfirmed reservations that are older than an hour.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelUnconfirmedReservations(Request $request)
+    {
+        if ($request->user()->cannot('cancelUnConfirmed', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the cancel logic from the service
+        $result = $this->reservationService->cancelUnconfirmedReservations();
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 404);
-                }
-
-                return self::success($result['cancelled_reservations'], $result['message'], 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error canceling unconfirmed reservations: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        if ($result['error']) {
+            return self::error(null, $result['message'], 404);
         }
 
-        /**
-         * Confirm a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function confirmReservation($id)
-        {
-            try {
-                // Call the confirm reservation logic from the service
-                $result = $this->reservationService->confirmReservation($id);
+        return self::success($result['cancelled_reservations'], $result['message'], 200);
+    }
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 400);
-                }
+    /**
+     * Confirm a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function confirmReservation(Request $request, $id)
+    {
 
-                return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error confirming reservation: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        if ($request->user()->cannot('confirm', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the confirm reservation logic from the service
+        $result = $this->reservationService->confirmReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
         }
 
-        /**
-         * Cancel a reservation.
-         *
-         * @param int $reservationId
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function cancelReservation($reservationId)
-        {
-            try {
-                // Call the cancel logic from the service
-                $result = $this->reservationService->cancelReservation($reservationId);
+        return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
+    }
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 422);
-                }
+    /**
+     * Cancel a reservation.
+     *
+     * @param int $reservationId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelReservation(Request $request, $reservationId)
+    {
 
-                return self::success(null, $result['message'], 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error canceling reservation: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        $reservation = Reservation::findOrFail($reservationId);
+        if ($request->user()->cannot('cancel', $reservation)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the cancel logic from the service
+        $result = $this->reservationService->cancelReservation($reservationId);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 422);
         }
 
-        /**
-         * Start service for a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function startService($id)
-        {
-            try {
-                // Call the start service logic from the service
-                $result = $this->reservationService->startService($id);
+        return self::success(null, $result['message'], 200);
+    }
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 400);
-                }
+    /**
+     * Start service for a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function startService(Request $request, $id)
+    {
 
-                return self::success($result['reservation'], 'Service started successfully', 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error starting service: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        if ($request->user()->cannot('startService', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the start service logic from the service
+        $result = $this->reservationService->startService($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
         }
 
-        /**
-         * Complete service for a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function completeService($id)
-        {
-            try {
-                // Call the complete service logic from the service
-                $result = $this->reservationService->completeService($id);
+        return self::success($result['reservation'], 'Service started successfully', 200);
+    }
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 400);
-                }
+    /**
+     * Complete service for a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function completeService(Request $request, $id)
+    {
 
-                return self::success($result['reservation'], 'Service completed successfully', 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error completing service: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        if ($request->user()->cannot('completeService', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the complete service logic from the service
+        $result = $this->reservationService->completeService($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
         }
 
-        /**
-         * Hard delete a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function hardDeleteReservation($id)
-        {
-            try {
-                // Call the hard delete logic from the service
-                $result = $this->reservationService->hardDeleteReservation($id);
+        return self::success($result['reservation'], 'Service completed successfully', 200);
+    }
 
-                if ($result['error']) {
-                    return self::error(null, $result['message'], 422);
-                }
+    /**
+     * Hard delete a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hardDeleteReservation(Request $request, $id)
+    {
 
-                return self::success(null, $result['message'], 200);
-            } catch (\Exception $e) {
-                // Log the error and return a generic message
-                Log::error('Error hard deleting reservation: ' . $e->getMessage());
-                return self::error(null, 'An unexpected error occurred.', 500);
-            }
+        if ($request->user()->cannot('delete', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the hard delete logic from the service
+        $result = $this->reservationService->hardDeleteReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 422);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return self::success(null, $result['message'], 200);
+    }
+}

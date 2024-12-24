@@ -5,6 +5,7 @@ namespace App\Http\Requests\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -16,7 +17,8 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Check if the authenticated user's ID matches the specific condition
+        return auth()->check() && auth()->id() === $this->route('id');
     }
 
     /**
@@ -28,8 +30,12 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'email' => ['sometimes', 'email', 'max:255',
-                   Rule::unique('users')->ignore(auth()->id())],
+            'email' => [
+                'sometimes',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore(auth()->id())
+            ],
             'password' => 'sometimes|string|min:8|confirmed',
             'phone' => 'nullable|string|regex:/^([0-9]{10})$/',
             'is_active' => 'nullable|boolean',
@@ -56,9 +62,9 @@ class UpdateUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.string' => 'The :attribute must be a string.' ,
-            'name.max' => 'The :attribute may not be greater than :max characters.' ,
-            'email.email' => 'The :attribute must be a valid email address.' ,
+            'name.string' => 'The :attribute must be a string.',
+            'name.max' => 'The :attribute may not be greater than :max characters.',
+            'email.email' => 'The :attribute must be a valid email address.',
             'email.max' => 'The :attribute may not be greater than :max characters.',
             'email.unique' => 'The :attribute has already been taken.',
             'password.confirmed' => 'The :attribute confirmation does not match.',
@@ -91,5 +97,4 @@ class UpdateUserRequest extends FormRequest
             ], 422)
         );
     }
-
 }

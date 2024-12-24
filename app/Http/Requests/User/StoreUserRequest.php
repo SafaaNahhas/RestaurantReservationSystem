@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\RoleUser;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreUserRequest extends FormRequest
 {
@@ -31,12 +34,13 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|regex:/^([0-9]{10})$/',
             'is_active' => 'nullable|boolean',
+            'role' => [Rule::enum(RoleUser::class)]
         ];
     }
 
     public function attributes(): array
     {
-        return[
+        return [
             'name' => 'Name',
             'email' => 'E-mail',
             'password' => 'Password',
@@ -88,5 +92,4 @@ class StoreUserRequest extends FormRequest
             ], 422)
         );
     }
-
 }

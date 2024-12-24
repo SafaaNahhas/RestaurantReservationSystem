@@ -44,7 +44,7 @@ class FoodCategoryService
      * Create a new Category.
      *
      * @param array $category
-     * @return \App\Models\Category
+     * @return \App\Models\FoodCategory
      */
     public function createCategory(array $data)
     {
@@ -71,7 +71,7 @@ class FoodCategoryService
      * Get the details of a specific Category by its ID.
      *
      * @param int $id
-     * @return \App\Models\Category
+     * @return \App\Models\FoodCategory
      */
     public function getCategory(int $id)
     {
@@ -109,7 +109,7 @@ class FoodCategoryService
      *
      * @param array $data
      * @param int $id
-     * @return \App\Models\Book
+     * @return \App\Models\FoodCategory
      */
     public function updateFoodCategory(array $data, int $id)
     {
@@ -210,7 +210,7 @@ class FoodCategoryService
      * Restore a trashed (soft deleted) resource by its ID.
      *
      * @param  int  $id  The ID of the trashed Task to be restored.
-     * @return \App\Models\Task
+     * @return \App\Models\FoodCategory
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the Task with the given ID is not found.
      * @throws \Exception If there is an error during the restore process.
@@ -220,7 +220,7 @@ class FoodCategoryService
         try {
             $category = FoodCategory::onlyTrashed()->findOrFail($id);
             $category->restore();
-            return $$category;
+            return $category;
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
 

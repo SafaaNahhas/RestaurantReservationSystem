@@ -87,5 +87,10 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make(12345678),
             'is_active' => true,
         ]);
+        // User::create([
+        //     'name' => 'safaa',
+        //     'email' => 'SafaaHusamNahhas@gmail.com',
+        //     'password' => Hash::make(12345678),
+        // ]);
     }
 }

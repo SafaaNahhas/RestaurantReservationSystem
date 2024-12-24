@@ -37,12 +37,12 @@ class ReservationService
                 $startDate = Carbon::parse($data['start_date']);
                 $endDate = Carbon::parse($data['end_date']);
 
-                if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
-                    ];
-                }
+            if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
+                ];
+            }
 
                 $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
                     return $query->where('table_number', $data['table_number']);
@@ -390,6 +390,4 @@ class ReservationService
             return ['error' => true, 'message' => 'An unexpected error occurred.'];
         }
     }
-
-
 }

@@ -3,6 +3,7 @@
 
 use App\Enums\RoleUser;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\ForgetPasswordController;
 use App\Models\User;
 use App\Http\Controllers\Api\Reservation\RatingController;
 use App\Http\Controllers\Api\Reservation\DishController;
@@ -29,6 +30,15 @@ Route::middleware('auth:api')->group(function () {
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('refresh', [AuthController::class, 'refresh']);
 Route::get('/me', [AuthController::class, 'me']);
+
+
+
+Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
+Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
+Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
+
+
+
 
     Route::post('reservations', [ReservationController::class, 'storeReservation']);
     Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
@@ -75,21 +85,22 @@ Route::delete('dishes/{dishId}/imageDdelet/{imageId}', [DishController::class, '
 // show deleted image
 Route::get('dishes/showDeletedImage', [DishController::class, 'showDeletedImage']);
 
+Route::prefix('admin')->group(function () {
+    Route::apiResource('departments.tables', TableController::class);
+    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
+    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
+    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
+});
 
-Route::apiResource('departments.tables', TableController::class);
-Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
-Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
-Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 
+// Route::apiResource('departments', DepartmentController::class);
+// use App\Http\Controllers\Api\Reservation\DepartmentController;
+// Route::apiResource('event', EventController::class);
 
-        // Route::apiResource('departments', DepartmentController::class);
-        // use App\Http\Controllers\Api\Reservation\DepartmentController;
-        // Route::apiResource('event', EventController::class);
-
-        Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-        Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-        Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-        Route::apiResource('event', EventController::class);
+Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+Route::apiResource('event', EventController::class);
 
 Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
 Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
@@ -114,6 +125,7 @@ Route::prefix('v1')->group(function () {
     Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
     Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
 });
+
 
 
 

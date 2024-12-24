@@ -7,11 +7,11 @@ namespace Database\Seeders;
 use App\Models\Dish;
 use App\Models\User;
 use App\Models\Department;
-use App\Models\Reservation;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -34,7 +34,6 @@ class DatabaseSeeder extends Seeder
             'phone' => '1234567890',
             'password' => bcrypt('password123'),
             'is_active' => true,
-
         ]);
 
         // إنشاء فئات الطعام
@@ -73,8 +72,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'Service',
             'description' => 'Responsible for customer service.',
         ]);
+
+        User::create([
+            'name' => 'haidar',
+            'email' => 'haidar@gmail.com',
+            'phone' => '1234567890',
+            'password' => Hash::make(12345678),
+            'is_active' => true,
+        ]);
     }
-
-
-
 }

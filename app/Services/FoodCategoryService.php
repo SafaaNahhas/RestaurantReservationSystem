@@ -11,7 +11,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
 use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
 
-class FoodCategoryService{
+class FoodCategoryService
+{
 
 
     /**
@@ -22,14 +23,14 @@ class FoodCategoryService{
         try {
             return FoodCategory::paginate($per_page);
         } catch (Exception $e) {
-         Log::error('Error in Get all FoodCategory'. $e->getMessage());
-         throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
-            ],
-            500
-        ));
+            Log::error('Error in Get all FoodCategory' . $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
@@ -37,7 +38,9 @@ class FoodCategoryService{
 
 
 
-     /**
+
+
+    /**
      * Create a new Category.
      *
      * @param array $category
@@ -53,18 +56,18 @@ class FoodCategoryService{
                 'user_id'=>Auth()->id(),
             ]);
         } catch (Exception $e) {
-          Log::error('Error creating Category: ' . $e->getMessage());
-          throw new HttpResponseException(response()->json(
-            [
-                'status' => 'error',
-                'message' => "there is something wrong in server",
-            ],
-            500
-        ));
+            Log::error('Error creating Category: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
-     /**
+    /**
      * Get the details of a specific Category by its ID.
      *
      * @param int $id
@@ -101,7 +104,7 @@ class FoodCategoryService{
     }
 
 
-     /**
+    /**
      * Update the details of a specific book.
      *
      * @param array $data
@@ -116,8 +119,8 @@ class FoodCategoryService{
 
             // Update the category with the provided data, filtering out null values
             $foodCategory->update(array_filter([
-                'category_name'=> $data['category_name'] ?? $foodCategory->category_name,
-                'description'=> $data['description'] ?? $foodCategory->description,
+                'category_name' => $data['category_name'] ?? $foodCategory->category_name,
+                'description' => $data['description'] ?? $foodCategory->description,
             ]));
 
             // Return the updated food category
@@ -184,14 +187,14 @@ class FoodCategoryService{
             ));
         }
     }
-     /**
+    /**
      * Display a paginated listing of the trashed (soft deleted) resources.
      */
     public function trashedListFoodCategory($perPage)
     {
         try {
             return FoodCategory::onlyTrashed()->paginate($perPage);
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error("error in display list of trashed FoodCategory" . $e->getMessage());
 
             throw new HttpResponseException(response()->json(
@@ -201,7 +204,7 @@ class FoodCategoryService{
                 ],
                 500
             ));
-    }
+        }
     }
     /**
      * Restore a trashed (soft deleted) resource by its ID.
@@ -280,5 +283,4 @@ class FoodCategoryService{
             ));
         }
     }
-
 }

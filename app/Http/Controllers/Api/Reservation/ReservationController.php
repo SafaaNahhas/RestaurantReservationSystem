@@ -16,6 +16,7 @@ use App\Http\Resources\TableReservationResource;
 use App\Http\Resources\ShowTableReservationResource;
 use App\Http\Resources\FaildTableReservationResource;
 use App\Http\Requests\ReservationRequest\StoreReservationRequest;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class ReservationController extends Controller
 {
@@ -37,10 +38,12 @@ class ReservationController extends Controller
      * @param StoreReservationRequest $request
      * @return JsonResponse
      */
-    
+
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
-        // Call the service to store the reservation
+        if ($request->user()->cannot('store', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
         $result = $this->reservationService->storeReservation($request->validated());
         // Handle the response based on the presence of reserved tables or reservation details
         return $result['status_code'] === 201
@@ -61,103 +64,134 @@ class ReservationController extends Controller
             return self::success( ShowTableReservationResource::collection($tables), 'Tables with reservations retrieved successfully.', 200 );
         }
 
-        /**
-         * Cancel unconfirmed reservations that are older than an hour.
-         *
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function cancelUnconfirmedReservations()
-        {
-                // Call the cancel logic from the service
-                $result = $this->reservationService->cancelUnconfirmedReservations();
-                if ($result['error']) {  return self::error(null, $result['message'], 404);  }
-                return self::success($result['cancelled_reservations'], $result['message'], 200);
+    /**
+     * Cancel unconfirmed reservations that are older than an hour.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelUnconfirmedReservations(Request $request)
+    {
+        if ($request->user()->cannot('cancelUnConfirmed', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the cancel logic from the service
+        $result = $this->reservationService->cancelUnconfirmedReservations();
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 404);
         }
 
-        /**
-         * Confirm a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function confirmReservation($id)
-        {
-                // Call the confirm reservation logic from the service
-                $result = $this->reservationService->confirmReservation($id);
-                if ($result['error']) { return self::error(null, $result['message'], 400); }
-                return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
+        return self::success($result['cancelled_reservations'], $result['message'], 200);
+    }
+
+    /**
+     * Confirm a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function confirmReservation(Request $request, $id)
+    {
+
+        if ($request->user()->cannot('confirm', Reservation::class)) {
+            throw new UnauthorizedException(403);
         }
+        // Call the confirm reservation logic from the service
+        $result = $this->reservationService->confirmReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
+        }
+
+        return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
+    }
 
     /**
      * Cancel a reservation.
      *
      * @param int $reservationId
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function cancelReservation(int $reservationId): JsonResponse
+    public function cancelReservation(Request $request, $reservationId)
     {
-        // Call the service method
+
+        $reservation = Reservation::findOrFail($reservationId);
+        if ($request->user()->cannot('cancel', $reservation)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the cancel logic from the service
         $result = $this->reservationService->cancelReservation($reservationId);
-        // Check if there was an error
-        if ($result['error']) {return self::error(null, $result['message'], 400);}
-        // Return success response with reservation details
-        return self::success( $result['data'], $result['message'], 200);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 422);
+        }
+
+        return self::success(null, $result['message'], 200);
     }
-        /**
-         * Start service for a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function startService($id)
-        {
-                // Call the start service logic from the service
-                $result = $this->reservationService->startService($id);
-                if ($result['error']) {return self::error(null, $result['message'], 400);}
-                return self::success($result['reservation'], 'Service started successfully', 200);
+
+    /**
+     * Start service for a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function startService(Request $request, $id)
+    {
+
+        if ($request->user()->cannot('startService', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the start service logic from the service
+        $result = $this->reservationService->startService($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
         }
 
-        /**
-         * Complete service for a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function completeService($id)
-        {
-                // Call the complete service logic from the service
-                $result = $this->reservationService->completeService($id);
-                if ($result['error']) {return self::error(null, $result['message'], 400); }
-                return self::success($result['reservation'], 'Service completed successfully', 200);
+        return self::success($result['reservation'], 'Service started successfully', 200);
+    }
+
+    /**
+     * Complete service for a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function completeService(Request $request, $id)
+    {
+
+        if ($request->user()->cannot('completeService', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the complete service logic from the service
+        $result = $this->reservationService->completeService($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
         }
 
-        /**
-         * Hard delete a reservation.
-         *
-         * @param int $id
-         * @return \Illuminate\Http\JsonResponse
-         */
-        public function hardDeleteReservation($id)
-        {
-                // Call the hard delete logic from the service
-                $result = $this->reservationService->hardDeleteReservation($id);
-                if ($result['error']) {return self::error(null, $result['message'], 422);}
-                return self::success(null, $result['message'], 200);
+        return self::success($result['reservation'], 'Service completed successfully', 200);
+    }
+
+    /**
+     * Hard delete a reservation.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hardDeleteReservation(Request $request, $id)
+    {
+
+        if ($request->user()->cannot('delete', Reservation::class)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the hard delete logic from the service
+        $result = $this->reservationService->hardDeleteReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 422);
         }
 
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return self::success(null, $result['message'], 200);
+    }
+}

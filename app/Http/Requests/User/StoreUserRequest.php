@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\RoleUser;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreUserRequest extends FormRequest
 {
@@ -33,19 +36,26 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',                        // User's full name
-            'email' => 'required|string|email|max:255|unique:users',    // Unique email address
-            'password' => 'required|string|min:8|confirmed',            // Secure password with confirmation
-            'phone' => 'nullable|string|regex:/^([0-9]{10})$/',         // Optional phone number
-            'is_active' => 'nullable|boolean',                          // Optional account status
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|regex:/^([0-9]{10})$/',
+            'is_active' => 'nullable|boolean',
+            'role' => [Rule::enum(RoleUser::class)]
         ];
     }
 
-    /**
-     * Custom error messages for validation failures.
-     *
-     * @return array<string, string>
-     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'Name',
+            'email' => 'E-mail',
+            'password' => 'Password',
+            'phone' => 'Phone Number',
+            'is_active' => 'Activation Status',
+        ];
+    }
+
     public function messages(): array
     {
         return [

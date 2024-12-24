@@ -3,6 +3,11 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+
+use App\Models\Rating;
+use App\Models\Reservation;
+use App\Policies\RatingPolicy;
+use App\Policies\ReservationPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -14,6 +19,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Reservation::class => ReservationPolicy::class,
+        Rating::class => RatingPolicy::class
+
+
     ];
 
     /**

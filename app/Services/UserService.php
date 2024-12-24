@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\RoleUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -50,8 +51,10 @@ class UserService extends Controller
             // Hash the password before creating user
             $data['password'] = Hash::make($data['password']);
 
-            // fresh() reloads the model from database to get a clean instance with all current data
-            return User::create($data)->fresh();
+            $user= User::create($data)->fresh();
+            $user->assignRole($data['role']);
+            return $user;
+
         } catch (Exception $e) {
             // Log error without exposing sensitive data
             Log::error('Failed to create user', [

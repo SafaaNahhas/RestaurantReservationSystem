@@ -17,7 +17,7 @@ class UserController extends Controller
 
     public function __construct(UserService $userService)
     {
-        $this->middleware('auth:api');
+      
         $this->userService = $userService;
     }
 

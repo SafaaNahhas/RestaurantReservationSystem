@@ -23,7 +23,7 @@ class TableController extends Controller
      * get all tables
      * @param FillterTabelRequest request
      * @param int department_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(FillterTabelRequest $request,  $department_id)
     {
@@ -42,7 +42,7 @@ class TableController extends Controller
      * create a  new table
      * @param StoreTableRequest request
      * @param int department_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreTableRequest $request,   $department_id)
     {
@@ -58,7 +58,7 @@ class TableController extends Controller
      * get a specified  table
      * @param int table_id
      * @param int department_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($department_id,   $table_id)
     {
@@ -74,7 +74,7 @@ class TableController extends Controller
      * @param UpdateTableRequest request
      * @param int department_id
      * @param int table_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateTableRequest $request,   $department_id,  $table_id)
     {
@@ -90,7 +90,7 @@ class TableController extends Controller
      * delete a specified  table
      * @param int department_id
      * @param int table_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($department_id,   $table_id)
     {
@@ -105,7 +105,7 @@ class TableController extends Controller
      * get all deleted tables
      * @param FillterTabelRequest request
      * @param int department_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function allDeletedTables(FillterTabelRequest $request,   $department_id)
     {
@@ -124,7 +124,7 @@ class TableController extends Controller
      * restore a specified  table
      * @param int department_id
      * @param int table_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function restoreTable($department_id, $table_id)
     {
@@ -138,7 +138,7 @@ class TableController extends Controller
      * force delete a specified  table
      * @param int department_id
      * @param int table_id
-     * @return \Illuminate\Http\JsonResponse 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function forceDeleteTable($department_id, $table_id)
     {

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Enums\RoleUser;
 use App\Models\Dish;
 use App\Models\User;
 use App\Models\Rating;
@@ -35,11 +36,12 @@ class DatabaseSeeder extends Seeder
 
         $user = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@ewxample.com',
+            'email' => 'admin@example.com',
             'phone' => '1234567890',
             'password' => bcrypt('password123'),
             'is_active' => true,
         ]);
+        $user->assignRole(RoleUser::Admin);
 
         // إنشاء فئات الطعام
         $category1 = FoodCategory::create([

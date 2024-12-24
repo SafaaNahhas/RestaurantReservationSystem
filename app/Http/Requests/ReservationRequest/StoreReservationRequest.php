@@ -26,11 +26,11 @@ class StoreReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
+
+            'table_number' => 'nullable|exists:tables,table_number',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after:start_date',
-            'table_number' => 'nullable|exists:tables,table_number',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+
             'guest_count' => 'required|integer|min:1',
             'services' => 'nullable|string',
         ];

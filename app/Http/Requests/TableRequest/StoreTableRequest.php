@@ -21,10 +21,29 @@ class StoreTableRequest extends BaseTableRequest
         $commonRules = $this->tableRequestService->getCommonRules();
 
         return [
-            'table_number' => ['required', 'string', 'min:2', 'max:255', 'unique:tables,table_number'],
-            'location' => ['required', 'string', 'min:6', 'max:255'],
-            'seat_count' => ['required', 'integer', 'gt:0'],
-            'department_id' => ['required', 'exists:departments,id', 'gt:0']
+
+            // 'table_number' => ['required', 'string', 'min:2', 'max:255', 'unique:tables,table_number'],
+            // 'location' => ['required', 'string', 'min:6', 'max:255'],
+            // 'seat_count' => ['required', 'integer', 'gt:0'],
+            // //  'department_id' => ['required', 'exists:departments,id', 'gt:0']
+
+            'table_number' => array_merge(
+                $commonRules['table_number'],
+                ['required', 'unique:tables,table_number']
+            ),
+            'location' => array_merge(
+                $commonRules['location'],
+                ['required']
+            ),
+            'seat_count' => array_merge(
+                $commonRules['seat_count'],
+                ['required']
+            ),
+            'department_id' => array_merge(
+                $commonRules['department_id'],
+                ['required']
+            ),
+
         ];
     }
 

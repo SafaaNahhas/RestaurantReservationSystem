@@ -14,6 +14,14 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class FavoriteService
 {
+
+    /**
+     * store the favorite
+     * @param $user
+     * @param array $type
+     * @param array $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addToFavorites($user, $type, $id)
     {
         try {
@@ -39,6 +47,11 @@ class FavoriteService
         }
     }
 
+    /**
+     * fetch the list of favorite from the user
+     * @param $user
+     * @return \Illuminate\Http\JsonResponse
+     */
 
     public function getFavorites($user)
     {
@@ -47,6 +60,14 @@ class FavoriteService
         );
     }
 
+
+    /**
+     * remove the favorite recource
+     * @param $user
+     * @param array $type
+     * @param array $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function removeFromFavorites($user, $type, $id)
     {
         try {

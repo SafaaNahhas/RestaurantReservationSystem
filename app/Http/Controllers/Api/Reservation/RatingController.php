@@ -53,9 +53,7 @@ class RatingController extends Controller
             return $this->success($response, 'rating created successfully', 201);
         }
     }
-    // public function show(){
-    //     dd(333);
-    // }
+   
 
     /** 
      * Display the specified rating.

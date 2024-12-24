@@ -4,13 +4,14 @@ namespace App\Services;
 
 use Exception;
 use App\Models\Dish;
+use App\Models\Image;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
-use Illuminate\Support\Str;
 
 class DishService
 {
@@ -60,9 +61,9 @@ class DishService
                     // Define the file path for storing the image
                     $filePath = "Images/{$imageName}.{$extension}";
                     // Store the image securely in the 'public' disk storage
-                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    $path = Storage::putFileAs('Images', $image, "{$imageName}.{$extension}");
                     // Get the full URL to the stored image
-                    $url = Storage::disk('public')->url($path);
+                    $url = Storage::url($path);
                     // Get the MIME type of the image
                     $mime_type = $image->getClientMimeType();
                     // Associate the image with the department and store it in the 'images' table
@@ -155,9 +156,9 @@ class DishService
                     // Define the file path for storing the image
                     $filePath = "Images/{$imageName}.{$extension}";
                     // Store the image securely in the 'public' disk storage
-                    $path = Storage::disk('public')->putFileAs('Images', $image, "{$imageName}.{$extension}");
+                    $path = Storage::putFileAs('Images', $image, "{$imageName}.{$extension}");
                     // Get the full URL to the stored image
-                    $url = Storage::disk('public')->url($path);
+                    $url = Storage::url($path);
                     // Get the MIME type of the image
                     $mime_type = $image->getClientMimeType();
                     // Associate the image with the department and store it in the 'images' table
@@ -347,23 +348,22 @@ class DishService
             // Find the dish by its ID
             $dish = Dish::findOrFail($dishId);
             // Find the image associated with the dish by its ID
-            $image = $dish->image()->find($imageId);
-            // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
+            $image = $dish->image()->findOrFail($imageId);
             // Soft delete the image
             $image->delete();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            Log::error('Dish not found: ' . $e->getMessage());
+            if ($e->getModel() === Dish::class) {
+                $errorMessage = 'Dish not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Dish not found",
+                'message' => $errorMessage,
             ], 404));
         } catch (HttpResponseException $e) {
             throw $e;
@@ -405,26 +405,23 @@ class DishService
             // Find the dish by its ID
             $dish = Dish::findOrFail($dishId);
             // Find the image associated with the dish by its ID
-            $image = $dish->image()->onlyTrashed()->find($imageId);
-            // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
+            $image = $dish->image()->onlyTrashed()->findOrFail($imageId);
             // Restore the soft-deleted image
             $image->restore();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            Log::error('Dish not found: ' . $e->getMessage());
+            if ($e->getModel() === Dish::class) {
+                $errorMessage = 'Dish not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Dish not found",
+                'message' => $errorMessage,
             ], 404));
-        } catch (HttpResponseException $e) {
-            throw $e;
         } catch (\Exception $e) {
             Log::error('Error restoring image: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
@@ -449,25 +446,22 @@ class DishService
             $dish = Dish::findOrFail($dishId);
             // Find the image associated with the dish by its ID
             $image = $dish->image()->onlyTrashed()->find($imageId);
-            // If the image is not found, return a clear error response
-            if (!$image) {
-                throw new HttpResponseException(response()->json([
-                    'status' => 'error',
-                    'message' => "Image not found",
-                ], 404));
-            }
             // Permanently delete the image
             $image->forceDelete();
             // Return true to indicate the operation was successful
             return true;
         } catch (ModelNotFoundException $e) {
-            Log::error('Dish not found: ' . $e->getMessage());
+            if ($e->getModel() === Dish::class) {
+                $errorMessage = 'Dish not found';
+            } elseif ($e->getModel() === Image::class) {
+                $errorMessage = 'Image not found ';
+            }
+            // Log and throw error if the restaurant or image is not found
+            Log::error($errorMessage . '. Error: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
-                'message' => "Dish not found",
+                'message' => $errorMessage,
             ], 404));
-        } catch (HttpResponseException $e) {
-            throw $e;
         } catch (\Exception $e) {
             Log::error('Error permanently deleting image: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([

@@ -19,7 +19,8 @@ use App\Http\Controllers\Api\Reservation\EventController;
 // use app\Http\Controllers\Api\Reservation\DepartmentController;
 
 use App\Http\Controllers\Api\Reservation\DepartmentController;
-
+use App\Http\Controllers\Api\Restaurant\RestaurantController;
+use App\Models\Restaurant;
 
 Route::middleware(['security'])->group(function (){
 
@@ -56,6 +57,7 @@ Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
     Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+
 
 
 
@@ -102,10 +104,12 @@ Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword
     Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
     Route::apiResource('event', EventController::class);
 
+
     Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
     Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
     Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
     Route::apiResource('department', DepartmentController::class);
+
 
 // soft delete
     Route::delete('department/{departmentId}/imageSoftDelet/{imageId}', [DepartmentController::class, 'softdeletImage']);
@@ -129,6 +133,21 @@ Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword
 });
 
 
+
+// soft delete
+Route::delete('restaurant/{restaurantId}/imageSoftDelet/{imageId}', [RestaurantController::class, 'softdeletImage']);
+// restore
+Route::post('restaurant/{restaurantId}/imageRestore/{imageId}', [RestaurantController::class, 'restoreImage']);
+// permanent delete
+Route::delete('restaurant/{restaurantId}/imageDdelet/{imageId}', [RestaurantController::class, 'deletImage']);
+// show deleted image
+Route::get('restaurant/showDeletedImage', [RestaurantController::class, 'showDeletedImage']);
+
+
+//restaurant
+Route::delete('restaurant/email/{id}', [RestaurantController::class, 'deleteEmail']);
+Route::delete('restaurant/phone-number/{id}', [RestaurantController::class, 'deletePhoneNumber']);
+Route::apiResource('restaurant', RestaurantController::class);
 
 
 

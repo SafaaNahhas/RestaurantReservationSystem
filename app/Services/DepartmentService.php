@@ -136,11 +136,12 @@ class DepartmentService
                         'name' => $imageName, // Randomly generated image name
                     ]);
                 }
-                DB::commit(); // Commit the transaction if all is well
-                // Return the updated department
-                return $department;
-
             }
+
+            DB::commit(); // Commit the transaction if all is well
+            // Return the updated department
+            return $department;
+
         } catch (Exception $e) {
             // Log any errors during the process
             Log::error('Error updating department: ' . $e->getMessage());

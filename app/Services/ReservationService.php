@@ -47,7 +47,8 @@ class ReservationService
                 $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
                     return $query->where('table_number', $data['table_number']);
                 }, function ($query) use ($data) {
-                    return $query->where('seat_count', '>=', $data['guest_count']);
+                    return $query->where('seat_count', '>=', $data['guest_count'])
+                    ->orderBy('seat_count', 'asc');;
                 })
                     ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
                         $query->whereBetween('start_date', [$startDate, $endDate])

@@ -54,4 +54,8 @@ class Table extends Model
         else
             return $query;
     }
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favorable');
+    }
 }

@@ -1,10 +1,10 @@
 <?php
 
 
+use App\Models\User;
 use App\Enums\RoleUser;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
-use App\Models\User;
 use App\Http\Controllers\Api\Reservation\RatingController;
 use App\Http\Controllers\Api\Reservation\DishController;
 use App\Http\Controllers\Api\Reservation\FoodCategoryController;
@@ -12,13 +12,14 @@ use App\Http\Controllers\Api\Reservation\TableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Reservation\ReservationController;
+use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\Reservation\EventController;
+use App\Http\Controllers\Api\Reservation\FavoriteController;
+use App\Http\Controllers\Api\Reservation\DepartmentController;
 // use app\Http\Controllers\Api\Reservation\DepartmentController;
 
-use App\Http\Controllers\Api\Reservation\DepartmentController;
+use App\Http\Controllers\Api\Reservation\ReservationController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Models\Restaurant;
 
@@ -67,7 +68,17 @@ Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword
     Route::delete('category/{category}', [FoodCategoryController::class, 'destroy']);
     Route::get('categories', [FoodCategoryController::class, 'index']);
     Route::get('category/{category}', [FoodCategoryController::class, 'show']);
+    Route::post('categories', [FoodCategoryController::class, 'store']);
+    Route::put('category/{category}', [FoodCategoryController::class, 'update']);
+    Route::delete('category/{category}', [FoodCategoryController::class, 'destroy']);
+    Route::get('categories', [FoodCategoryController::class, 'index']);
+    Route::get('category/{category}', [FoodCategoryController::class, 'show']);
 
+    Route::post('dishes', [DishController::class, 'store']);
+    Route::put('dish/{dish}', [DishController::class, 'update']);
+    Route::delete('dish/{dish}', [DishController::class, 'destroy']);
+    Route::get('dishes', [DishController::class, 'index']);
+    Route::get('dish/{dish}', [DishController::class, 'show']);
     Route::post('dishes', [DishController::class, 'store']);
     Route::put('dish/{dish}', [DishController::class, 'update']);
     Route::delete('dish/{dish}', [DishController::class, 'destroy']);
@@ -152,10 +163,18 @@ Route::apiResource('restaurant', RestaurantController::class);
 
 
 
-// Route::prefix('auth/v1')->group(function (){
-//     Route::post('register', [AuthController::class, 'register']);
-//     Route::post('login', [AuthController::class, 'login']);
-//     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-//     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
-// });
+    // Route::prefix('auth/v1')->group(function (){
+    //     Route::post('register', [AuthController::class, 'register']);
+    //     Route::post('login', [AuthController::class, 'login']);
+    //     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
+    //     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
+    // });
+
+
+
+});Route::middleware('auth:api')->group(function () {
+    Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
+    Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
+    Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
 });
+

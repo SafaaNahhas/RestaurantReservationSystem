@@ -99,9 +99,15 @@ class User extends Authenticatable implements JWTSubject
     }
     /**
      * Relationship: A user has many ratings.
-     */
+     */ 
     public function ratings()
     {
         return $this->hasMany(Rating::class);
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+    
 }

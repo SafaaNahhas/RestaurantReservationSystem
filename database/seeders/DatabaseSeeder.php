@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Dish;
 use App\Models\User;
+use App\Models\Rating;
 use App\Models\Department;
 use App\Models\Restaurant;
 use App\Models\FoodCategory;
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Reservation::factory()->count(10)->create();
         \App\Models\Table::factory()->count(10)->create();
+         Rating::factory()->count(10)->create();
 
         $user = User::create([
             'name' => 'Admin User',

@@ -19,7 +19,7 @@ class RatingService
     public function getRatingByReservationAndUser($reservationId, $userId)
     {
         try {
-
+ 
             $rating=Rating::where('reservation_id', $reservationId)
                 ->where('user_id', $userId)
                 ->first();

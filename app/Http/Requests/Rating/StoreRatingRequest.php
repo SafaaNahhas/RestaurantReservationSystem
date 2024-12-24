@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Rating;
 
 use App\Models\Reservation;
 use Illuminate\Contracts\Validation\ValidationRule;

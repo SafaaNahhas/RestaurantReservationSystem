@@ -6,11 +6,10 @@ use App\Models\Rating;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Services\RatingService;
-// use App\Http\Requests\StoreRatingRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RatingResource;
-use App\Http\Requests\StoreRatingRequest;
-use App\Http\Requests\UpdateRatingRequest;
+use App\Http\Requests\Rating\StoreRatingRequest;
+use App\Http\Requests\Rating\UpdateRatingRequest;
 use Carbon\Carbon;
 
 

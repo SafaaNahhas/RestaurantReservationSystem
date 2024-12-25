@@ -24,10 +24,8 @@ class StoreRatingRequest extends FormRequest
     public function authorize(): bool
     {
         // Check if the reservation belongs to the authenticated user
-        return Reservation::where('id', $this->query('reservation_id'))
-            ->where('user_id', auth()->id())
-            ->exists();
-    }
+        return true;
+        }
 
     /**
      * Handle a failed authorization attempt.

@@ -3,10 +3,12 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\RoleUser;
+use App\Models\Reservation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -41,7 +43,7 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|regex:/^([0-9]{10})$/',
             'is_active' => 'nullable|boolean',
-            'role' => [Rule::enum(RoleUser::class)]
+            'role' => ['required', Rule::enum(RoleUser::class)]
         ];
     }
 

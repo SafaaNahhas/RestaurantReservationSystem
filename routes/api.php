@@ -51,15 +51,14 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
     Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
     Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
-
-
+});
 
 //  ********* Rating Routes    *****************************
 Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('ratings', RatingController::class);
-    Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
-    Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
-    Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+    // Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
+    // Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
+    // Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
 });
 
 // ********* Category Routes  *********************************
@@ -134,85 +133,26 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('event/{id}', [EventController::class, 'show']); // Get a specific department
 });
 
-// soft delete
-    Route::delete('dishes/{dishId}/imageSoftDelet/{imageId}', [DishController::class, 'softDeleteImage']);
-// restore
-    Route::post('dishes/{dishId}/imageRestore/{imageId}', [DishController::class, 'restoreImage']);
-// permanent delete
-    Route::delete('dishes/{dishId}/imageDdelet/{imageId}', [DishController::class, 'deleteImage']);
-// show deleted image
-    Route::get('dishes/showDeletedImage', [DishController::class, 'showDeletedImage']);
-
-    Route::apiResource('departments.tables', TableController::class);
-    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
-    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
-    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
-
-
-    // Route::apiResource('departments', DepartmentController::class);
-    // use App\Http\Controllers\Api\Reservation\DepartmentController;
-    // Route::apiResource('event', EventController::class);
-
-    Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-    Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-    Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-    Route::apiResource('event', EventController::class);
-
-
-    Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
-    Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
-    Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
-    Route::apiResource('department', DepartmentController::class);
-
-
-// soft delete
-    Route::delete('department/{departmentId}/imageSoftDelet/{imageId}', [DepartmentController::class, 'softdeletImage']);
-// restore
-    Route::post('department/{departmentId}/imageRestore/{imageId}', [DepartmentController::class, 'restoreImage']);
-// permanent delete
-    Route::delete('department/{departmentId}/imageDdelet/{imageId}', [DepartmentController::class, 'deletImage']);
-// show deleted image
-    Route::get('departments/showDeletedImage', [DepartmentController::class, 'showDeletedImage']);
-
-// Route::prefix('customer')->group(function () {
-//     Route::apiResource('departments.tables', TableController::class)->only(['index', 'show']);
-// });
-    Route::prefix('v1')->group(function () {
-        Route::apiResource('users', UserController::class);
-        Route::post('users/restore/{id}', [UserController::class, 'restore']);
-        Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
-        Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
-    });
-
+//   *********** Restaurant Routes ***********************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    // soft delete
+    Route::delete('restaurant/{restaurantId}/imageSoftDelet/{imageId}', [RestaurantController::class, 'softdeletImage']);
+    // restore
+    Route::post('restaurant/{restaurantId}/imageRestore/{imageId}', [RestaurantController::class, 'restoreImage']);
+    // permanent delete
+    Route::delete('restaurant/{restaurantId}/imageDdelet/{imageId}', [RestaurantController::class, 'deletImage']);
+    // show deleted image
+    Route::get('restaurant/showDeletedImage', [RestaurantController::class, 'showDeletedImage']);
+    //restaurant
+    Route::delete('restaurant/email/{id}', [RestaurantController::class, 'deleteEmail']);
+    Route::delete('restaurant/phone-number/{id}', [RestaurantController::class, 'deletePhoneNumber']);
+    Route::apiResource('restaurant', RestaurantController::class)->except(['index', 'show']);
 });
 
+Route::get('restaurant', [RestaurantController::class, 'index']);
+Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
 
-
-// soft delete
-Route::delete('restaurant/{restaurantId}/imageSoftDelet/{imageId}', [RestaurantController::class, 'softdeletImage']);
-// restore
-Route::post('restaurant/{restaurantId}/imageRestore/{imageId}', [RestaurantController::class, 'restoreImage']);
-// permanent delete
-Route::delete('restaurant/{restaurantId}/imageDdelet/{imageId}', [RestaurantController::class, 'deletImage']);
-// show deleted image
-Route::get('restaurant/showDeletedImage', [RestaurantController::class, 'showDeletedImage']);
-
-
-//restaurant
-Route::delete('restaurant/email/{id}', [RestaurantController::class, 'deleteEmail']);
-Route::delete('restaurant/phone-number/{id}', [RestaurantController::class, 'deletePhoneNumber']);
-Route::apiResource('restaurant', RestaurantController::class);
-
-
-
-
-    // Route::prefix('auth/v1')->group(function (){
-    //     Route::post('register', [AuthController::class, 'register']);
-    //     Route::post('login', [AuthController::class, 'login']);
-    //     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-    //     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
-    // });
-
+// **********  Favorites Routes ***********************
 
 
 Route::middleware('auth:api')->group(function () {

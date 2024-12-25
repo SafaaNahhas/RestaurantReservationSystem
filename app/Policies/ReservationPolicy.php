@@ -6,6 +6,8 @@ use App\Enums\RoleUser;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use PgSql\Lob;
 
 class ReservationPolicy
 {
@@ -44,5 +46,20 @@ class ReservationPolicy
     public function delete(User $user)
     {
         return $user->hasPermissionTo('hard delete reservation');
+    }
+
+    /**
+     * Determine if the given user can create a rating for the reservation.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Reservation  $reservation
+     * @return bool
+     */
+    public function storeRating(User $user, Reservation $reservation)
+    {
+        // Check if the reservation belongs to the user
+        return Reservation::where('id', $reservation->id)
+            ->where('user_id', $user->id)
+            ->exists();
     }
 }

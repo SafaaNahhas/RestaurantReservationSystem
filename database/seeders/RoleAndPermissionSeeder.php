@@ -51,11 +51,9 @@ class RoleAndPermissionSeeder extends Seeder
         $cancelUnConfirmed->assignRole($admin);
 
         // Ratings Permissions      
-        $viewDeleteRating = Permission::create(['name' => 'view delete rating']);
-        $forceDeleteRating = Permission::create(['name' => 'force delete rating']);
+        $deleteRating = Permission::create(['name' => 'delete rating']);
 
         // Assign Roles to Ratings Permissions
-        $viewDeleteRating->assignRole([$admin, $reservationManager]);
-        $forceDeleteRating->assignRole([$admin, $reservationManager]);
+        $deleteRating->assignRole([$admin, $reservationManager]);
     }
 }

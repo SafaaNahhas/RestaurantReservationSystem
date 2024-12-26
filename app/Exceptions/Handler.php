@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -39,17 +42,31 @@ class Handler extends ExceptionHandler
     /**
      * Register the exception handling callbacks for the application.
      */
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+    public function register(): void {}
 
-        $this->renderable(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             return response()->json([
-                'responseMessage' => 'You do not have the required authorization.',
-                'responseStatus'  => 403,
-            ]);
-        });
+                'error' => true,
+                'message' => $exception->getMessage() ?: "You don't have the required role or permission.",
+            ], 403);
+        }
+
+        if ($exception instanceof AuthenticationException) {
+            return response()->json([
+                'error' => 'You need to be logged in to access this resource.',
+                'code' => 401
+            ], 401);
+        }
+
+        // if ($exception instanceof \Exception) {
+        //     return response()->json([
+        //         'error' => true,
+        //         'message' => "An unexpected error occurred.",
+        //     ], 500);
+        // }
+
+        return parent::render($request, $exception);
     }
 }

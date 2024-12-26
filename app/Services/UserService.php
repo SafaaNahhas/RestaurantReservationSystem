@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\RoleUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,105 +15,113 @@ use Mockery\Exception;
 
 class UserService extends Controller
 {
-
     /**
-     * List users with pagination
+     * Retrieves a paginated list of users sorted by most recent first.
      *
-     * @param int $perPage
+     * @param int $perPage Number of users per page
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @throws HttpResponseException If retrieval fails
      */
     public function listUsers(int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         try {
+            // Fetch paginated users ordered by latest
             return User::query()
                 ->latest()
                 ->paginate($perPage);
-
         } catch (Exception $e) {
+            // Handle and log any database or query errors
             Log::error('Error listing users: ' . $e->getMessage());
             throw new HttpResponseException(
-                $this->error('Failed to retrieve users list', 500, null)
+                self::error('Failed to retrieve users list', 500, null)
             );
         }
     }
 
     /**
-     * Create a new user
+     * Create a new user with hashed password
      *
-     * @param array $data
-     * @return User
-     * @throws HttpResponseException
+     * @param array $data User details including password
+     * @return User Newly created user instance
+     * @throws HttpResponseException If creation fails
      */
     public function createUser(array $data): User
     {
         try {
+            // Hash the password before creating user
             $data['password'] = Hash::make($data['password']);
 
-            return User::create($data)->fresh();
+            $user= User::create($data)->fresh();
+            $user->assignRole($data['role']);
+            return $user;
 
         } catch (Exception $e) {
+            // Log error without exposing sensitive data
             Log::error('Failed to create user', [
                 'error' => $e->getMessage(),
                 'data' => Arr::except($data, ['password'])
             ]);
 
             throw new HttpResponseException(
-                $this->error('Failed to create user', 500, null)
+                self::error('Failed to create user', 500, null)
             );
         }
     }
 
     /**
-     * Get user by ID
+     * Retrieve a specific user
      *
-     * @param User $user
+     * @param User $user User model instance
      * @return User
-     * @throws HttpResponseException
+     * @throws HttpResponseException If retrieval fails
      */
     public function getUser(User $user): User
     {
         try {
             return $user;
-
         } catch (Exception $e) {
+            // Log failure with user identifier
             Log::error('Failed to retrieve user', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage()
             ]);
 
             throw new HttpResponseException(
-                $this->error('Failed to retrieve user details', 500, null)
+                self::error('Failed to retrieve user details', 500, null)
             );
         }
     }
 
     /**
-     * Update user details
+     * Update user details with optional password change
      *
-     * @param User $user
-     * @param array $data
-     * @return User
-     * @throws HttpResponseException
+     * @param User $user User model instance
+     * @param array $data Updated user data
+     * @return User Updated user instance
+     * @throws HttpResponseException If update fails
      */
     public function updateUser(User $user, array $data): User
     {
         try {
+            // Hash password if provided
             if (!empty($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             }
 
-            // Filter out null/empty values and update
+            // Remove null values and update user
             $filteredData = array_filter($data, static fn($value) => !is_null($value));
             $user->update($filteredData);
 
+            // Log successful update
             Log::info('User updated successfully', [
                 'user_id' => $user->id,
                 'updated_fields' => array_keys($filteredData)
             ]);
 
+            // Reload fresh user data from database
             return $user->fresh();
-
         } catch (Exception $e) {
+            // Log error without sensitive data
             Log::error('Failed to update user', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
@@ -120,7 +129,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                $this->error('Failed to update user details', 500, null)
+                self::error('Failed to update user details', 500, null)
             );
         }
     }
@@ -128,8 +137,8 @@ class UserService extends Controller
     /**
      * Delete a user from the system
      *
-     * @param User $user
-     * @throws HttpResponseException
+     * @param User $user User to be deleted
+     * @throws HttpResponseException If deletion fails
      * @return void
      */
     public function deleteUser(User $user): void
@@ -137,19 +146,20 @@ class UserService extends Controller
         try {
             $user->delete();
 
+            // Log deletion for audit trail
             Log::info('User deleted successfully', [
                 'user_id' => $user->id,
                 'user_email' => $user->email
             ]);
-
         } catch (Exception $e) {
+            // Log failure details
             Log::error('Failed to delete user', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage()
             ]);
 
             throw new HttpResponseException(
-                $this->error('Failed to delete user', 500, null)
+                self::error('Failed to delete user', 500, null)
             );
         }
     }
@@ -157,78 +167,84 @@ class UserService extends Controller
     /**
      * Restore a soft-deleted user
      *
-     * @param int $id
-     * @return User
-     * @throws HttpResponseException
+     * @param int $id ID of deleted user
+     * @return User Fresh instance of restored user
+     * @throws HttpResponseException If user not found or restoration fails
      */
     public function restoreUser(int $id): User
     {
         try {
+            // Find the soft-deleted user
             $user = User::onlyTrashed()->findOrFail($id);
 
+            // Attempt to restore the user
             if (!$user->restore()) {
                 throw new Exception('Failed to restore user');
             }
 
+            // Log successful restoration
             Log::info('User restored successfully', [
                 'user_id' => $id,
                 'user_email' => $user->email
             ]);
 
+            // Get fresh instance of restored user
             return $user->fresh();
-
         } catch (ModelNotFoundException $e) {
+            // Handle case when user not found
             Log::error('User not found for restoration', [
                 'id' => $id,
                 'error' => $e->getMessage()
             ]);
             throw new HttpResponseException(
-                $this->error('User not found', 404, null)
+                self::error('User not found', 404, null)
             );
-
         } catch (Exception $e) {
+            // Handle general restoration failures
             Log::error('Failed to restore user', [
                 'id' => $id,
                 'error' => $e->getMessage()
             ]);
             throw new HttpResponseException(
-                $this->error('Failed to restore user', 500, null)
+                self::error('Failed to restore user', 500, null)
             );
         }
     }
 
     /**
-     * Retrieve paginated list of soft-deleted users
+     * Get paginated list of soft-deleted users
      *
-     * @param int $perPage Number of items per page
-     * @throws HttpResponseException If retrieval fails
-     * @return LengthAwarePaginator
+     * @param int $perPage Items per page
+     * @return LengthAwarePaginator Paginated deleted users
+     * @throws HttpResponseException If no users found or retrieval fails
      */
     public function showDeletedUsers(int $perPage): LengthAwarePaginator
     {
         try {
+            // Get deleted users with specific fields
             $deletedUsers = User::onlyTrashed()
                 ->latest()
                 ->select(['id', 'name', 'email', 'phone', 'deleted_at'])
                 ->paginate($perPage);
 
+            // Check if any deleted users exist
             if ($deletedUsers->isEmpty()) {
                 throw new HttpResponseException(
-                    $this->error('No deleted users found.', 404, null)
+                    self::error('No deleted users found.', 404, null)
                 );
             }
 
             return $deletedUsers;
-
         } catch (Exception $e) {
+            // Log retrieval error with details
             Log::error('Error retrieving deleted users:', [
                 'per_page' => $perPage,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString()  // Provides error stack trace for debugging
             ]);
 
             throw new HttpResponseException(
-                $this->error('An error occurred while retrieving deleted users.', 403, null)
+                self::error('An error occurred while retrieving deleted users.', 403, null)
             );
         }
     }
@@ -236,42 +252,47 @@ class UserService extends Controller
     /**
      * Permanently delete a user from the database
      *
-     * @param $id
-     * @return bool
+     * @param int $id User ID to permanently delete
+     * @return bool True if deletion successful
+     * @throws HttpResponseException If user not found or deletion fails
      */
-    public function forceDeleteUser($id): bool
+    public function forceDeleteUser(int $id): bool
     {
         try {
+            // Find user including soft-deleted records
             $user = User::withTrashed()->findOrFail($id);
 
+            // Store user details for logging
             $userDetails = [
                 'id' => $user->id,
                 'email' => $user->email
             ];
 
+            // Permanently remove user from database
             $user->forceDelete();
 
+            // Log successful permanent deletion
             Log::info('User permanently deleted:', $userDetails);
             return true;
-
         } catch (ModelNotFoundException $e) {
+            // Handle case when user not found
             Log::error('Error force deleting user - user not found:', [
                 'user_id' => $id,
                 'error' => $e->getMessage()
             ]);
 
             throw new HttpResponseException(
-                $this->error('User not found.', 404, null)
+                self::error('User not found.', 404, null)
             );
-
         } catch (Exception $e) {
+            // Handle general deletion failures
             Log::error('Error force deleting user:', [
                 'user_id' => $id,
                 'error' => $e->getMessage()
             ]);
 
             throw new HttpResponseException(
-                $this->error('An error occurred while permanently deleting user.', 403, null)
+                self::error('An error occurred while permanently deleting user.', 403, null)
             );
         }
     }

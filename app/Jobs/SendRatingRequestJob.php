@@ -4,8 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Reservation;
 use App\Mail\RatingRequestMail;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;

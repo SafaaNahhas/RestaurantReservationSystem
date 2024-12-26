@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 class ReservationFactory extends Factory
 {
-    /**
+      /**
      * The name of the factory's corresponding model.
      *
      * @var string

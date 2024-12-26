@@ -11,7 +11,9 @@ use App\Http\Resources\RatingResource;
 use App\Http\Requests\Rating\StoreRatingRequest;
 use App\Http\Requests\Rating\UpdateRatingRequest;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Termwind\Components\Raw;
 
 class RatingController extends Controller
 {
@@ -27,8 +29,11 @@ class RatingController extends Controller
      * Display a listing of the resource. 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->user()->cannot('index', Rating::class)) {
+            throw new UnauthorizedException(403);
+        }
         $ratings = Rating::select('user_id', 'rating', 'comment')->get(); // تحميل العلاقات المطلوبة
         return $this->success(RatingResource::collection($ratings));
     }
@@ -42,11 +47,18 @@ class RatingController extends Controller
      */
     public function store(StoreRatingRequest $request)
     {
-        $reservationId = $request->query('reservation_id');
-        $userId = $request->query('user_id');
 
+        $reservationId = $request->input('reservation_id');
+
+        // Retrieve the reservation instance
+        $reservation = Reservation::findOrFail($reservationId);
+
+        // Check authorization using the RatingPolicy
+        if ($request->user()->cannot('storeRating', $reservation)) {
+            throw new UnauthorizedException(403);
+        }
         $validationdata = $request->validated();
-        $response = $this->ratingService->create_rating($validationdata, $reservationId, $userId);
+        $response = $this->ratingService->create_rating($validationdata, $reservationId, $request->user()->id);
         if (!$response) {
             return $this->error();
         } else {
@@ -62,18 +74,19 @@ class RatingController extends Controller
      */
     public function show_rating(Request $request)
     {
+
         $reservationId = $request->query('reservation_id');
         $userId = $request->query('user_id');
-    
+
         $rating = $this->ratingService->getRatingByReservationAndUser($reservationId, $userId);
-    
+
         if (!$rating) {
             return $this->error();
         }
-    
+
         return $this->success($rating);
     }
-    
+
 
 
     /** 
@@ -84,6 +97,9 @@ class RatingController extends Controller
      */
     public function update(UpdateRatingRequest $request, Rating $rating)
     {
+        if ($request->user()->cannot('update', $rating)) {
+            throw new UnauthorizedException(403,"You can only update your own ratings.");
+        }
         $validatedRequest = $request->validated();
 
         $resault = $this->ratingService->update_rating($rating, $validatedRequest);
@@ -100,59 +116,67 @@ class RatingController extends Controller
      * @param Rating $rating
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Rating $rating)
+    public function destroy(Request $request, Rating $rating)
     {
+        if ($request->user()->cannot('delete', $rating)) {
+            throw new UnauthorizedException(403,"You can only delete your own ratings.");
+        }
         $rating->delete();
         return $this->success();
     }
 
 
-    /**
-     * Get deleted ratings.
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getDeletedRatings()
-    {
-        $deletedRatings = $this->ratingService->get_deleted_ratings();
+    // /**
+    //  * Get deleted ratings.
+    //  * @return \Illuminate\Http\JsonResponse
+    //  */
+    // public function getDeletedRatings(Request $request)
+    // {
 
-        if ($deletedRatings) {
-            return $this->success($deletedRatings, 'Deleted ratings retrieved successfully.');
-        } else {
-            return $this->error('Failed to retrieve deleted ratings.', 500);
-        }
-    }
+    //     $deletedRatings = $this->ratingService->get_deleted_ratings();
 
-
-    /**
-     * Restore a deleted rating.
-     * @param int $ratingId
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function restoreRating($ratingId)
-    {
-        $restored = $this->ratingService->restore_rating($ratingId);
-
-        if ($restored) {
-            return $this->success('Rating restored successfully.');
-        } else {
-            return $this->error('Failed to restore rating.', 500);
-        }
-    }
+    //     if ($deletedRatings) {
+    //         return $this->success($deletedRatings, 'Deleted ratings retrieved successfully.');
+    //     } else {
+    //         return $this->error('Failed to retrieve deleted ratings.', 500);
+    //     }
+    // }
 
 
-    /**
-     * Permanently delete a rating.
-     * @param int $ratingId
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function forceDeleteRating($ratingId)
-    {
-        $deleted = $this->ratingService->force_delete_rating($ratingId);
+    // /**
+    //  * Restore a deleted rating.
+    //  * @param int $ratingId
+    //  * @return \Illuminate\Http\JsonResponse
+    //  */
+    // public function restoreRating($ratingId)
+    // {
 
-        if ($deleted) {
-            return $this->success('Rating permanently deleted.');
-        } else {
-            return $this->error('Failed to permanently delete rating.', 500);
-        }
-    }
+    //     $restored = $this->ratingService->restore_rating($ratingId);
+
+    //     if ($restored) {
+    //         return $this->success('Rating restored successfully.');
+    //     } else {
+    //         return $this->error('Failed to restore rating.', 500);
+    //     }
+    // }
+
+
+    // /**
+    //  * Permanently delete a rating.
+    //  * @param int $ratingId
+    //  * @return \Illuminate\Http\JsonResponse
+    //  */
+    // public function forceDeleteRating(Request $request, $ratingId)
+    // {
+    //     $rating = Rating::findOrFail($ratingId);
+    //     if ($request->user()->cannot('forceDelete', $rating)) {
+    //         throw new UnauthorizedException(403);
+    //     }
+    //     $deleted = $this->ratingService->force_delete_rating($ratingId);
+    //     if ($deleted) {
+    //         return $this->success('Rating permanently deleted.');
+    //     } else {
+    //         return $this->error('Failed to permanently delete rating.', 500);
+    //     }
+    // }
 }

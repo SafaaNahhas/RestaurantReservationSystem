@@ -4,15 +4,18 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Enums\RoleUser;
 use App\Models\Dish;
 use App\Models\User;
 use App\Models\Rating;
 use App\Models\Department;
-use App\Models\Reservation;
+use App\Models\Restaurant;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\RestaurantSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,7 +26,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndPermissionSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
+            RestaurantSeeder::class,
         ]);
 
         \App\Models\Reservation::factory()->count(10)->create();
@@ -32,12 +36,12 @@ class DatabaseSeeder extends Seeder
 
         $user = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@ewxample.com',
+            'email' => 'admin@example.com',
             'phone' => '1234567890',
             'password' => bcrypt('password123'),
             'is_active' => true,
-
         ]);
+        $user->assignRole(RoleUser::Admin);
 
         // إنشاء فئات الطعام
         $category1 = FoodCategory::create([
@@ -75,8 +79,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Service',
             'description' => 'Responsible for customer service.',
         ]);
+
+        User::create([
+            'name' => 'haidar',
+            'email' => 'haidar@gmail.com',
+            'phone' => '1234567890',
+            'password' => Hash::make(12345678),
+            'is_active' => true,
+        ]);
+        
     }
-
-
-
 }

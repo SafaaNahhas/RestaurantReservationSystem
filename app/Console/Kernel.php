@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:end-reservation')->everyMinute();
+        $schedule->command('report:daily-reservations')->daily();
     }
 
     /**

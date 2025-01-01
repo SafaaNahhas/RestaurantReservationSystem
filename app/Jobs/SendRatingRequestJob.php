@@ -3,9 +3,11 @@
 namespace App\Jobs;
 
 use App\Models\Reservation;
-use App\Mail\RatingRequestMail;
+use Illuminate\Bus\Queueable;
 
+use App\Mail\RatingRequestMail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;

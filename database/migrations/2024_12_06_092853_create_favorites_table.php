@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->morphs('favorable'); // يتيح تخزين النوع (model) والمعرف (id) للكيان المفضل
+            $table->morphs('favorable'); 
             $table->timestamps();
             $table->softDeletes();
         });

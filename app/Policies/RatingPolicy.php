@@ -15,9 +15,11 @@ class RatingPolicy
      */
     public function index(User $user)
     {
-        return $user->hasRole(RoleUser::Admin->value);
+        // Allow only Admin and Reservation Manager to view all ratings
+        return $user->hasRole(RoleUser::Admin->value) ||
+            $user->hasRole(RoleUser::ReservationManager->value);
     }
-    
+
     /**
      * Determine whether the user can update the rating.
      */
@@ -33,5 +35,23 @@ class RatingPolicy
     {
         return $rating->user_id === $user->id ||
             $user->hasPermissionTo('delete rating');
+    }
+
+    public function forceDelete(User $user)
+    {
+        // Allow only Admin can do the force delete
+        return $user->hasRole(RoleUser::Admin->value);
+    }
+    public function restore(User $user)
+    {
+        // Allow only Admin can do the restore the deleting rating
+    
+        return $user->hasRole(RoleUser::Admin->value) ;
+    }
+    public function get_deleting(User $user)
+    {
+        // Allow only Admin can do the restore the deleting rating
+    
+        return $user->hasRole(RoleUser::Admin->value) ;
     }
 }

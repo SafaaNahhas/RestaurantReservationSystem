@@ -47,8 +47,8 @@ class ReservationController extends Controller
         $result = $this->reservationService->storeReservation($request->validated());
         // Handle the response based on the presence of reserved tables or reservation details
         return $result['status_code'] === 201
-            ? self::success( new TableReservationResource($result['reservation']),  $result['message'],$result['status_code'])
-            : self::error( isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
+            ? self::success(new TableReservationResource($result['reservation']),  $result['message'], $result['status_code'])
+            : self::error(isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
     }
 
     /**
@@ -58,11 +58,11 @@ class ReservationController extends Controller
      */
     public function getAllTablesWithReservations(): JsonResponse
     {
-            // Fetch tables with reservations using the service
-            $tables = $this->reservationService->getAllTablesWithReservations();
-            // Use the resource collection to format the response
-            return self::success( ShowTableReservationResource::collection($tables), 'Tables with reservations retrieved successfully.', 200 );
-        }
+        // Fetch tables with reservations using the service
+        $tables = $this->reservationService->getAllTablesWithReservations();
+        // Use the resource collection to format the response
+        return self::success(ShowTableReservationResource::collection($tables), 'Tables with reservations retrieved successfully.', 200);
+    }
 
     /**
      * Cancel unconfirmed reservations that are older than an hour.
@@ -168,6 +168,12 @@ class ReservationController extends Controller
 
         if ($result['error']) {
             return self::error(null, $result['message'], 400);
+        }
+        $reservation = $result['reservation'];
+
+        // التحقق من الحالة وإطلاق الإيفنت
+        if ($reservation->status === 'completed') { // الشرط يتحقق إذا اكتملت الخدمة
+            event(new \App\Events\ReservationCompleted($reservation));
         }
 
         return self::success($result['reservation'], 'Service completed successfully', 200);

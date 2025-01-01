@@ -11,22 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('emergencies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->timestamp('start_date');
+            $table->timestamp('end_date')->nullable();
             $table->text('description')->nullable();
-            $table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->softDeletes();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
-
     }
-    
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('emergencies');
     }
 };

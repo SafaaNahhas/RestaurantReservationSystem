@@ -56,7 +56,7 @@ class SendRatingRequestJob implements ShouldQueue
                 'user_id' => $user->id,
                 'user_email' => $user->email,
                 'error_message' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString(), 
+                'error_trace' => $e->getTraceAsString(),
             ]);
         }
     }

@@ -32,148 +32,149 @@ class ReservationService
      * @return array The result of the reservation operation, including status code and message.
      */
     public function storeReservation(array $data)
-        {
-            try {
-                $startDate = Carbon::parse($data['start_date']);
-                $endDate = Carbon::parse($data['end_date']);
+    {
+        try {
+            $startDate = Carbon::parse($data['start_date']);
+            $endDate = Carbon::parse($data['end_date']);
 
-                if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
-                    ];
-                }
-
-                $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
-                    return $query->where('table_number', $data['table_number']);
-                }, function ($query) use ($data) {
-                    return $query->where('seat_count', '>=', $data['guest_count'])
-                    ->orderBy('seat_count', 'asc');;
-                })
-                    ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('start_date', [$startDate, $endDate])
-                            ->orWhereBetween('end_date', [$startDate, $endDate])
-                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                                $nestedQuery->where('start_date', '<', $startDate)
-                                            ->where('end_date', '>', $endDate);
-                            });
-                    })
-                    ->select(['id', 'table_number', 'seat_count'])
-                    ->first();
-                    if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
-                        return [
-                            'status_code' => 422,
-                            'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
-                        ];}
-                if (!$selectedTable) {
-                    $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('start_date', [$startDate, $endDate])
-                            ->orWhereBetween('end_date', [$startDate, $endDate])
-                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                                $nestedQuery->where('start_date', '<', $startDate)
-                                            ->where('end_date', '>', $endDate);
-                            });
-                    })
-                        ->with('reservations')
-                        ->select(['id', 'table_number', 'seat_count'])
-                        ->get();
-
-                    return [
-                        'status_code' => 409,
-                        'message' => isset($data['table_number'])
-                            ? 'Selected table is not available for the selected time.'
-                            : 'No available tables for the selected time.',
-                        'reserved_tables' => $reservedTables
-                    ];
-                }
-
-                $reservation = Reservation::create([
-                    'user_id' => auth()->id(),
-                    'table_id' => $selectedTable->id,
-                    'start_date' => $data['start_date'],
-                    'end_date' => $data['end_date'],
-                    'guest_count' => $data['guest_count'],
-                    'services' => $data['services'] ?? null,
-                    'status' => 'pending',
-                ]);
-
+            if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
                 return [
-                    'status_code' => 201,
-                    'message' => 'Reservation created successfully',
-                    'reservation' => $reservation
-                ];
-            } catch (Exception $e) {
-                Log::error('Error storing reservation: ' . $e->getMessage());
-                return [
-                    'status_code' => 500,
-                    'message' => 'An unexpected error occurred.'
+                    'status_code' => 422,
+                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
                 ];
             }
-        }
 
-        /**
-         * Get all tables with their reservations.
-         *
-         * @return \Illuminate\Database\Eloquent\Collection
-         */
-        public function getAllTablesWithReservations()
-        {
-            return Table::with(['reservations' => function ($query) {
-                $query->select('id', 'table_id', 'start_date', 'end_date', 'status');
-            }])->get();
-        }
-
-
-        /**
-         * Service method to cancel unconfirmed reservations.
-         *
-         * @return array
-         */
-        public function cancelUnconfirmedReservations()
-        {
-            try {
-                $currentTime = Carbon::now();
-
-                // Retrieve all unconfirmed reservations
-                $reservations = Reservation::where('status', 'pending')
-                    ->where('start_date', '>', $currentTime) // ensure that the reservation start date is in the future
+            $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
+                return $query->where('table_number', $data['table_number']);
+            }, function ($query) use ($data) {
+                return $query->where('seat_count', '>=', $data['guest_count'])
+                    ->orderBy('seat_count', 'asc');;
+            })
+                ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                ->select(['id', 'table_number', 'seat_count'])
+                ->first();
+            if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
+                ];
+            }
+            if (!$selectedTable) {
+                $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                    ->with('reservations')
+                    ->select(['id', 'table_number', 'seat_count'])
                     ->get();
 
-                // If no reservations are found to cancel
-                if ($reservations->isEmpty()) {
-                    return ['error' => true, 'message' => 'No unconfirmed reservations found to cancel.'];
-                }
-
-                // Cancel the reservations
-                foreach ($reservations as $reservation) {
-                    $reservation->update([
-                        'status' => 'cancelled',
-                        'cancelled_at' => now(),
-                    ]);
-
-                    // Log the cancellation
-                    Log::info('Cancelled reservation ID: ' . $reservation->id . ' by User ID: ' . $reservation->user_id);
-                }
-
-                // Return cancelled reservations data
                 return [
-                    'error' => false,
-                    'message' => 'The following reservations have been cancelled:',
-                    'cancelled_reservations' => $reservations->map(function ($reservation) {
-                        return [
-                            'reservation_id' => $reservation->id,
-                            'user_id' => $reservation->user_id,
-                            'start_date' => $reservation->start_date,
-                            'end_date' => $reservation->end_date,
-                        ];
-                    }),
+                    'status_code' => 409,
+                    'message' => isset($data['table_number'])
+                        ? 'Selected table is not available for the selected time.'
+                        : 'No available tables for the selected time.',
+                    'reserved_tables' => $reservedTables
                 ];
-            } catch (Exception $e) {
-                // Log any errors and return an error message
-                Log::error('Error canceling unconfirmed reservations: ' . $e->getMessage());
-                return ['error' => true, 'message' => 'An unexpected error occurred.'];
             }
+
+            $reservation = Reservation::create([
+                'user_id' => auth()->id(),
+                'table_id' => $selectedTable->id,
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'guest_count' => $data['guest_count'],
+                'services' => $data['services'] ?? null,
+                'status' => 'pending',
+            ]);
+
+            return [
+                'status_code' => 201,
+                'message' => 'Reservation created successfully',
+                'reservation' => $reservation
+            ];
+        } catch (Exception $e) {
+            Log::error('Error storing reservation: ' . $e->getMessage());
+            return [
+                'status_code' => 500,
+                'message' => 'An unexpected error occurred.'
+            ];
         }
+    }
+
+    /**
+     * Get all tables with their reservations.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllTablesWithReservations()
+    {
+        return Table::with(['reservations' => function ($query) {
+            $query->select('id', 'table_id', 'start_date', 'end_date', 'status');
+        }])->get();
+    }
+
+
+    /**
+     * Service method to cancel unconfirmed reservations.
+     *
+     * @return array
+     */
+    public function cancelUnconfirmedReservations()
+    {
+        try {
+            $currentTime = Carbon::now();
+
+            // Retrieve all unconfirmed reservations
+            $reservations = Reservation::where('status', 'pending')
+                ->where('start_date', '>', $currentTime) // ensure that the reservation start date is in the future
+                ->get();
+
+            // If no reservations are found to cancel
+            if ($reservations->isEmpty()) {
+                return ['error' => true, 'message' => 'No unconfirmed reservations found to cancel.'];
+            }
+
+            // Cancel the reservations
+            foreach ($reservations as $reservation) {
+                $reservation->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                ]);
+
+                // Log the cancellation
+                Log::info('Cancelled reservation ID: ' . $reservation->id . ' by User ID: ' . $reservation->user_id);
+            }
+
+            // Return cancelled reservations data
+            return [
+                'error' => false,
+                'message' => 'The following reservations have been cancelled:',
+                'cancelled_reservations' => $reservations->map(function ($reservation) {
+                    return [
+                        'reservation_id' => $reservation->id,
+                        'user_id' => $reservation->user_id,
+                        'start_date' => $reservation->start_date,
+                        'end_date' => $reservation->end_date,
+                    ];
+                }),
+            ];
+        } catch (Exception $e) {
+            // Log any errors and return an error message
+            Log::error('Error canceling unconfirmed reservations: ' . $e->getMessage());
+            return ['error' => true, 'message' => 'An unexpected error occurred.'];
+        }
+    }
 
     /**
      * Service method to confirm a reservation.
@@ -188,7 +189,7 @@ class ReservationService
                 'user:id,name,email',
                 'table:id,table_number'
             ])->select('id', 'user_id', 'table_id', 'start_date', 'end_date', 'status')
-              ->findOrFail($reservationId);
+                ->findOrFail($reservationId);
 
             if ($reservation->status !== 'pending') {
                 return [
@@ -391,6 +392,4 @@ class ReservationService
             return ['error' => true, 'message' => 'An unexpected error occurred.'];
         }
     }
-
-
 }

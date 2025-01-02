@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use Exception;
+use App\Models\User;
 use App\Models\Image;
-use App\Models\Department;
 
+use RuntimeException;
+use App\Models\Department;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -29,15 +31,19 @@ class DepartmentService
      * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getAllDepartments()
+    public function getAllDepartments($per_page = 10)
     {
         try {
             return Department::paginate(10);
         } catch (Exception $e) {
-            Log::error('Error fetching departments: ' . $e->getMessage());
+            Log::error('Error fetching departments: ' . $e->getMessage(), [
+                'exception' => $e,
+                'per_page' => $per_page
+            ]);
             throw new \RuntimeException('Unable to fetch departments.');
         }
     }
+    
 
     /**
      * Create a new department.
@@ -53,6 +59,7 @@ class DepartmentService
         try {
             // Begin a transaction
             DB::beginTransaction();
+            $this->validateManager($data['manager_id'] ?? null);
             // Create the department
             $department = Department::create($data);
             // Handle images if they exist
@@ -111,6 +118,9 @@ class DepartmentService
             // Begin a transaction
             DB::beginTransaction();
             // Update the department's main data (name, description, etc.)
+            if (isset($data['manager_id'])) {
+                $this->validateManager($data['manager_id']);
+            }
             $department->update($data);
             // Handle images if they exist
             if (isset($data['images']) && !empty($data['images'])) {
@@ -349,4 +359,28 @@ class DepartmentService
             ], 500));
         }
     }
+
+
+    /**
+ * Validate the manager ID and ensure the user has the "Manager" role.
+ *
+ * @param int|null $managerId
+ * @throws \RuntimeException
+ */
+private function validateManager($managerId)
+{
+    if (!$managerId) {
+        throw new \RuntimeException('Manager ID is required.');
+    }
+
+    $manager = User::find($managerId);
+
+    if (!$manager) {
+        throw new \RuntimeException('Invalid manager ID.');
+    }
+
+    if (!$manager->hasRole('Reservation Manager')) {
+        throw new \RuntimeException('The selected user is not a Manager.');
+    }
+}
 }

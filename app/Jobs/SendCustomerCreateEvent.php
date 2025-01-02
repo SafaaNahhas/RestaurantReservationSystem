@@ -14,19 +14,22 @@ class SendCustomerCreateEvent implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+   
     public $event;
     public $customerEmails;
-
-    /**
-     * Create a new job instance.
-     *
-     * @param $event
-     * @param $customerEmails
-     */
-    public function __construct($event, $customerEmails)
+    public $isUpdated; 
+    
+        /**
+         * Create a new job instance.
+         *
+         * @param $event
+         * @param $customerEmails
+         */
+    public function __construct($event, $customerEmails, $isUpdated = false)
     {
         $this->event = $event;
         $this->customerEmails = $customerEmails;
+        $this->isUpdated = $isUpdated;
     }
 
     /**
@@ -37,7 +40,10 @@ class SendCustomerCreateEvent implements ShouldQueue
     public function handle()
     {
         foreach ($this->customerEmails as $email) {
-            Mail::to($email)->send(new EventMail($this->event));
+            Mail::to($email)->send(new EventMail($this->event, $this->isUpdated));
         }
     }
+    
+    
+    
 }

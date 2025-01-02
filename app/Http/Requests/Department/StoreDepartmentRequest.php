@@ -29,6 +29,7 @@ class StoreDepartmentRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:departments,name',
             'description' => 'nullable|string|max:1000',
+            'manager_id' => 'required|exists:users,id',
             'images' => [
                 'sometimes',
                 'array', // Make sure 'images' is an array

@@ -5,6 +5,7 @@ namespace App\Services;
 use Exception;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\EmailLog;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCustomerCreateEvent;
@@ -54,10 +55,11 @@ class EventService
     {
         try {
             $event = Event::create($data);
-            // get all email to customer 
+            // get all email to customer
             $customers = Role::findByName('Customer')->users;
             // send email
-            SendCustomerCreateEvent::dispatch($event, $customers);
+            $emailLogService = new EmailLogService();
+            SendCustomerCreateEvent::dispatch($event, $customers, $emailLogService);
             return $event;
         } catch (Exception $e) {
             Log::error('Error creating event: ' . $e->getMessage());
@@ -98,7 +100,7 @@ class EventService
      * @return bool true if the event was deleted successfully.
      * @throws \RuntimeException if an error occurs while deleting the event.
      */
-    public function deleteEvent(Event $event)
+    public function softdeleteEvent(Event $event)
     {
         try {
             // Delete the event and return true to indicate success.
@@ -109,4 +111,5 @@ class EventService
             throw new \RuntimeException('Unable to delete event.');
         }
     }
+
 }

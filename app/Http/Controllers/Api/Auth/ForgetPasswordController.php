@@ -15,6 +15,11 @@ class ForgetPasswordController extends Controller
     {
         $this->forgetPasswordService = $forgetPasswordService;
     }
+    /**
+     * check email
+     * @param CheckUserEmailRequest request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkEmail(CheckUserEmailRequest $request)
     {
         $email = $request->validated()['email'];
@@ -25,6 +30,11 @@ class ForgetPasswordController extends Controller
             return $this->error(message: $data['message'], status: $data['status']);
         }
     }
+        /**
+     * check code
+     * @param CheckUserCodeRequest request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkCode(CheckUserCodeRequest $request)
     {
         $email = $request->validated()['email'];
@@ -36,6 +46,13 @@ class ForgetPasswordController extends Controller
             return $this->error(message: $data['message'], status: $data['status']);
         }
     }
+
+    /**
+     * change password
+     * @param CheckUserPasswordRequest request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function changePassword(CheckUserPasswordRequest $request)
     {
         $email = $request->validated()['email'];

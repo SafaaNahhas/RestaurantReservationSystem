@@ -104,4 +104,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Rating::class);
     }
+     /**
+     * Relationship: A user can manage one departments.
+     */
+    public function department()
+    {
+        return $this->hasOne(Department::class, 'manager_id');
+    }
 }

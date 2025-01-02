@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('app:end-reservation')->everyMinute();
         $schedule->command('report:daily-reservations')->daily();
+        $schedule->command('report:manager-daily-reservations')->daily();
     }
 
     /**

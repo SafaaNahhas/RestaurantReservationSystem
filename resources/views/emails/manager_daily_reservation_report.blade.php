@@ -6,7 +6,7 @@
     <title>Daily Reservations Report</title>
 </head>
 <body>
-    <h1>Daily Reservations Report</h1>
+    <h1>Daily Reservations Report for Your Department</h1>
     <p>Date: {{ $date }}</p>
 
     <h2>Summary</h2>
@@ -27,7 +27,6 @@
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Created At</th>
-                <th>Manager</th>
             </tr>
         </thead>
         <tbody>
@@ -40,7 +39,6 @@
                     <td>{{ $reservation->start_date }}</td>
                     <td>{{ $reservation->end_date }}</td>
                     <td>{{ $reservation->created_at }}</td>
-                    <td>{{ $reservation->manager ? $reservation->manager->name : 'N/A' }}</td>
                 </tr>
             @endforeach
         </tbody>

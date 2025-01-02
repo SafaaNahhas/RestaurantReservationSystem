@@ -23,7 +23,7 @@ class SendDailyReservationReportJob implements ShouldQueue
      */
     public function __construct()
     {
-        //
+        
     }
 
     /**
@@ -37,13 +37,21 @@ class SendDailyReservationReportJob implements ShouldQueue
         $today = Carbon::today();
         $reservations = Reservation::with(['user', 'table', 'manager'])->whereDate('created_at', $today)->get();
 
+        $confirmedCount = $reservations->where('status', 'confirmed')->count();
+        $cancelledCount = $reservations->where('status', 'cancelled')->count();
+        $pendingCount = $reservations->where('status', 'pending')->count();
+
         $data = [
             'date' => $today->toFormattedDateString(),
             'reservations' => $reservations,
+            'confirmedCount' => $confirmedCount,
+            'cancelledCount' => $cancelledCount,
+            'pendingCount' => $pendingCount,
         ];
 
+
         Mail::send('emails.daily_reservation_report', $data, function ($message) {
-            $message->to('hiba11h2h@gmail.com') 
+            $message->to('admin@example.com') 
                     ->subject('Daily Reservations Report');
         });
         log::info('GenerateDailyReservationReport job completed..');

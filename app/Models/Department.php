@@ -14,7 +14,15 @@ class Department extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description','manager_id'];
+
+     /**
+     * Relationship: A department belongs to a manager (User).
+     */
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
     /**
        * Relationship: A department has one image (Morph One).
        */

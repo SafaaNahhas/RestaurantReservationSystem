@@ -43,10 +43,4 @@ class   StoreRoleRequest extends FormRequest
     {
         $this->roleRequestService->failedValidation($validator);
     }
-    public function messages(): array
-    {
-        $messages = $this->roleRequestService->messages();
-        $messages['required'] = 'حقل :attribute هو حقل اجباري ';
-        return $messages;
-    }
 }

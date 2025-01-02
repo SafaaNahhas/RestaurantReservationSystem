@@ -188,7 +188,7 @@ class RoleService
             }));
 
             foreach ($permissionsData as $i) {
-                $role->givePermissionTo(Permission::find($i));
+                $role->givePermissionTo(Permission::findOrFail($i));
             }
         } catch (ModelNotFoundException $e) {
             Log::error("error in add permission to role" . $e->getMessage());
@@ -227,7 +227,7 @@ class RoleService
                 return $num > 0;
             }));
             foreach ($permissionsData as $i) {
-                $role->revokePermissionTo(Permission::find($i));
+                $role->revokePermissionTo(Permission::findOrFail($i));
             }
         } catch (ModelNotFoundException $e) {
             Log::error("error in remove permission from role" . $e->getMessage());

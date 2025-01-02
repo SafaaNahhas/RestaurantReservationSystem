@@ -44,8 +44,4 @@ class UpdateRoleRequest extends FormRequest
     {
         $this->roleRequestService->failedValidation($validator);
     }
-    public function messages(): array
-    {
-        return $this->roleRequestService->messages();
-    }
 }

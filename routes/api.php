@@ -77,23 +77,17 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
 // *******  Roles Routes *******************************
 
-//Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('roles', RoleController::class);
-  // Route::get('/deletedRoles', [RoleController::class, 'deletedRoles']);
-  // Route::post('/roles/{role}/restore', [RoleController::class, 'restoreRole']);
-  // Route::delete('/roles/{role}/finalDelete', [RoleController::class, 'forceDeleteRole']);
     Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
     Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
-//});
+});
 
 // *******  Permissions Routes *******************************
 
-//Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('permissions', PermissionController::class);
-    Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
-    Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
-    Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
-//});
+});
 
 
 

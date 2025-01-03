@@ -11,17 +11,20 @@ class EventMail extends Mailable
     use Queueable, SerializesModels;
 
     public $event;
+public $isUpdated;
+
 
     /**
      * Create a new message instance.
      *
      * @param $event
+     * @param $isUpdated
      */
-    public function __construct($event)
+    public function __construct($event, $isUpdated)
     {
         $this->event = $event;
+        $this->isUpdated = $isUpdated;
     }
-
     /**
      * Build the message.
      *
@@ -29,8 +32,16 @@ class EventMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('New Event created')
+        $subject = $this->isUpdated
+            ? 'Event Updated: ' . $this->event->name
+            : 'New Event Created: ' . $this->event->name;
+    
+        return $this->subject($subject)
                     ->view('emails.event_emails')
-                    ->with(['event' => $this->event]);
+                    ->with([
+                        'event' => $this->event,
+                        'isUpdated' => $this->isUpdated,
+                    ]);
     }
+    
 }

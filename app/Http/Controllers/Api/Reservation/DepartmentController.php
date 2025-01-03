@@ -32,13 +32,16 @@ class DepartmentController extends Controller
     /**
      * Display a listing of departments.
      *
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index(): JsonResponse
+    public function index()
     {
         $departments = $this->departmentService->getAllDepartments();
-        return self::paginated($departments, DepartmentResource::class, 'departments retrieved successfully.', 200);
+                // Return JSON response containing the departments data.
+
+        return self::paginated($departments, DepartmentResource::class, 'Departments retrieved successfully.',200);
     }
+    
 
 
     /**
@@ -61,11 +64,16 @@ class DepartmentController extends Controller
      * @param Department $department
      * @return JsonResponse
      */
-    public function show(Department $department): JsonResponse
+   
+
+    public function show($id): JsonResponse
     {
-        return self::success(new DepartmentResource($department->load('image', 'tables')), 'Department retrieved successfully.');
-    }
+        $department = Department::with('image', 'tables', 'manager')->find($id);
+        return self::success(new DepartmentResource($department,'Department retrieved successfully.'));
+    } 
+
     /**
+     * 
      * Handle the request to update a department.
      *
      * This method receives the validated data from the request, including the department's
@@ -104,65 +112,28 @@ class DepartmentController extends Controller
     /**
         * Retrieve a list of soft-deleted departments.
         *
-        * @return JsonResponse
+        * 
         * @throws Exception
         */
-    public function showDeleted(): JsonResponse
-    {
-        try {
-            $softDeleted = $this->departmentService->getDeletedDepartments();
-            if ($softDeleted->isEmpty()) {
-                return self::error(null, 'No deleted departments found.', 404);
+        public function showDeleted(): JsonResponse
+        {
+            try {
+                $softDeleted = Department::whereNotNull('deleted_at')->get();
+                
+                if ($softDeleted->isEmpty()) {
+                    return self::error(null, 'No deleted Department found.', 404);
+                }
+                
+                return self::success($softDeleted, 'Soft-deleted Departments retrieved successfully.');
+            } catch (\Exception $e) {
+                // Log the error
+                \Log::error('Error retrieving soft-deleted Departments: ' . $e->getMessage());
+                return self::error(null, 'An error occurred while retrieving deleted Departments.', 500);
             }
-            return self::success($softDeleted, 'Soft-deleted departments retrieved successfully.');
-        } catch (Exception $e) {
-            Log::error('Error retrieving soft-deleted departments: ' . $e->getMessage());
-            return self::error(null, 'An error occurred while retrieving deleted departments.', 500);
         }
-    }
+        
+        
 
-    // /**
-    //  * Restore a soft-deleted department by its ID.
-    //  *
-    //  * @param string $id The ID of the department to restore.
-    //  * @return JsonResponse
-
-    //  * @throws ModelNotFoundException If the department with the given ID is not found.
-    //  * @throws Exception If an error occurs during the restoration process.
-    //  */
-    // public function restoreDeleted(string $id): JsonResponse
-    // {
-    //     try {
-    //         $department = $this->departmentService->restoreDeletedDepartment($id);
-    //         return self::success($department, 'Department restored successfully.');
-    //     } catch (ModelNotFoundException $e) {
-    //         return self::error(null, 'Department not found.', 404);
-    //     } catch (Exception $e) {
-    //         Log::error('Error restoring department: ' . $e->getMessage());
-    //         return self::error(null, 'An error occurred while restoring the department.', 500);
-    //     }
-    // }
-    // /**
-    //  * Permanently delete a soft-deleted department by its ID.
-    //  *
-    //  * @param string $id The ID of the department to permanently delete.
-    //  * @return JsonResponse
-    //  *
-    //  * @throws ModelNotFoundException If the department with the given ID is not found.
-    //  * @throws Exception If an error occurs during the permanent deletion process.
-    //  */
-    // public function forceDeleted(string $id): JsonResponse
-    // {
-    //     try {
-    //         $this->departmentService->permanentlyDeleteDepartment($id);
-    //         return self::success(null, 'Department permanently deleted.');
-    //     } catch (ModelNotFoundException $e) {
-    //         return self::error(null, 'Department not found.', 404);
-    //     } catch (Exception $e) {
-    //         Log::error('Error permanently deleting department: ' . $e->getMessage());
-    //         return self::error(null, 'An error occurred while permanently deleting the department.', 500);
-    //     }
-    // }
 
 
 

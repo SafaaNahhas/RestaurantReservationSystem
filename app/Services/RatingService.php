@@ -10,29 +10,6 @@ class RatingService
 
 
     /**
-     * Fetch a rating based on reservation ID and user ID.
-     *
-     * @param int $reservationId
-     * @param int $userId
-     * @return Rating|null
-     */
-    public function getRatingByReservationAndUser($reservationId, $userId)
-    {
-        try {
- 
-            $rating=Rating::where('reservation_id', $reservationId)
-                ->where('user_id', $userId)
-                ->first();
-            return $rating;
-        } catch (\Exception $e) {
-            Log::error('Error in ratingService@create_rating: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-
-
-    /**
      * store the rating
      * @param Rating $rating
      * @param array $data
@@ -84,63 +61,63 @@ class RatingService
     }
 
 
-    // /**
-    //  * get all deleted rating
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
-    // public function get_deleted_ratings()
-    // {
-    //     try {
-    //         // Fetch only soft-deleted ratings
-    //         $deletedRatings = Rating::onlyTrashed()->get();
+    /**
+     * get all deleted rating
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_deleted_ratings()
+    {
+        try {
+            // Fetch only soft-deleted ratings
+            $deletedRatings = Rating::onlyTrashed()->get();
 
-    //         return $deletedRatings;
-    //     } catch (\Exception $e) {
-    //         Log::error('Error in RatingService@get_deleted_ratings: ' . $e->getMessage());
-    //         return false;
-    //     }
-    // }
-    // /**
-    //  * restore the rating
-    //  * @param  $ratingId
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
+            return $deletedRatings;
+        } catch (\Exception $e) {
+            Log::error('Error in RatingService@get_deleted_ratings: ' . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * restore the rating
+     * @param  $ratingId
+     * @return \Illuminate\Http\JsonResponse
+     */
 
-    // public function restore_rating($ratingId)
-    // {
-    //     try {
-    //         // Find the soft-deleted rating
-    //         $rating = Rating::onlyTrashed()->findOrFail($ratingId);
+    public function restore_rating($ratingId)
+    {
+        try {
+            // Find the soft-deleted rating
+            $rating = Rating::onlyTrashed()->findOrFail($ratingId);
 
-    //         // Restore the rating
-    //         $rating->restore();
+            // Restore the rating
+            $rating->restore();
 
-    //         return true;
-    //     } catch (\Exception $e) {
-    //         Log::error('Error in RatingService@restore_rating: ' . $e->getMessage());
-    //         return false;
-    //     }
-    // }
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error in RatingService@restore_rating: ' . $e->getMessage());
+            return false;
+        }
+    }
 
 
-    // /**
-    //  * force_delete the rating
-    //  * @param  $ratingId
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
-    // public function force_delete_rating($ratingId)
-    // {
-    //     try {
-    //         // Find the soft-deleted rating
-    //         $rating = Rating::onlyTrashed()->findOrFail($ratingId);
+    /**
+     * force_delete the rating
+     * @param  $ratingId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function force_delete_rating($ratingId)
+    {
+        try {
+            // Find the soft-deleted rating
+            $rating = Rating::onlyTrashed()->findOrFail($ratingId);
 
-    //         // Permanently delete the rating
-    //         $rating->forceDelete();
+            // Permanently delete the rating
+            $rating->forceDelete();
 
-    //         return true;
-    //     } catch (\Exception $e) {
-    //         Log::error('Error in RatingService@force_delete_rating: ' . $e->getMessage());
-    //         return false;
-    //     }
-    // }
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error in RatingService@force_delete_rating: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

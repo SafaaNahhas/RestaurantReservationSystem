@@ -48,10 +48,10 @@ class ReservationController extends Controller
         $result = $this->reservationService->storeReservation($request->validated());
         // Handle the response based on the presence of reserved tables or reservation details
         return $result['status_code'] === 201
-            ? self::success( new TableReservationResource($result['reservation']),  $result['message'],$result['status_code'])
-            : self::error( isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
+            ? self::success(new TableReservationResource($result['reservation']),  $result['message'], $result['status_code'])
+            : self::error(isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
     }
-    /**
+     /**
      * Update an existing reservation and return the response as JSON.
      *
      * @param UpdateReservationRequest $request The validated request object containing new reservation data.
@@ -70,7 +70,6 @@ class ReservationController extends Controller
             ? self::success(new TableReservationResource($result['reservation']), $result['message'], $result['status_code'])
             : self::error(isset($result['reserved_tables'])? FaildTableReservationResource::collection($result['reserved_tables']): null,$result['message'],$result['status_code']);
     }
-
     /**
      * Get all tables with their reservations.
      *
@@ -223,6 +222,12 @@ class ReservationController extends Controller
 
         if ($result['error']) {
             return self::error(null, $result['message'], 400);
+        }
+        $reservation = $result['reservation'];
+
+        // التحقق من الحالة وإطلاق الإيفنت
+        if ($reservation->status === 'completed') { // الشرط يتحقق إذا اكتملت الخدمة
+            event(new \App\Events\ReservationCompleted($reservation));
         }
 
         return self::success($result['reservation'], 'Service completed successfully', 200);

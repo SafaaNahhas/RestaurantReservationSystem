@@ -31,7 +31,9 @@ use App\Http\Controllers\Api\Reservation\PermissionController;
 // Route::middleware(['security'])->group(function (){
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+
 Route::get('ratings', [RatingController::class, 'index']);
+Route::post('ratings', [RatingController::class, 'store']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -68,10 +70,10 @@ Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
 Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 //  ********* Rating Routes    *****************************
 Route::middleware(['auth:api'])->group(function () {
-    Route::apiResource('ratings', RatingController::class);
-    // Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
-    // Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
-    // Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
+    Route::apiResource('ratings', RatingController::class)->except(['index', 'store']);
+    Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
+    Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
+    Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
 });
 
 // ********* Category Routes  *********************************
@@ -188,6 +190,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
     Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
+    Route::get('/favorite_deleted', [FavoriteController::class, 'getDeletedFavorite']); // Get deleted favorites
+    Route::patch('favorite/restore/{id}', [FavoriteController::class, 'restorefavorite']); // Restore a deleted favorite
+    Route::delete('favorite/force-delete/{id}', [FavoriteController::class, 'forceDeletefavorite']); // Permanently delete favorite
 });
 
 // *********  Users Routes  **************************************

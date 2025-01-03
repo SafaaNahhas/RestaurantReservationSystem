@@ -61,3 +61,4 @@ class RoleAndPermissionSeeder extends Seeder
         $deleteRating->assignRole([$admin, $reservationManager]);
     }
 }
+ 

@@ -23,6 +23,9 @@ use App\Http\Controllers\Api\Reservation\ReservationController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Models\Restaurant;
 
+use App\Http\Controllers\Api\Reservation\RoleController;
+use App\Http\Controllers\Api\Reservation\PermissionController;
+
 // ***********  Auth Routes ****************************
 
 // Route::middleware(['security'])->group(function (){
@@ -35,6 +38,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::get('/me', [AuthController::class, 'me']);
 });
+
+Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
+Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
+Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
+
 
 // **********  Reservation Routes *************************
 Route::middleware(['auth:api'])->group(function () {
@@ -74,6 +82,22 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::get('categories', [FoodCategoryController::class, 'index']);
     Route::get('category/{category}', [FoodCategoryController::class, 'show']);
 });
+
+
+// *******  Roles Routes *******************************
+
+Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('roles', RoleController::class);
+    Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
+    Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
+});
+
+// *******  Permissions Routes *******************************
+
+Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+});
+
 
 
 // *******  Dishes Routes *******************************

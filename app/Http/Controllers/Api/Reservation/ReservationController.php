@@ -15,8 +15,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Resources\TableReservationResource;
 use App\Http\Resources\ShowTableReservationResource;
 use App\Http\Resources\FaildTableReservationResource;
-use App\Http\Requests\ReservationRequest\StoreReservationRequest;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use App\Http\Requests\ReservationRequest\StoreReservationRequest;
+use App\Http\Requests\ReservationRequest\UpdateReservationRequest;
 
 class ReservationController extends Controller
 {
@@ -50,38 +51,46 @@ class ReservationController extends Controller
             ? self::success( new TableReservationResource($result['reservation']),  $result['message'],$result['status_code'])
             : self::error( isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
     }
+    /**
+     * Update an existing reservation and return the response as JSON.
+     *
+     * @param UpdateReservationRequest $request The validated request object containing new reservation data.
+     * @param int $id The ID of the reservation to update.
+     * @return JsonResponse JSON response with status, message, and data.
+     */
+    public function updateReservation(UpdateReservationRequest $request, $id): JsonResponse
+    {
+        // Check if the user has permission to update the reservation
+        $reservation = Reservation::findOrFail($id); // جلب الحجز للتحقق منه
+        if ($request->user()->cannot('update', $reservation)) {throw new UnauthorizedException(403);}
+        // Call the service to update the reservation
+        $result = $this->reservationService->updateReservation($request->validated(), $id);
+       // Return the response based on the result
+        return $result['status_code'] === 200
+            ? self::success(new TableReservationResource($result['reservation']), $result['message'], $result['status_code'])
+            : self::error(isset($result['reserved_tables'])? FaildTableReservationResource::collection($result['reserved_tables']): null,$result['message'],$result['status_code']);
+    }
 
     /**
      * Get all tables with their reservations.
      *
      * @return JsonResponse
      */
-    public function getAllTablesWithReservations(): JsonResponse
+    public function getAllTablesWithReservations(Request $request): JsonResponse
     {
-            // Fetch tables with reservations using the service
-            $tables = $this->reservationService->getAllTablesWithReservations();
-            // Use the resource collection to format the response
-            return self::success( ShowTableReservationResource::collection($tables), 'Tables with reservations retrieved successfully.', 200 );
-        }
+        $status = $request->input('status'); // الفلترة حسب الحالة
 
-    /**
-     * Cancel unconfirmed reservations that are older than an hour.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function cancelUnconfirmedReservations(Request $request)
-    {
-        if ($request->user()->cannot('cancelUnConfirmed', Reservation::class)) {
-            throw new UnauthorizedException(403);
+        $tables = $this->reservationService->getAllTablesWithReservations([
+            'status' => $status,
+        ]);
+        if ($tables->isEmpty()) {
+            return self::error([], 'No tables found with the specified reservation status.', 200);
         }
-        // Call the cancel logic from the service
-        $result = $this->reservationService->cancelUnconfirmedReservations();
-
-        if ($result['error']) {
-            return self::error(null, $result['message'], 404);
-        }
-
-        return self::success($result['cancelled_reservations'], $result['message'], 200);
+        return self::success(
+            ShowTableReservationResource::collection($tables),
+            'Tables with reservations retrieved successfully.',
+            200
+        );
     }
 
     /**
@@ -93,7 +102,11 @@ class ReservationController extends Controller
     public function confirmReservation(Request $request, $id)
     {
 
-        if ($request->user()->cannot('confirm', Reservation::class)) {
+        // if ($request->user()->cannot('confirm', Reservation::class)) {
+        //     throw new UnauthorizedException(403);
+        // }
+        $reservation = Reservation::findOrFail($id);
+        if ($request->user()->cannot('confirm', $reservation)) {
             throw new UnauthorizedException(403);
         }
         // Call the confirm reservation logic from the service
@@ -104,6 +117,42 @@ class ReservationController extends Controller
         }
 
         return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
+
+    }
+    /**
+     * Reject a reservation.
+     *
+     * This method rejects a reservation by updating its status to 'rejected'.
+     * The user must have the necessary permission to reject the reservation.
+     * If successful, the method will also send a rejection email to the user.
+     *
+     * @param Request $request The HTTP request object, containing the current user and their authorization.
+     * @param int $reservationId The ID of the reservation to be rejected.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the rejection attempt.
+     *
+     * @throws UnauthorizedException If the user does not have permission to reject the reservation.
+     */
+    public function rejectReservation(Request $request, $reservationId)
+    {
+    $rejectionReason = $request->input('rejection_reason');
+    // Check if the user has permission to reject reservations
+    // if ($request->user()->cannot('reject', Reservation::class)) {
+    //     throw new UnauthorizedException(403);
+    // }
+    $reservation = Reservation::findOrFail($reservationId);
+    if ($request->user()->cannot('confirm', $reservation)) {
+        throw new UnauthorizedException(403);
+    }
+    // Call the service to handle the reservation rejection
+    $result = $this->reservationService->rejectReservation($reservationId, $rejectionReason);
+
+    // If there is an error, return a 400 response with the error message
+    if ($result['error']) {
+        return self::error(null, $result['message'], 400);
+    }
+
+    // Return the result with a success message and the reservation data
+    return self::success($result['data'], 'Reservation rejected successfully', 200);
     }
 
     /**
@@ -114,19 +163,25 @@ class ReservationController extends Controller
      */
     public function cancelReservation(Request $request, $reservationId)
     {
+        // Validate the request to ensure the cancellation reason is provided
+        $validated = $request->validate([
+            'cancellation_reason' => 'required|string|max:255',
+        ]);
 
+        // Fetch the reservation and check authorization
         $reservation = Reservation::findOrFail($reservationId);
         if ($request->user()->cannot('cancel', $reservation)) {
             throw new UnauthorizedException(403);
         }
+
         // Call the cancel logic from the service
-        $result = $this->reservationService->cancelReservation($reservationId);
+        $result = $this->reservationService->cancelReservation($reservationId, $validated['cancellation_reason']);
 
         if ($result['error']) {
             return self::error(null, $result['message'], 422);
         }
 
-        return self::success(null, $result['message'], 200);
+        return self::success($result['data'], $result['message'], 200);
     }
 
     /**
@@ -174,24 +229,72 @@ class ReservationController extends Controller
     }
 
     /**
-     * Hard delete a reservation.
+     * Soft delete a reservation.
      *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request The request object.
+     * @param int $id The ID of the reservation to soft delete.
+     * @return JsonResponse JSON response indicating success or failure.
      */
-    public function hardDeleteReservation(Request $request, $id)
+    public function softDeleteReservation(Request $request, $id)
     {
-
-        if ($request->user()->cannot('delete', Reservation::class)) {
-            throw new UnauthorizedException(403);
-        }
-        // Call the hard delete logic from the service
-        $result = $this->reservationService->hardDeleteReservation($id);
+        $result = $this->reservationService->softDeleteReservation($id);
 
         if ($result['error']) {
-            return self::error(null, $result['message'], 422);
+            return self::error(null, $result['message'], 400);
         }
 
         return self::success(null, $result['message'], 200);
+    }
+    /**
+     * Force delete a soft-deleted reservation.
+     *
+     * @param Request $request The request object.
+     * @param int $id The ID of the reservation to force delete.
+     * @return JsonResponse JSON response indicating success or failure.
+     */
+    public function forceDeleteReservation(Request $request, $id)
+    {
+        $result = $this->reservationService->forceDeleteReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
+        }
+
+        return self::success(null, $result['message'], 200);
+    }
+
+    /**
+    * Restore a soft-deleted reservation.
+     *
+     * @param Request $request The request object.
+     * @param int $id The ID of the reservation to restore.
+     * @return JsonResponse JSON response indicating success or failure.
+     */
+    public function restoreReservation(Request $request, $id)
+    {
+        $result = $this->reservationService->restoreReservation($id);
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
+        }
+
+        return self::success(null, $result['message'], 200);
+    }
+
+    /**
+     * Retrieve all soft-deleted reservations.
+     *
+     * @param Request $request The request object.
+     * @return JsonResponse JSON response containing soft-deleted reservations or an error message.
+     */
+    public function getSoftDeletedReservations(Request $request)
+    {
+        $result = $this->reservationService->getSoftDeletedReservations();
+
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
+        }
+
+        return self::success($result['reservations'], 'Soft deleted reservations retrieved successfully', 200);
     }
 }

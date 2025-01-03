@@ -19,6 +19,8 @@ class FaildTableReservationResource extends JsonResource
             return [
                 'start_date' => $reservation->start_date,
                 'end_date' => $reservation->end_date,
+                'location' => $reservation->table->location,
+                'department_id' => $reservation->table->department_id ,
                 'status' => in_array($reservation->status, ['cancelled', 'completed'])
                             ? $reservation->status
                             : '_',

@@ -68,16 +68,30 @@ class DatabaseSeeder extends Seeder
             'description' => 'Popular Chinese dish with crispy chicken in a tangy sauce.',
             'category_id' => $category2->id,
         ]);
+        // Create the first manager
+        $manager1 = User::create([
+            'name' => 'Manager One',
+            'email' => 'manager1@example.com',
+            'password' => Hash::make('123456789')
 
+        ]);
         // إنشاء أقسام
         Department::create([
             'name' => 'Kitchen',
             'description' => 'Responsible for food preparation.',
-        ]);
+            'manager_id' => $manager1->id,
 
+        ]);
+        $manager2 = User::create([
+            'name' => 'Manager Two',
+            'email' => 'manager2@example.com',
+            'password' => Hash::make('123456789')
+
+        ]);
         Department::create([
             'name' => 'Service',
             'description' => 'Responsible for customer service.',
+            'manager_id' => $manager2->id,
         ]);
 
         User::create([
@@ -87,6 +101,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make(12345678),
             'is_active' => true,
         ]);
-        
+
     }
 }

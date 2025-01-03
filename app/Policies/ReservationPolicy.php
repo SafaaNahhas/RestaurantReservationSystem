@@ -15,24 +15,47 @@ class ReservationPolicy
     {
         return $user->hasPermissionTo('store reservation');
     }
-
-    public function confirm(User $user)
+    // public function update(User $user)
+    // {
+    //     return $user->hasPermissionTo('update reservation');
+    // }
+    public function update(User $user, Reservation $reservation)
     {
-        return $user->hasPermissionTo('confirm reservation');
+        // السماح بالتعديل فقط للكستمر الذي أنشأ الحجز
+        return $reservation->user_id == $user->id;
     }
-
+    // public function confirm(User $user)
+    // {
+    //     return $user->hasPermissionTo('confirm reservation');
+    // }
+    public function confirm(User $user, Reservation $reservation)
+    {
+        // السماح بتأكيد الحجز فقط لمدير القسم أو الأدمن
+        return $user->hasRole(RoleUser::Admin->value) ||
+            ($reservation->table && $reservation->table->department->manager_id == $user->id);
+    }
+    // public function reject(User $user)
+    // {
+    //     return $user->hasPermissionTo('reject reservation');
+    // }
+    public function reject(User $user, Reservation $reservation)
+    {
+        // السماح برفض الحجز فقط لمدير القسم أو الأدمن
+        return $user->hasRole(RoleUser::Admin->value) ||
+            ($reservation->table && $reservation->table->department->manager_id == $user->id);
+    }
+    // public function cancel(User $user, Reservation $reservation)
+    // {
+    //     return $user->hasRole(RoleUser::Admin->value) ||
+    //         $reservation->manager_id == $user->id    ||
+    //         $reservation->user_id == $user->id;
+    // }
     public function cancel(User $user, Reservation $reservation)
     {
-        return $user->hasRole(RoleUser::Admin->value) ||
-            $reservation->manager_id == $user->id    ||
-            $reservation->user_id == $user->id;
+        // السماح بالإلغاء فقط للكستمر الذي أنشأ الحجز
+        return $reservation->user_id == $user->id;
     }
-
-    public function cancelUnConfirmed(User $user)
-    {
-        return $user->hasPermissionTo('cancel unconfirmed reservation');
-    }
-
+  
     public function startService(User $user)
     {
         return $user->hasPermissionTo('start service');

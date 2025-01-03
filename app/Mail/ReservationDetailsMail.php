@@ -40,7 +40,7 @@ class ReservationDetailsMail extends Mailable
      */
     public function build()
     {   Log::info("Reservation details in Mailable: ", $this->reservation->toArray());
-        return $this->subject('Your Reservation Details')
+        return $this->subject('Your Reservation Confirm ')
                     ->view('emails.reservation_details')
                     ->with(['reservation' => $this->reservation]);
     }

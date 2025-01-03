@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reservation Details</title>
+    <title>Confirm Reservation with Details</title>
 </head>
 <body>
-    <h1>Reservation Details</h1>
+    <h1>Confirm Reservation with Details</h1>
     <p>Dear {{ $reservation->user->name }},</p>
     <p>Thank you for your reservation. Here are the details:</p>
     <ul>

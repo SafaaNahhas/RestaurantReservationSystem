@@ -40,19 +40,24 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api'])->group(function () {
 
     Route::post('reservations', [ReservationController::class, 'storeReservation']);
+    Route::put('/reservations/{id}', [ReservationController::class, 'updateReservation']);
     Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
+    Route::post('reservations/{reservationId}/reject', [ReservationController::class, 'rejectReservation']);
     Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancelReservation']);
     Route::post('/reservations/{id}/start-service', [ReservationController::class, 'startService']);
     Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
     Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
-    Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
+    // Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
     Route::get('/tables-with-reservations', [ReservationController::class, 'getAllTablesWithReservations']);
+    Route::delete('reservations/{id}/soft-delete', [ReservationController::class, 'softDeleteReservation']);
+    Route::delete('reservations/{id}/force-delete', [ReservationController::class, 'forceDeleteReservation']);
+    Route::post('reservations/{id}/restore', [ReservationController::class, 'restoreReservation']);
+    Route::get('reservations/get-soft-deleted', [ReservationController::class, 'getSoftDeletedReservations']);
 
-    Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
-    Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
     Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
 });
-
+Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
+Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 //  ********* Rating Routes    *****************************
 Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('ratings', RatingController::class);

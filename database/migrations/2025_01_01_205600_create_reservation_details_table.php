@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservation_logs', function (Blueprint $table) {
+        Schema::create('reservation_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reservation_id')->constrained('reservations')->cascadeOnDelete();
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed','rejected', 'deleted', 'restored']);
-            $table->foreignId('changed_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('log_time');
-            $table->integer('log_number');
+            $table->enum('status', ['cancelled', 'rejected']);
+            $table->timestamp('cancelled_at');
+            $table->string('cancellation_reason')->nullable();
+            $table->string('rejection_reason')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reservation_logs');
+        Schema::dropIfExists('reservation_details');
     }
 };

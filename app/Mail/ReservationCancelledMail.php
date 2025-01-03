@@ -18,15 +18,18 @@ class ReservationCancelledMail extends Mailable
      * @var mixed
      */
     public $reservation;
+    public $isManager;
 
      /**
      * Create a new message instance.
      *
      * @param mixed $reservation The reservation details to be included in the email.
      */
-    public function __construct($reservation)
+    public function __construct($reservation, $isManager = false)
     {
         $this->reservation = $reservation;
+        $this->isManager = $isManager;
+
     }
 
     /**
@@ -39,9 +42,16 @@ class ReservationCancelledMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Your Reservation Has Been Cancelled')
-                    ->view('emails.reservation_cancelled')
-                    ->with(['reservation' => $this->reservation]);
+        return $this->subject(
+            $this->isManager
+                ? 'Reservation Cancellation Notification for Manager'
+                : 'Your Reservation Has Been Cancelled'
+        )
+        ->view('emails.reservation_cancelled')
+        ->with([
+            'reservation' => $this->reservation,
+            'isManager' => $this->isManager,
+        ]);
     }
 
 }

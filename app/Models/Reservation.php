@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\Table;
 use App\Models\ReservationLog;
+use App\Models\ReservationDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,10 +14,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Reservation extends Model
 {
     use HasFactory;
-    // use SoftDeletes;
+    use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'cancelled_at', 'email_sent_at',];
+    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status','cancelled_at '];
     /**
      * Relationship: A reservation belongs to a user.
      */
@@ -52,9 +53,23 @@ class Reservation extends Model
     {
         return $this->hasMany(Event::class);
     }
-
+    /**
+     * Get the rating associated with the reservation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function rating()
     {
-        return $this->hasOne(Rating::class);
+        return $this->hasOne(Rating::class);// One-to-one relationship with Rating
     }
+    /**
+     * Get the details of the reservation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function details()
+    {
+        return $this->hasOne(ReservationDetail::class);// One-to-one relationship with ReservationDetail
+    }
+
 }

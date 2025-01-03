@@ -16,16 +16,15 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('table_id')->constrained('tables')->cascadeOnDelete();
-            $table->timestamp('start_date');
-            $table->timestamp('end_date')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->integer('guest_count');
             $table->text('services')->nullable();
-            // $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed','rejected'])->default('pending');
             $table->timestamp('cancelled_at')->nullable();
-            $table->timestamp('email_sent_at')->nullable();
+
             $table->timestamps();
-            // $table->softDeletes();
+            $table->softDeletes();
             $table->index(['start_date', 'end_date']);
 
 

@@ -25,7 +25,7 @@ class ForgetPasswordService
             if (Cache::has($email)) {
                 return  [
                     'status' => 400,
-                    'message' => "The code you entered is correct You can't resend the code again, please try after an hour.",
+                    'message' => "You can't resend the code again, please try after an hour.",
                 ];
             }
             $code = Cache::remember($email, 3600, function () {
@@ -63,7 +63,6 @@ class ForgetPasswordService
                     return  [
                         'status' => 400,
                         'message' => "The code you entered is incorrect",
-
                     ];
                 }
                 return  [
@@ -100,6 +99,7 @@ class ForgetPasswordService
             if ($user) {
                 $user->password = Hash::make($password);
                 $user->save();
+                Cache::delete($email);
             } else {
                 throw new ModelNotFoundException();
             }

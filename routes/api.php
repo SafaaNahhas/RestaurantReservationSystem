@@ -46,7 +46,6 @@ Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword
 
 // **********  Reservation Routes *************************
 Route::middleware(['auth:api'])->group(function () {
-
     Route::post('reservations', [ReservationController::class, 'storeReservation']);
     Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
     Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancelReservation']);
@@ -77,7 +76,7 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
 // *******  Roles Routes *******************************
 
-Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+Route::middleware( ['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('roles', RoleController::class);
     Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
     Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
@@ -85,7 +84,7 @@ Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
 
 // *******  Permissions Routes *******************************
 
-Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
+Route::middleware(  ['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('permissions', PermissionController::class);
 });
 
@@ -93,7 +92,6 @@ Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
 
 // *******  Dishes Routes *******************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
-
     Route::post('dishes', [DishController::class, 'store']);
     Route::put('dish/{dish}', [DishController::class, 'update']);
     Route::delete('dish/{dish}', [DishController::class, 'destroy']);

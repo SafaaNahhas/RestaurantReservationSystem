@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+
 use App\Models\Reservation;
 use Illuminate\Support\Facades\Event;
+
+use App\Events\EmergencyOccurred;
+use App\Listeners\SendEmergencyEmails;
+
 use Illuminate\Auth\Events\Registered;
 use App\Observers\ReservationLogObserver;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;

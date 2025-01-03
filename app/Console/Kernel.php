@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\SendDailyReservationReport;
 use App\Models\Reservation;
 use App\Jobs\SendRatingRequestJob;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:end-reservation')->everyMinute();
+
         $schedule->command('report:daily-reservations')->daily();
+
+        // $schedule->command(SendDailyReservationReport::class)->daily();
     }
 
     /**

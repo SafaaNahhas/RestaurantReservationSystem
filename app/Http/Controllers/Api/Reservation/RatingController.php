@@ -26,7 +26,7 @@ class RatingController extends Controller
     }
 
     /**
-     * Display a listing of the resource. 
+     * Display a listing of the resource.
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -69,7 +69,7 @@ class RatingController extends Controller
     //     dd(333);
     // }
 
-    /** 
+    /**
      * Display the specified rating.
      * @param Rating $rating
      * @return \Illuminate\Http\JsonResponse
@@ -91,7 +91,7 @@ class RatingController extends Controller
 
 
 
-    /** 
+    /**
      * Update the specified resource in storage.
      * @param UpdateRatingRequest $request
      * @param Rating $rating

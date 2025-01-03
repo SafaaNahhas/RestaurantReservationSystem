@@ -116,6 +116,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Department::class, 'manager_id');
     }
+
     /**
      * Relationship: A user has many reservation logs.
      */
@@ -123,4 +124,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ReservationLog::class, 'changed_by');
     }
+
+
 }

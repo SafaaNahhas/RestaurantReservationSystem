@@ -62,6 +62,7 @@ class Reservation extends Model
     {
         return $this->hasOne(Rating::class);// One-to-one relationship with Rating
     }
+
     /**
      * Get the details of the reservation.
      *
@@ -70,6 +71,42 @@ class Reservation extends Model
     public function details()
     {
         return $this->hasOne(ReservationDetail::class);// One-to-one relationship with ReservationDetail
+    }
+
+
+
+    protected static function booted()
+    {
+        // Hook into the "creating" event of the model
+        static::creating(function ($reservation) {
+            // Retrieve the first active emergency (if any)
+            $emergency = Emergency::where('is_active', true)->first();
+
+            // If an active emergency exists, perform further checks
+            if (!empty($emergency)) {
+                // Check for emergencies that conflict with the reservation
+                $conflictingEmergencies = Emergency::where(function ($query) use ($reservation) {
+                    $query->where(function ($subQuery) use ($reservation) {
+                        // Condition 1: Emergency with a definite start and end date
+                        // overlaps with the reservation period
+                        $subQuery->where('start_date', '<=', $reservation->start_date)
+                            ->where('end_date', '>=', $reservation->end_date);
+                    })
+                        ->orWhere(function ($subQuery) use ($reservation) {
+                            // Condition 2: Ongoing emergency (no end date)
+                            // that starts before or on the reservation's start date
+                            $subQuery->where('start_date', '<=', $reservation->start_date)
+                                ->whereNull('end_date');
+                        });
+                })
+                    ->exists(); // Check if any emergencies match the conditions
+
+                // If there are conflicting emergencies, prevent the reservation from being created
+                if ($conflictingEmergencies) {
+                    throw new \Exception('The reservation cannot be made because the restaurant is closed due to an ongoing emergency.');
+                }
+            }
+        });
     }
 
 }

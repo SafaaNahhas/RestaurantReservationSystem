@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Reservation\EventController;
 use App\Http\Controllers\Api\Reservation\FavoriteController;
 use App\Http\Controllers\Api\Reservation\DepartmentController;
-
+use App\Http\Controllers\Api\Reservation\EmergencyController;
 use App\Http\Controllers\Api\Reservation\ReservationController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Models\Restaurant;
@@ -176,4 +176,10 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
 Route::middleware(['auth:api'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'update']);
+});
+
+// ********** Emergency Routes *****************************
+
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('emergencies', EmergencyController::class);
 });

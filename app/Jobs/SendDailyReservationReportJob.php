@@ -43,7 +43,7 @@ class SendDailyReservationReportJob implements ShouldQueue
         ];
 
         Mail::send('emails.daily_reservation_report', $data, function ($message) {
-            $message->to('hiba11h2h@gmail.com') 
+            $message->to('hussein.hamdan.ite@gmail.com') 
                     ->subject('Daily Reservations Report');
         });
         log::info('GenerateDailyReservationReport job completed..');

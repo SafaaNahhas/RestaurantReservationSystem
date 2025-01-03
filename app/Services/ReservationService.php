@@ -715,5 +715,3 @@ class ReservationService
         }
     }
     }
-
-

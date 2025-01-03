@@ -48,7 +48,7 @@ class EventController extends Controller
     public function index()
     {
         $events = $this->eventService->getAllEvents();
-        
+
         // Return JSON response containing the events data.
         return self::paginated($events, EventResource::class, 'Events retrieved successfully.', 200);
     }
@@ -125,7 +125,7 @@ class EventController extends Controller
 
     }
 
-       
+
  /**
      * Retrieve a list of soft-deleted Event.
      *
@@ -148,7 +148,7 @@ class EventController extends Controller
             return self::error(null, 'An error occurred while retrieving deleted events.', 500);
         }
     }
-    
+
     /**
      * Restore a soft-deleted event.
      *
@@ -169,7 +169,7 @@ class EventController extends Controller
             return self::error(null, 'An error occurred while restoring the event.', 500);
         }
     }
-    
+
     /**
      * Permanently delete a soft-deleted event.
      *
@@ -190,5 +190,5 @@ class EventController extends Controller
             return self::error(null, 'An error occurred while permanently deleting the event.', 500);
         }
     }
-    
+
 }

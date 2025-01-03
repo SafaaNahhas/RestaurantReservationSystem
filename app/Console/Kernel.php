@@ -21,6 +21,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('report:daily-reservations')->daily();
 
         // $schedule->command(SendDailyReservationReport::class)->daily();
+
+        $schedule->command('report:manager-daily-reservations')->daily();
     }
 
     /**

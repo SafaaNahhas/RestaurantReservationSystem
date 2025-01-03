@@ -20,18 +20,27 @@ class UserSeeder extends Seeder
             'email'    => 'theadmin@example.com',
             'password' => Hash::make('123456789')
         ]);
+
         $user->assignRole(RoleUser::Admin->value);
-        $user1 = User::create([
-            'name'     => 'admin2',
-            'email'    => 'youssefalkurdi24@gmail.com',
+
+
+        $manager1=User::create([
+            'name'     => 'manager1',
+            'email'    => 'manager1@example.com',
             'password' => Hash::make('123456789')
         ]);
-        $user1->assignRole(RoleUser::Customer->value);
-        $user2 = User::create([
-            'name'     => 'Manger 1',
-            'email'    => 'manger@gmail.com',
+
+        $manager1->assignRole(RoleUser::ReservationManager->value);
+
+        $manager2=User::create([
+            'name'     => 'manager2',
+            'email'    => 'manager2@example.com',
             'password' => Hash::make('123456789')
         ]);
-        $user2->assignRole(RoleUser::ReservationManager->value);
+
+        $manager2->assignRole(RoleUser::ReservationManager->value);
+
+
+
     }
 }

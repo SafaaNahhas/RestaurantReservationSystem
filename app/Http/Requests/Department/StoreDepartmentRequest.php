@@ -63,6 +63,10 @@ class StoreDepartmentRequest extends FormRequest
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description must not exceed :max characters.',
 
+            // Manager validation messages
+            'manager_id.required' => 'The manager is required.',
+            'manager_id.exists' => 'The selected manager does not exist.',
+
             // Images validation messages
             'images.array' => 'Images must be provided in the correct format.',
             'images.max' => 'You cannot upload more than 5 images.',
@@ -93,6 +97,7 @@ class StoreDepartmentRequest extends FormRequest
         Log::info('Store Department form validation passed', [
             'department_name' => $this->name,                           // Department being created
             'description' => $this->description,                        // Description of the department
+            'manager_id' => $this->manager_id,                          // Manager assigned to the department
             'ip' => $this->ip(),                                        // Client IP for request tracking
             'user_agent' => $this->userAgent(),                         // Browser/device information
             'has_images' => $this->hasFile('images'),              // Whether images were uploaded

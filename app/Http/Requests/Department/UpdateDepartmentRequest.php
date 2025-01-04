@@ -62,6 +62,9 @@ class UpdateDepartmentRequest extends FormRequest
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description may not be greater than :max characters',
 
+            // Manager validation messages
+            'manager_id.exists' => 'The selected manager does not exist.',
+
             // Images validation messages
             'images.array' => 'Images must be provided in the correct format.',
             'images.max' => 'You cannot upload more than 5 images.',

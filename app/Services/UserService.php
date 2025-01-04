@@ -33,7 +33,7 @@ class UserService extends Controller
             // Handle and log any database or query errors
             Log::error('Error listing users: ' . $e->getMessage());
             throw new HttpResponseException(
-                self::error('Failed to retrieve users list', 500, null)
+                self::error(null, 'Failed to retrieve users list', 500)
             );
         }
     }
@@ -63,7 +63,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('Failed to create user', 500, null)
+                self::error(null, 'Failed to create user', 500)
             );
         }
     }
@@ -87,7 +87,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('Failed to retrieve user details', 500, null)
+                self::error(null, 'Failed to retrieve user details', 500)
             );
         }
     }
@@ -129,7 +129,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('Failed to update user details', 500, null)
+                self::error(null, 'Failed to update user details', 500)
             );
         }
     }
@@ -159,7 +159,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('Failed to delete user', 500, null)
+                self::error(null, 'Failed to delete user', 500)
             );
         }
     }
@@ -197,7 +197,7 @@ class UserService extends Controller
                 'error' => $e->getMessage()
             ]);
             throw new HttpResponseException(
-                self::error('User not found', 404, null)
+                self::error(null, 'User not found', 404)
             );
         } catch (Exception $e) {
             // Handle general restoration failures
@@ -206,7 +206,7 @@ class UserService extends Controller
                 'error' => $e->getMessage()
             ]);
             throw new HttpResponseException(
-                self::error('Failed to restore user', 500, null)
+                self::error(null, 'Failed to restore user', 500)
             );
         }
     }
@@ -230,7 +230,7 @@ class UserService extends Controller
             // Check if any deleted users exist
             if ($deletedUsers->isEmpty()) {
                 throw new HttpResponseException(
-                    self::error('No deleted users found.', 404, null)
+                    self::error(null, 'No deleted users found.', 404)
                 );
             }
 
@@ -244,7 +244,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('An error occurred while retrieving deleted users.', 403, null)
+                self::error(null, 'An error occurred while retrieving deleted users.', 403)
             );
         }
     }
@@ -282,7 +282,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('User not found.', 404, null)
+                self::error(null, 'User not found.', 404)
             );
         } catch (Exception $e) {
             // Handle general deletion failures
@@ -292,7 +292,7 @@ class UserService extends Controller
             ]);
 
             throw new HttpResponseException(
-                self::error('An error occurred while permanently deleting user.', 403, null)
+                self::error(null, 'An error occurred while permanently deleting user.', 403)
             );
         }
     }

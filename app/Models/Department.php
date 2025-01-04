@@ -24,10 +24,9 @@ class Department extends Model
         return $this->belongsTo(User::class, 'manager_id');
     }
 
-
     /**
-       * Relationship: A department has one image (Morph One).
-       */
+     * Relationship: A department has one image (Morph One).
+     */
     public function image()
     {
         return $this->morphOne(Image::class, 'imagable');

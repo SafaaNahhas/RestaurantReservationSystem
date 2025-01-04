@@ -21,13 +21,12 @@ return new class extends Migration
             $table->integer('guest_count');
             $table->text('services')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed','rejected'])->default('pending');
+
             $table->timestamp('cancelled_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
             $table->index(['start_date', 'end_date']);
-
-
         });
     }
 

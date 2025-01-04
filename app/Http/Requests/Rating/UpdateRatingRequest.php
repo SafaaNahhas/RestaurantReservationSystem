@@ -23,17 +23,46 @@ class UpdateRatingRequest extends FormRequest
      * - Users can only modify their own ratings
      * - Ratings stay associated with correct reservations
      * - System maintains data integrity
+     * - Unauthorized modifications are prevented
+     * - Data consistency is maintained across relationships
      *
-     * @return bool
+     * @throws HttpResponseException When authorization fails
+     * @return bool Returns true if user is authorized, false otherwise
      */
     public function authorize(): bool
     {
-       
-        return true;
+
+        // return true;
+
+        // Get rating instance from route parameter
+        $rating = $this->route('rating');
+        if (!($rating instanceof Rating)) {
+            $rating = Rating::find($rating);
+        }
+
+        // If rating doesn't exist, deny access
+        if (!$rating) {
+            return false;
+        }
+
+        // Get the reservation associated with this rating
+        $reservation = $rating->reservation;
+
+        // If no reservation found, deny access
+        if (!$reservation) {
+            return false;
+        }
+
+        // Verify reservation belongs to authenticated user
+        return $reservation->user_id === auth()->id();
     }
 
     /**
      * Handle a failed authorization attempt.
+     * This method is triggered when the authorize() method returns false.
+     *
+     * @throws HttpResponseException With a 403 status code and JSON error details
+     * @return void
      */
     protected function failedAuthorization(): void
     {

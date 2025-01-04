@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Jobs\NotifyManagersAboutReservation;
+use App\Notifications\PendingReservationNotification;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Table;
@@ -95,6 +97,9 @@ class ReservationService
                     'services' => $data['services'] ?? null,
                     'status' => 'pending',
                 ]);
+
+                // Notify managers
+                NotifyManagersAboutReservation::dispatch($reservation);
 
                 return [
                     'status_code' => 201,

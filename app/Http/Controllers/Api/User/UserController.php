@@ -17,107 +17,109 @@ class UserController extends Controller
 
     public function __construct(UserService $userService)
     {
-      
+
         $this->userService = $userService;
     }
 
     /**
-     * Display a listing of the resource.
+     * Lists all users with pagination.
      *
-     * @param Request $request
-     * @return JsonResponse
+     * @param Request $request Contains query params.
+     * @return JsonResponse Users collection.
      */
     public function index(Request $request): JsonResponse
     {
-        $perPage = $request->input('per_page', 10);
-        $users = $this->userService->listUsers($perPage);
-        return UserResource::collection($users)->response();
+        $perPage = $request->input('per_page', 10);     // Get pagination limit
+        $users = $this->userService->listUsers($perPage);           // Fetch paginated users
+        return UserResource::collection($users)->response();        // Transform and return collection
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Creates new user.
      *
-     * @param StoreUserRequest $request
-     * @return JsonResponse
+     * @param StoreUserRequest $request Validated user data.
+     * @return JsonResponse Newly created user.
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $user = $this->userService->createUser($data);
-        return $this->success(new UserResource($user), 'User created successfully', 201);
+        $data = $request->validated();                              // Get validated input
+        $user = $this->userService->createUser($data);              // Create new user
+        return self::success(new UserResource($user), 'User created successfully', 201);      // Return transformed resource
     }
 
+
     /**
-     * Display the specified resource.
+     * Retrieves specific user.
      *
-     * @param User $user
-     * @return JsonResponse
+     * @param User $user User model instance.
+     * @return JsonResponse User details.
      */
     public function show(User $user): JsonResponse
     {
-        $user = $this->userService->getUser($user);
-        return $this->success(new UserResource($user), 'User retrieved successfully', 200);
+        $user = $this->userService->getUser($user);             // Fetch user details
+        return self::success(new UserResource($user), 'User retrieved successfully', 200);      // Transform and return
     }
 
     /**
-     * Update the specified resource in storage.
+     * Updates existing user.
      *
-     * @param UpdateUserRequest $request
-     * @param User $user
-     * @return JsonResponse
+     * @param UpdateUserRequest $request Validated update data.
+     * @param User $user User to update.
+     * @return JsonResponse Updated user.
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $data = $request->validated();
-        $updatedUser = $this->userService->updateUser($user, $data);
-        return $this->success(new UserResource($updatedUser), 'User updated successfully', 200);
+        $data = $request->validated();                                          // Get validated updates
+        $updatedUser = $this->userService->updateUser($user, $data);            // Update user record
+        return self::success(new UserResource($updatedUser), 'User updated successfully', 200);   // Return updated data
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft deletes user.
      *
-     * @param User $user
-     * @return JsonResponse
+     * @param User $user User to delete.
+     * @return JsonResponse Empty response.
      */
     public function destroy(User $user): JsonResponse
     {
-        $this->userService->deleteUser($user);
-        return $this->success([], 'User deleted successfully', 204);
+        $this->userService->deleteUser($user);                                              // Soft delete user
+        return self::success([], 'User deleted successfully', 204);         // Return empty response
     }
 
     /**
-     * Restore a specific deleted user.
-     * @param $id
-     * @return JsonResponse
-     */
-    public function restore($id): JsonResponse
-    {
-        $user = $this->userService->restoreUser($id);
-        return $this->success(new UserResource($user), 'User restored successfully', 200);
-    }
-
-    /**
-     * List trashed users.
+     * Restores soft-deleted user.
      *
-     * @param Request $request
-     * @return JsonResponse
+     * @param int $id User ID to restore.
+     * @return JsonResponse Restored user.
+     */
+    public function restore(int $id): JsonResponse
+    {
+        $user = $this->userService->restoreUser($id);             // Restore soft-deleted user
+        return self::success(new UserResource($user), 'User restored successfully', 200);       // Return restored user data
+    }
+
+    /**
+     * Lists soft-deleted users.
+     *
+     * @param Request $request Contains pagination params.
+     * @return JsonResponse Collection of trashed users.
      */
     public function trashedUsers(Request $request): JsonResponse
     {
-        $perPage = $request->input('per_page', 10);
-        $users = $this->userService->showDeletedUsers($perPage);
-        return UserResource::collection($users)->response();
+        $perPage = $request->input('per_page', 10);             // Get pagination limit
+        $users = $this->userService->showDeletedUsers($perPage);            // Fetch soft-deleted users
+        return UserResource::collection($users)->response();                // Return collection
     }
 
     /**
-     * Permanently delete user.
+     * Permanently removes user.
      *
-     * @param $id
-     * @return JsonResponse
+     * @param int $id User ID to permanently delete.
+     * @return JsonResponse Empty response.
      */
-    public function forceDelete($id): JsonResponse
+    public function forceDelete(int $id): JsonResponse
     {
-        $this->userService->forceDeleteUser($id);
-        return $this->success(null, 'User deleted permanently');
+        $this->userService->forceDeleteUser($id);                                   // Permanently delete user
+        return self::success(null, 'User deleted permanently');      // Return success response
     }
 }

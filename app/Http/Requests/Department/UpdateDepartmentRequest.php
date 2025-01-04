@@ -29,6 +29,7 @@ class UpdateDepartmentRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255|unique:departments,name,' . $this->route('department')->id,
             'description' => 'sometimes|string|max:1000',
+            'manager_id' => 'sometimes|exists:users,id',
               'images' => [
                 'sometimes',
                 'array', // Make sure 'images' is an array
@@ -60,6 +61,9 @@ class UpdateDepartmentRequest extends FormRequest
             // Description validation messages
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description may not be greater than :max characters',
+
+            // Manager validation messages
+            'manager_id.exists' => 'The selected manager does not exist.',
 
             // Images validation messages
             'images.array' => 'Images must be provided in the correct format.',

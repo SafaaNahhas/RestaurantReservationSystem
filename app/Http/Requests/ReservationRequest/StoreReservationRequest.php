@@ -26,7 +26,6 @@ class StoreReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-
             'table_number' => 'nullable|exists:tables,table_number',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after:start_date',
@@ -52,6 +51,9 @@ class StoreReservationRequest extends FormRequest
             // End date validation messages
             'end_date.date' => 'Please provide a valid end time.',
             'end_date.after' => 'The end time must be after the start time.',
+
+            // Table Number validation messages
+            'table_number.exists' => 'The selected table does not exist.',
 
             // Guest count validation messages
             'guest_count.required' => 'Please specify the number of guests.',

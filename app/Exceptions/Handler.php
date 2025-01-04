@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
@@ -48,16 +49,23 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             return response()->json([
                 'error' => true,
-                'message' => "You don't have the required role or permission.",
+                'message' => $exception->getMessage() ?: "You don't have the required role or permission.",
             ], 403);
         }
 
-        if ($exception instanceof \Exception) {
+        if ($exception instanceof AuthenticationException) {
             return response()->json([
-                'error' => true,
-                'message' => "An unexpected error occurred.",
-            ], 500);
+                'error' => 'You need to be logged in to access this resource.',
+                'code' => 401
+            ], 401);
         }
+
+        // if ($exception instanceof \Exception) {
+        //     return response()->json([
+        //         'error' => true,
+        //         'message' => "An unexpected error occurred.",
+        //     ], 500);
+        // }
 
         return parent::render($request, $exception);
     }

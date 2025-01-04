@@ -16,9 +16,9 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $user = User::firstOrCreate([
-            'name'     => 'theadmin',
-            'email'    => 'theadmin@example.com',
-            'password' => Hash::make('123456789')
+            'name'     => 'safa',
+            'email'    => 'safa@gmail.com',
+            'password' => Hash::make('12345678')
         ]);
 
         $user->assignRole(RoleUser::Admin->value);
@@ -28,6 +28,10 @@ class UserSeeder extends Seeder
             'name'     => 'manager1',
             'email'    => 'manager1@example.com',
             'password' => Hash::make('123456789')
+        // $user1 = User::create([
+        //         'name'     => 'mohammed',
+        //     'email'    => 'mohammedalmostfa36@gmail.com',
+        //     'password' => Hash::make('12345678'),
         ]);
 
         $manager1->assignRole(RoleUser::ReservationManager->value);

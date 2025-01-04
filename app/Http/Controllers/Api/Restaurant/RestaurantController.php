@@ -119,6 +119,8 @@ class RestaurantController extends Controller
         return self::success(null, 'Phone number deleted');
     }
 
+
+
     /**
      * Soft delete an image associated with a restaurant by its ID.
      *
@@ -132,7 +134,7 @@ class RestaurantController extends Controller
         $this->restaurantService->softDeleteRestaurantImage($imageId, $restaurantId);
 
         // Return success response after soft delete
-        return self::success(null, 'Image soft deleted');
+        return self::success(null, 'Restaurant Image soft deleted');
     }
 
     /**
@@ -146,7 +148,7 @@ class RestaurantController extends Controller
         $images = $this->restaurantService->getDeletedImages();
 
         // Return success response with the deleted images
-        return self::success($images, 'Images deleted.', 200);
+        return self::success($images, ' Restaurant Images deleted.', 200);
     }
 
     /**
@@ -162,7 +164,7 @@ class RestaurantController extends Controller
         $this->restaurantService->restoreRestaurantImage($imageId, $restaurantId);
 
         // Return success response after restoration
-        return self::success(null, 'Image restored');
+        return self::success(null, 'Restaurant Image restored');
     }
 
     /**
@@ -177,36 +179,8 @@ class RestaurantController extends Controller
         // Call the service to permanently delete the image
         $this->restaurantService->permanentlyDeleteImage($imageId, $restaurantId);
         // Return success response after permanent deletion
-        return self::success(null, 'Image permanently deleted');
+        return self::success(null, 'Restaurant Image permanently deleted');
     }
 
-    /**
-     * Restore a soft-deleted restaurant's image.
-     *
-     * @param string $imageId The image ID to restore.
-     * @param string $restaurantId The restaurant ID associated with the image.
-     * @return \Illuminate\Http\JsonResponse A success or error response based on the outcome.
-     */
-    public function restoreDeleted(string $imageId, string $restaurantId)
-    {
-        // Attempt to restore the restaurant image
-        $department = $this->restaurantService->restoreRestaurantImage($imageId, $restaurantId);
-        return self::success($department, 'Restaurant restored successfully');
-    }
 
-    /**
-     * Permanently delete a soft-deleted restaurant by its ID.
-     *
-     * @param string $imageId The image ID associated with the restaurant.
-     * @param string $restaurantId The restaurant ID to permanently delete.
-     * @return \Illuminate\Http\JsonResponse A success or error response based on the outcome.
-     */
-    public function forceDeleted(string $imageId, string $restaurantId)
-    {
-
-        // Attempt to permanently delete the image
-        $this->restaurantService->permanentlyDeleteImage($imageId, $restaurantId);
-        return self::success(null, 'Restaurant permanently deleted');
-
-    }
 }

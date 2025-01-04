@@ -5,9 +5,12 @@ namespace App\Services;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Table;
+use App\Models\EmailLog;
 use App\Models\Reservation;
+use App\Services\EmailLogService;
 use App\Models\ReservationLog;
 use Illuminate\Http\JsonResponse;
+use App\Jobs\SendRatingRequestJob;
 use Illuminate\Support\Facades\Log;
 use App\Mail\ReservationDetailsMail;
 use Illuminate\Support\Facades\Mail;
@@ -19,8 +22,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReservationService
 {
-
-
+    protected $emailLogService;
+    public function __construct(EmailLogService $emailLogService)
+    {
+        $this->emailLogService = $emailLogService;
+    }
 
     /**
      * Store a new reservation.
@@ -34,12 +40,11 @@ class ReservationService
      * @return array The result of the reservation operation, including status code and message.
      */
     public function storeReservation(array $data)
-    {
+        {
         try {
             $startDate = Carbon::parse($data['start_date']);
             $endDate = Carbon::parse($data['end_date']);
-
-            // Validate reservation dates
+// Validate reservation dates
             if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
                 return [
                     'status_code' => 422,
@@ -337,24 +342,40 @@ class ReservationService
                 Mail::to($reservation->user->email)
                     ->queue(new ReservationDetailsMail($reservation));
 
-                return [
-                    'error' => false,
-                    'reservation' => $reservation,
-                ];
-            } catch (ModelNotFoundException $e) {
-                Log::warning("Reservation with ID {$reservationId} not found.");
-                return [
-                    'error' => true,
-                    'message' => "No reservation found with ID {$reservationId}",
-                ];
-            } catch (Exception $e) {
-                Log::error('Error confirming reservation: ' . $e->getMessage());
-                return [
-                    'error' => true,
-                    'message' => 'An unexpected error occurred.',
-                ];
+            // Create email log
+            $emailLog = $this->emailLogService->createEmailLog(
+                $reservation->user->id,
+                'reservation confirmed',  // Fixed typo
+                "Email to confirm reservation ID " . $reservation->id,
+            );
+
+            return [
+                'error' => false,
+                'reservation' => $reservation,
+            ];
+        } catch (ModelNotFoundException $e) {
+            Log::warning("Reservation with ID {$reservationId} not found.");
+            return [
+                'error' => true,
+                'message' => "No reservation found with ID {$reservationId}",
+            ];
+        } catch (Exception $e) {
+            Log::error('Error confirming reservation: ' . $e->getMessage());
+
+            // Ensure the email log variable is available
+            if (isset($emailLog)) {
+                $this->emailLogService->updateEmailLog(
+                    $emailLog,
+                    "Email to confirm reservation ID " . $reservation->id . " failed.",
+                );
             }
+
+            return [
+                'error' => true,
+                'message' => 'An unexpected error occurred.',
+            ];
         }
+    }
 
 
         /**
@@ -560,7 +581,10 @@ class ReservationService
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
+            // Dispatch job to send a rating request email
+            $emailLogService = new EmailLogService();
 
+            SendRatingRequestJob::dispatch($reservation, $emailLogService);
             return [
                 'error' => false,
                 'reservation' => $reservation,

@@ -4,6 +4,8 @@ namespace App\Http\Requests\RestaurantRequest;
 
 use App\Rules\ImageNumeCheck;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class StoreRestaurantRequest extends FormRequest
 {
@@ -41,5 +43,15 @@ class StoreRestaurantRequest extends FormRequest
                 new ImageNumeCheck(),
             ],
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        // Return standardized error response
+        throw new HttpResponseException(response()->json([
+            'status'  => 'error',
+            'message' => 'Validation failed.',
+            'errors'  => $validator->errors(),
+        ], 422));
     }
 }

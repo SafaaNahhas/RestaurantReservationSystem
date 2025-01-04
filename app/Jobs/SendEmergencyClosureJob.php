@@ -2,26 +2,30 @@
 
 namespace App\Jobs;
 
-use App\Events\EmergencyOccurred;
-use App\Mail\EmergencyClosureMail;
 use App\Models\Restaurant;
 use Illuminate\Bus\Queueable;
+use App\Services\EmailLogService;
+use App\Mail\EmergencyClosureMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SendEmergencyClosureJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
     public $affectedReservations;
+    protected EmailLogService $emailLogService;
 
-    public function __construct($affectedReservations)
+    /**
+     * Create a new job instance.
+     */
+    public function __construct($affectedReservations, EmailLogService $emailLogService)
     {
-
+        $this->emailLogService = $emailLogService;
         $this->affectedReservations = $affectedReservations;
     }
 
@@ -36,10 +40,24 @@ class SendEmergencyClosureJob implements ShouldQueue
         // Iterate over the collection of affected reservations
         foreach ($this->affectedReservations as $reservation) {
             // Send an email notification to the user associated with the reservation
-            // The EmergencyClosureMail mailable is used to construct the email content
-            // It passes the restaurant and reservation details to the email template
-            Mail::to($reservation->user->email)
-                ->send(new EmergencyClosureMail($restaurant, $reservation));
+            try {
+                Mail::to($reservation->user->email)
+                    ->send(new EmergencyClosureMail($restaurant, $reservation));
+
+                // Log the email success
+                $emailLog = $this->emailLogService->createEmailLog(
+                    $reservation->user->id,
+                    'Emergency Closure Mail',
+                    'Reservation in ' . $reservation->start_date
+                );
+            } catch (\Exception $e) {
+                // Log the email failure
+                Log::error('Error sending email to user ' . $reservation->user->id . ': ' . $e->getMessage());
+                $this->emailLogService->updateEmailLog(
+                    $emailLog,
+                    'Reservation in ' . $reservation->start_date
+                );
+            }
         }
     }
 }

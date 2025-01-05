@@ -26,8 +26,8 @@ class UserSeeder extends Seeder
 
 
         $manager1=User::create([
-            'name'     => 'manager1',
-            'email'    => 'manager1@example.com',
+            'name'     => 'manager11',
+            'email'    => 'manager11@example.com',
             'password' => Hash::make('123456789')
         // $user1 = User::create([
         //         'name'     => 'mohammed',
@@ -38,8 +38,8 @@ class UserSeeder extends Seeder
         $manager1->assignRole(RoleUser::ReservationManager->value);
 
         $manager2=User::create([
-            'name'     => 'manager2',
-            'email'    => 'manager2@example.com',
+            'name'     => 'manager22',
+            'email'    => 'manager22@example.com',
             'password' => Hash::make('123456789')
         ]);
 

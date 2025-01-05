@@ -135,6 +135,9 @@ class ReservationService
 
             ]);
 
+            // Notify managers
+            NotifyManagersAboutReservation::dispatch($reservation, $this->emailLogService);
+
             // Get the department and manager details
             $department = $selectedTable->department;
             $manager = $department->manager;
@@ -267,9 +270,6 @@ class ReservationService
                     'guest_count' => $data['guest_count'],
                     'services' => $data['services'] ?? null,
                 ]);
-
-                // Notify managers
-                NotifyManagersAboutReservation::dispatch($reservation);
 
                 return [
                     'status_code' => 200,

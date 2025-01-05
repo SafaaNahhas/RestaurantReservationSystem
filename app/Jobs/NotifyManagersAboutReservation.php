@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Notifications\PendingReservationNotification;
+use App\Services\EmailLogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,15 +19,19 @@ class NotifyManagersAboutReservation implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Reservation $reservation;
+    protected EmailLogService $emailLogService;
+    protected $emailLog; // Added this to hold the email log for access in failed()
 
     /**
      * Create a new job instance.
      *
      * @param Reservation $reservation The reservation that needs manager notification
+     * @param EmailLogService $emailLogService The service responsible for logging email notifications
      */
-    public function __construct(Reservation $reservation)
+    public function __construct(Reservation $reservation, EmailLogService $emailLogService)
     {
         $this->reservation = $reservation;
+        $this->emailLogService = $emailLogService;  // Fixed missing assignment
     }
 
     /**
@@ -108,6 +113,13 @@ class NotifyManagersAboutReservation implements ShouldQueue
             // Send email notification to department manager
             $departmentManager->notify(new PendingReservationNotification($this->reservation));
 
+            // Create an email log entry
+            $this->emailLog = $this->emailLogService->createEmailLog(
+                $departmentManager->id,
+                'Reservation notification',
+                "Reservation notification for " . $this->reservation->id
+            );
+
             // Update only the email_sent_at timestamp
             $this->reservation->update([
                 'email_sent_at' => now()
@@ -132,7 +144,7 @@ class NotifyManagersAboutReservation implements ShouldQueue
     /**
      * Handle a job failure.
      *
-     * @param  Throwable  $exception
+     * @param Throwable $exception
      * @return void
      */
     public function failed(Throwable $exception): void
@@ -142,5 +154,13 @@ class NotifyManagersAboutReservation implements ShouldQueue
             'reservation_id' => $this->reservation->id,
             'error' => $exception->getMessage()
         ]);
+
+        // Update the email log on failure
+        if (isset($this->emailLog)) {  // Make sure $emailLog exists
+            $this->emailLogService->updateEmailLog(
+                $this->emailLog,
+                "Reservation notification for " . $this->reservation->id
+            );
+        }
     }
 }

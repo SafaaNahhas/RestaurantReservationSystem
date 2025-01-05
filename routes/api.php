@@ -79,6 +79,12 @@ Route::middleware(['auth:api'])->group(function () {
 
 // ********* Category Routes  *********************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
+    Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
+    Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
+    Route::get('/favorite_deleted', [FavoriteController::class, 'getDeletedFavorite']); // Get deleted favorites
+    Route::patch('favorite/restore/{id}', [FavoriteController::class, 'restorefavorite']); // Restore a deleted favorite
+    Route::delete('favorite/force-delete/{id}', [FavoriteController::class, 'forceDeletefavorite']); // Permanently delet
     // Define API resource routes for EmailLog
     Route::apiResource('emaillog', EmailLogController::class);
 
@@ -95,9 +101,127 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::post('restore/', [EmailLogController::class, 'restoreEmailLog']);
 });
 
+// *******  Dishes Routes *******************************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
+    Route::post('dishes', [DishController::class, 'store']);
+    Route::put('dish/{dish}', [DishController::class, 'update']);
+    Route::delete('dish/{dish}', [DishController::class, 'destroy']);
+    Route::get('dishes/showDeleted', [DishController::class, 'trashed']);
+    Route::put('dishes/{id}/restore', [DishController::class, 'restore']);
+    Route::delete('dishes/{id}/delete', [DishController::class, 'forceDelete']);
+    // soft delete
+    Route::delete('dishes/{dishId}/imageSoftDelet/{imageId}', [DishController::class, 'softDeleteImage']);
+    // restore
+    Route::post('dishes/{dishId}/imageRestore/{imageId}', [DishController::class, 'restoreImage']);
+    // permanent delete
+    Route::delete('dishes/{dishId}/imageDelete/{imageId}', [DishController::class, 'deleteImage']);
+    // show deleted image
+    Route::get('dishes/showDeletedImage', [DishController::class, 'showDeletedImage']);
+});
+Route::get('dishes', [DishController::class, 'index']);
+Route::get('dish/{dish}', [DishController::class, 'show']);
+// ***********  Departments Tables Routes **********************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('departments.tables', TableController::class);
+    Route::get('departments/{department}/allDeletedTables', [TableController::class, 'allDeletedTables']);
+    Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
+    Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
+});
+
+
+// ********* Departments Routes ***********************************
+// Publicly accessible for all authenticated roles
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('department', [DepartmentController::class, 'index']); // Get all departments
+    Route::get('department/{id}', [DepartmentController::class, 'show']); // Get a specific department
+});
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
+    Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
+    Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
+    Route::apiResource('department', DepartmentController::class)->except(['index', 'show']);
+    // soft delete
+    Route::delete('department/{departmentId}/imageSoftDelet/{imageId}', [DepartmentController::class, 'softdeletImage']);
+    // restore
+    Route::post('department/{departmentId}/imageRestore/{imageId}', [DepartmentController::class, 'restoreImage']);
+    // permanent delete
+    Route::delete('department/{departmentId}/imageDdelet/{imageId}', [DepartmentController::class, 'deletImage']);
+    // show deleted image
+    Route::get('departments/showDeletedImage', [DepartmentController::class, 'showDeletedImage']);
+});
+
+// ************ Event Routes *************************************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+    Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+    Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+    Route::apiResource('event', EventController::class)->except(['index', 'show']);
+});
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('event', [EventController::class, 'index']); // Get all departments
+    Route::get('event/{id}', [EventController::class, 'show']); // Get a specific department
+});
+
+//   *********** Restaurant Routes ***********************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    // soft delete
+    Route::delete('restaurant/{restaurantId}/imageSoftDelet/{imageId}', [RestaurantController::class, 'softdeletImage']);
+    // restore
+    Route::post('restaurant/{restaurantId}/imageRestore/{imageId}', [RestaurantController::class, 'restoreImage']);
+    // permanent delete
+    Route::delete('restaurant/{restaurantId}/imageDdelet/{imageId}', [RestaurantController::class, 'deletImage']);
+    // show deleted image
+    Route::get('restaurant/showDeletedImage', [RestaurantController::class, 'showDeletedImage']);
+    //restaurant
+    Route::delete('restaurant/email/{id}', [RestaurantController::class, 'deleteEmail']);
+    Route::delete('restaurant/phone-number/{id}', [RestaurantController::class, 'deletePhoneNumber']);
+    Route::apiResource('restaurant', RestaurantController::class)->except(['index', 'show']);
+});
+
+Route::get('restaurant', [RestaurantController::class, 'index']);
+Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
+
+// **********  Favorites Routes ***********************
+
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
+    Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
+    Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
+});
+
+// *********  Users Routes  **************************************
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('users', UserController::class)->except('update');
+    Route::post('users/restore/{id}', [UserController::class, 'restore']);
+    Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
+    Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
+});
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::put('users/{id}', [UserController::class, 'update']);
+});
 // ********** Emergency Routes *****************************
 
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('emergencies', EmergencyController::class);
+});
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('roles', RoleController::class);
+    // Route::get('/deletedRoles', [RoleController::class, 'deletedRoles']);
+    // Route::post('/roles/{role}/restore', [RoleController::class, 'restoreRole']);
+    // Route::delete('/roles/{role}/finalDelete', [RoleController::class, 'forceDeleteRole']);
+    Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
+    Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
+//});
+});
+
+// *******  Permissions Routes *******************************
+
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+    Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
+    Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
+    Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
 });

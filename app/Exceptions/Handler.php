@@ -74,6 +74,12 @@ class Handler extends ExceptionHandler
         //         'message' => "An unexpected error occurred.",
         //     ], 500);
         // }
+        if ($exception instanceof \Exception) {
+            return response()->json([
+                'error' => true,
+                'message' => $exception->getMessage() ?? "An unexpected error occurred.",
+            ], 500);
+        }
 
         return parent::render($request, $exception);
     }

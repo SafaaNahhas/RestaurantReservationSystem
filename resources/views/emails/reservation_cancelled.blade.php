@@ -7,8 +7,8 @@
     <h1>{{ $isManager ? 'Reservation Cancellation Notification for Manager' : 'Reservation Cancelled' }}</h1>
 
     @if($isManager)
-        <p>Dear Manager,</p>
-        <p>The following reservation in your department has been cancelled:</p>
+        <p>Dear Manager {{ $reservation->manager->name }},</p>
+        <p>The following reservation has been cancelled:</p>
     @else
         <p>Dear {{ $reservation->user->name }},</p>
         <p>We regret to inform you that your reservation has been cancelled. Here are the details:</p>

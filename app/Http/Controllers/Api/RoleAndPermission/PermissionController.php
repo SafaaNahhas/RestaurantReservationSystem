@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\RoleAndPermission;
 
 use App\Http\Requests\Permission\StorePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
@@ -22,7 +22,7 @@ class PermissionController extends Controller
 
     /**
      * get all  permissions
-     * @param Request  $request 
+     * @param Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -36,7 +36,7 @@ class PermissionController extends Controller
      */
     /**
      * create a new permission
-     * @param StorePermissionRequest  $request 
+     * @param StorePermissionRequest  $request
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -53,14 +53,14 @@ class PermissionController extends Controller
      */
     /**
      * get a  specified permission
-     * @param int  $permission_id 
+     * @param int  $permission_id
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($permission_id)
     {
         $permission = $this->permissionService->onePermission($permission_id);
-         
+
         return $this->success( [ 'permission' => $permission,],"Show Permission",200);
 
     }
@@ -72,7 +72,7 @@ class PermissionController extends Controller
     /**
      * update a  specified permission
      * @param UpdatePermissionRequest $request
-     * @param int  $permission_id 
+     * @param int  $permission_id
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -89,7 +89,7 @@ class PermissionController extends Controller
      */
     /**
      * delete a  specified permission
-     * @param int  $permission_id 
+     * @param int  $permission_id
      *
      * @return \Illuminate\Http\JsonResponse
      */

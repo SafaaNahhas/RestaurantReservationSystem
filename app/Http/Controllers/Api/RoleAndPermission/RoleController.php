@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\RoleAndPermission;
 
 use App\Http\Requests\Role\AddPermissionsRequest;
 use App\Http\Requests\Role\RemovePermissionsRequest;
@@ -24,7 +24,7 @@ class RoleController extends Controller
      */
     /**
      * get all  roles
-     * @param Request  $request 
+     * @param Request  $request
      * @return \Illuminate\Http\JsonResponse
       */
     public function index(Request $request)
@@ -39,8 +39,8 @@ class RoleController extends Controller
      */
     /**
      * create a new role
-     * 
-     * @param StoreRoleRequest  $request 
+     *
+     * @param StoreRoleRequest  $request
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -59,8 +59,8 @@ class RoleController extends Controller
      */
     /**
      * get a specified role
-     * 
-     * @param StoreRoleRequest  $request 
+     *
+     * @param StoreRoleRequest  $request
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -78,8 +78,8 @@ class RoleController extends Controller
 
     /**
      * update a specified role
-     * @param int  $role_id 
-     * @param UpdateRoleRequest  $request 
+     * @param int  $role_id
+     * @param UpdateRoleRequest  $request
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -96,7 +96,7 @@ class RoleController extends Controller
 
     /**
      * delete a specified role
-     * @param int  $role_id 
+     * @param int  $role_id
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -112,7 +112,7 @@ class RoleController extends Controller
     /**
      * add a permission to role
      * @param AddPermissionsRequest $request
-     * @param int  $role_id 
+     * @param int  $role_id
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -127,7 +127,7 @@ class RoleController extends Controller
     /**
      * remove a permission from role
      * @param RemovePermissionsRequest $request
-     * @param int $role_id 
+     * @param int $role_id
      *
      * @return \Illuminate\Http\JsonResponse
      */

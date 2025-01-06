@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Email;
 
 use App\Models\EmailLog;
 use Illuminate\Http\Request;

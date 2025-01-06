@@ -10,22 +10,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Food\DishController;
 use App\Http\Controllers\Api\User\UserController;
-use App\Http\Controllers\Api\Reservation\DishController;
-use App\Http\Controllers\Api\Reservation\RoleController;
-use App\Http\Controllers\Api\Reservation\EventController;
-use App\Http\Controllers\Api\Reservation\TableController;
-use App\Http\Controllers\Api\Reservation\RatingController;
-use App\Http\Controllers\Api\Auth\ForgetPasswordController;
-use App\Http\Controllers\Api\Reservation\EmailLogController;
+use App\Http\Controllers\Api\Event\EventController;
 
-use App\Http\Controllers\Api\Reservation\FavoriteController;
-use App\Http\Controllers\Api\Reservation\EmergencyController;
+
+use App\Http\Controllers\Api\Rating\RatingController;
+use App\Http\Controllers\Api\Email\EmailLogController;
+use App\Http\Controllers\Api\Favorite\FavoriteController;
+use App\Http\Controllers\Api\Food\FoodCategoryController;
+use App\Http\Controllers\Api\Reservation\TableController;
+use App\Http\Controllers\Api\Auth\ForgetPasswordController;
+use App\Http\Controllers\Api\Emergency\EmergencyController;
+use App\Http\Controllers\Api\Restaurant\DepartmentController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
-use App\Http\Controllers\Api\Reservation\DepartmentController;
-use App\Http\Controllers\Api\Reservation\PermissionController;
+use App\Http\Controllers\Api\RoleAndPermission\RoleController;
 use App\Http\Controllers\Api\Reservation\ReservationController;
-use App\Http\Controllers\Api\Reservation\FoodCategoryController;
+use App\Http\Controllers\Api\RoleAndPermission\PermissionController;
 
 // ***********  Auth Routes ****************************
 

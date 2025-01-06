@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Rating;
 
 use App\Models\Rating;
 use App\Models\Reservation;

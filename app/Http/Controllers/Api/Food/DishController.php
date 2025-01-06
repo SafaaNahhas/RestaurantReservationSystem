@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Food;
 
 use App\Models\Dish;
 use Illuminate\Http\Request;

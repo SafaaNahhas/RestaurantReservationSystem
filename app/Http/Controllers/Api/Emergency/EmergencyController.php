@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Emergency;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Emergency\StoreEmergencyRequest;

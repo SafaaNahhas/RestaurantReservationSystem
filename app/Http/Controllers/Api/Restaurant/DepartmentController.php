@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Restaurant;
 
 use Exception;
 use App\Models\Department;
@@ -41,7 +41,7 @@ class DepartmentController extends Controller
 
         return self::paginated($departments, DepartmentResource::class, 'Departments retrieved successfully.',200);
     }
-    
+
 
 
     /**
@@ -64,16 +64,16 @@ class DepartmentController extends Controller
      * @param Department $department
      * @return JsonResponse
      */
-   
+
 
     public function show($id): JsonResponse
     {
         $department = Department::with('image', 'tables', 'manager')->find($id);
         return self::success(new DepartmentResource($department,'Department retrieved successfully.'));
-    } 
+    }
 
     /**
-     * 
+     *
      * Handle the request to update a department.
      *
      * This method receives the validated data from the request, including the department's
@@ -112,18 +112,18 @@ class DepartmentController extends Controller
     /**
         * Retrieve a list of soft-deleted departments.
         *
-        * 
+        *
         * @throws Exception
         */
         public function showDeleted(): JsonResponse
         {
             try {
                 $softDeleted = Department::whereNotNull('deleted_at')->get();
-                
+
                 if ($softDeleted->isEmpty()) {
                     return self::error(null, 'No deleted Department found.', 404);
                 }
-                
+
                 return self::success($softDeleted, 'Soft-deleted Departments retrieved successfully.');
             } catch (\Exception $e) {
                 // Log the error
@@ -131,8 +131,8 @@ class DepartmentController extends Controller
                 return self::error(null, 'An error occurred while retrieving deleted Departments.', 500);
             }
         }
-        
-        
+
+
 
 
 

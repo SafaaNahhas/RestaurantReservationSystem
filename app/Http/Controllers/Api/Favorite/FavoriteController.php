@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Favorite;
 
 use App\Models\Favorite;
 use Illuminate\Http\Request;
@@ -42,7 +42,7 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Display a listing of the favorite. 
+     * Display a listing of the favorite.
      * @return \Illuminate\Http\JsonResponse
      */
     public function getFavorites(): JsonResponse
@@ -120,7 +120,7 @@ class FavoriteController extends Controller
     {
         $this->authorize('forceDelete', Favorite::class);
 
-        
+
         $deleted = $this->favoriteService->force_delete_favorite($favoriteId);
         if ($deleted) {
             return $this->success($deleted,'favorite permanently deleted.');

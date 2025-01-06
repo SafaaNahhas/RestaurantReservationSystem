@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\Reservation;
+namespace App\Http\Controllers\Api\Food;
 
 use App\Models\FoodCategory;
-use App\Services\FoodCategoryService as FoodCategoryService ;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Services\FoodCategoryService as FoodCategoryService ;
 use App\Http\Requests\FoodCategoryRequest\StoreFoodCategoryRequest;
 use App\Http\Requests\FoodCategoryRequest\UpdateFoodCategoryRequest;
 
@@ -40,7 +41,7 @@ class FoodCategoryController extends Controller
     /**
      * Store a new foodCategory.
      *
-     * @param StorebookRequest $request
+     * @param StoreFoodCategoryRequest $request
      * @return JsonResponse
      */
     public function store(StoreFoodCategoryRequest $request)

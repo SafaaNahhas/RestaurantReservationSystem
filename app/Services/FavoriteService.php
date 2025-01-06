@@ -8,7 +8,7 @@ use App\Models\Favorite;
 use App\Models\FoodCategory;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\FavoriteResource;
+use App\Http\Resources\Favorite\FavoriteResource;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

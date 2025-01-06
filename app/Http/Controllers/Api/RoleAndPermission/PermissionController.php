@@ -7,7 +7,7 @@ use App\Http\Requests\Permission\UpdatePermissionRequest;
  use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PermissionResource;
+use App\Http\Resources\RoleAndPermission\PermissionResource;
 
 class PermissionController extends Controller
 {

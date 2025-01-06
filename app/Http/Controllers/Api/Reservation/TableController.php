@@ -7,7 +7,7 @@ use App\Services\TableService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TableRequest\FillterTabelRequest;
 use App\Http\Requests\TableRequest\UpdateTableRequest;
-use App\Http\Resources\TableResource;
+use App\Http\Resources\Table\TableResource;
 
 class TableController extends Controller
 {

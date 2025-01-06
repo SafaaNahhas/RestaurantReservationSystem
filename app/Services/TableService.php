@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Http\Resources\TableResource;
+use App\Http\Resources\Table\TableResource;
 use App\Models\Department;
 use App\Models\Table;
 use Exception;

@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Services\DepartmentService;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\DepartmentResource;
+use App\Http\Resources\Department\DepartmentResource;
 use App\Http\Requests\ImageRequest\StoreImageRequest;
 use App\Http\Requests\Department\StoreDepartmentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

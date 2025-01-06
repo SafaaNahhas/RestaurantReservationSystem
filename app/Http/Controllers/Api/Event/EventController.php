@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\Event;
 
+
 use Log;
 use Exception;
 use App\Models\Event;
 use App\Services\EventService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\EventResource;
+use App\Http\Resources\Event\EventResource;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
 
@@ -144,7 +145,7 @@ class EventController extends Controller
             return self::success($softDeleted, 'Soft-deleted Event retrieved successfully.');
         } catch (\Exception $e) {
             // Log the error
-            \Log::error('Error retrieving soft-deleted events: ' . $e->getMessage());
+            Log::error('Error retrieving soft-deleted events: ' . $e->getMessage());
             return self::error(null, 'An error occurred while retrieving deleted events.', 500);
         }
     }

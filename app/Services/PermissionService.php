@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
- use App\Http\Resources\PermissionResource;
+ use App\Http\Resources\RoleAndPermission\PermissionResource;
  use Spatie\Permission\Models\Permission;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

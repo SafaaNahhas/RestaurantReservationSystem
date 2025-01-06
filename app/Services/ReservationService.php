@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationRejectedMail;
 use App\Mail\ReservationCancelledMail;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Http\Resources\TableReservationResource;
+use App\Http\Resources\Reservation\TableReservationResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReservationService

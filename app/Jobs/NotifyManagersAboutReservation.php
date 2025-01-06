@@ -37,27 +37,49 @@ class NotifyManagersAboutReservation implements ShouldQueue
     /**
      * Execute the notification job for a new reservation.
      *
+     * Process Flow:
+     * 1. Loads fresh reservation data with related table, department, and manager
+     * 2. Verifies existence of table, department, and assigned manager
+     * 3. Sends email notification to department manager
+     * 4. Updates reservation with notification timestamp
+     *
+     * Relationships Chain:
+     * Reservation -> Table -> Department -> Manager
+     *
+     * Error Handling:
+     * - Handles soft-deleted tables and departments
+     * - Logs warnings for missing relationships
+     * - Captures and logs notification failures
+     *
      * @return void
      * @throws Throwable
      */
     public function handle(): void
     {
         try {
-            // Refresh reservation data and load necessary relationships
+            // This block refreshes the reservation data from the database and loads all related models
+            // refresh() ensures we have the latest data
+            // load() eagerly loads the relationships we need
             $this->reservation->refresh()->load([
 
+                // Loads the table relationship, including soft-deleted tables
+                // withTrashed() ensures we can still find tables that have been soft-deleted
                 'table' => function ($query) {
+
                     $query->withTrashed(); // Include soft-deleted tables
                 },
 
+                // Loads the department relationship through table, including soft-deleted departments
                 'table.department' => function ($query) {
+
                     $query->withTrashed(); // Include soft-deleted departments
                 },
 
+                // Loads the manager relationship through department
                 'table.department.manager'
             ]);
 
-            // Validate table, department, and manager existence
+            // Checks if the table exists for this reservation
             if (!$this->reservation->table) {
                 Log::warning('Table not found for reservation', [
                     'reservation_id' => $this->reservation->id,
@@ -66,6 +88,7 @@ class NotifyManagersAboutReservation implements ShouldQueue
                 return;
             }
 
+            // Checks if the department exists for the table
             if (!$this->reservation->table->department) {
                 Log::warning('Department not found for table', [
                     'reservation_id' => $this->reservation->id,
@@ -74,9 +97,10 @@ class NotifyManagersAboutReservation implements ShouldQueue
                 return;
             }
 
-            // Get the department manager
+            // Gets the department manager
             $departmentManager = $this->reservation->table->department->manager;
 
+            // Checks if a manager exists for the department
             if (!$departmentManager) {
                 Log::warning('No department manager found for reservation', [
                     'reservation_id' => $this->reservation->id,
@@ -86,7 +110,7 @@ class NotifyManagersAboutReservation implements ShouldQueue
                 return;
             }
 
-            // Send the notification to the department manager
+            // Send email notification to department manager
             $departmentManager->notify(new PendingReservationNotification($this->reservation));
 
             // Create an email log entry
@@ -96,7 +120,7 @@ class NotifyManagersAboutReservation implements ShouldQueue
                 "Reservation notification for " . $this->reservation->id
             );
 
-            // Update the reservation's email_sent_at timestamp
+            // Update only the email_sent_at timestamp
             $this->reservation->update([
                 'email_sent_at' => now()
             ]);
@@ -140,3 +164,5 @@ class NotifyManagersAboutReservation implements ShouldQueue
         }
     }
 }
+
+

@@ -135,6 +135,9 @@ class ReservationService
 
             ]);
 
+            // Notify managers
+            NotifyManagersAboutReservation::dispatch($reservation, $this->emailLogService);
+
             // Get the department and manager details
             $department = $selectedTable->department;
             $manager = $department->manager;

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dateTime('end_date');
             $table->integer('guest_count');
             $table->text('services')->nullable();
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed','rejected'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed', 'rejected'])->default('pending');
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamp('email_sent_at')->nullable();
             $table->timestamps();

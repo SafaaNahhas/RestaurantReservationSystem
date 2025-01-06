@@ -49,6 +49,11 @@ class RatingController extends Controller
 
         $userId = $request->query('user_id');
 
+        if ($request->user()->cannot('create', [Rating::class, $userId, $reservationId])) {
+            throw new UnauthorizedException(403, "You can only rate your own reservations.");
+        }
+
+
         $validationdata = $request->validated();
         $response = $this->ratingService->create_rating($validationdata, $reservationId, $userId);
         if (!$response) {
@@ -67,7 +72,7 @@ class RatingController extends Controller
     public function show(Rating $rating)
     {
         try {
-            $this->authorize('index', Rating::class);
+            $this->authorize('show', Rating::class);
 
             $rating = Rating::select('user_id', 'rating', 'comment')->first();
             return new RatingResource($rating);
@@ -151,7 +156,7 @@ class RatingController extends Controller
         $restored = $this->ratingService->restore_rating($ratingId);
 
         if ($restored) {
-            return $this->success($restored,'Rating restored successfully.');
+            return $this->success($restored, 'Rating restored successfully.');
         } else {
             return $this->error('Failed to restore rating.', 500);
         }

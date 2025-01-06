@@ -65,11 +65,7 @@ Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 
 //  ********* Rating Routes    *****************************
 Route::middleware(['auth:api'])->group(function () {
-    Route::apiResource('ratings', RatingController::class);
-    // Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
-    // Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
-    // Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
-    Route::apiResource('ratings', RatingController::class)->except(['index', 'store']);
+    Route::apiResource('ratings', RatingController::class)->except(['index']);
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
     Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
@@ -112,11 +108,11 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
     Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 });
-  // Define API resource routes for EmailLog
-  Route::apiResource('emaillog', EmailLogController::class);
+// Define API resource routes for EmailLog
+Route::apiResource('emaillog', EmailLogController::class);
 
-  // Define a route for soft deleting email logs
-  Route::delete('softdeletemaillog', [EmailLogController::class, 'deleteEmailLogs']);
+// Define a route for soft deleting email logs
+Route::delete('softdeletemaillog', [EmailLogController::class, 'deleteEmailLogs']);
 
 
 // ********* Departments Routes ***********************************
@@ -140,7 +136,7 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::get('departments/showDeletedImage', [DepartmentController::class, 'showDeletedImage']);
 });
 // Define a route for retrieving deleted email logs
-    Route::get('getemailogs', [EmailLogController::class, 'getDeletedEmailLogs']);
+Route::get('getemailogs', [EmailLogController::class, 'getDeletedEmailLogs']);
 
 // ************ Event Routes *************************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
@@ -191,8 +187,8 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
     Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
 });
-    // Define a route for permanently deleting a soft-deleted email log
-    Route::delete('premanentdeletemaillog/', [EmailLogController::class, 'permanentlyDeleteEmailLog']);
+// Define a route for permanently deleting a soft-deleted email log
+Route::delete('premanentdeletemaillog/', [EmailLogController::class, 'permanentlyDeleteEmailLog']);
 Route::middleware(['auth:api'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'update']);
     // Define a route for restoring a soft-deleted email log
@@ -205,25 +201,22 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 });
 
 // *******  Roles Routes *******************************
-Route::middleware( ['auth:api', 'role:Admin'])->group(function () {
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('roles', RoleController::class);
-  // Route::get('/deletedRoles', [RoleController::class, 'deletedRoles']);
-  // Route::post('/roles/{role}/restore', [RoleController::class, 'restoreRole']);
-  // Route::delete('/roles/{role}/finalDelete', [RoleController::class, 'forceDeleteRole']);
+    // Route::get('/deletedRoles', [RoleController::class, 'deletedRoles']);
+    // Route::post('/roles/{role}/restore', [RoleController::class, 'restoreRole']);
+    // Route::delete('/roles/{role}/finalDelete', [RoleController::class, 'forceDeleteRole']);
     Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
     Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
-//});
+    //});
 });
 // *******  Permissions Routes *******************************
 
 //Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
-    Route::middleware( ['auth:api', 'role:Admin'])->group(function () {
-        Route::apiResource('permissions', PermissionController::class);
-        Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
-        Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
-        Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+    Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
+    Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
+    Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
     //});
-    });
-
-
-
+});

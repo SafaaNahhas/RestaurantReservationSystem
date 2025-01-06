@@ -4,18 +4,21 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Enums\RoleUser;
 use App\Models\Dish;
 use App\Models\User;
+use App\Models\Table;
 use App\Models\Rating;
+use App\Enums\RoleUser;
+use App\Models\Favorite;
 use App\Models\Department;
 use App\Models\Restaurant;
+use App\Models\Reservation;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
+use Illuminate\Support\Facades\Hash;
 use Database\Seeders\RestaurantSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,9 +33,10 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
         ]);
 
-        \App\Models\Reservation::factory()->count(10)->create();
-        \App\Models\Table::factory()->count(10)->create();
-         Rating::factory()->count(10)->create();
+        Reservation::factory()->count(10)->create();
+        Table::factory()->count(10)->create();
+        Rating::factory()->count(10)->create();
+        FoodCategory::factory()->count(10)->create();
 
         $user = User::create([
             'name' => 'Admin User',
@@ -43,7 +47,6 @@ class DatabaseSeeder extends Seeder
         ]);
         $user->assignRole(RoleUser::Admin);
 
-        // إنشاء فئات الطعام
         $category1 = FoodCategory::create([
             'category_name' => 'Italian',
             'description' => 'Authentic Italian dishes including pasta, pizza, and more.',
@@ -55,8 +58,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Delicious Chinese dishes like noodles, rice, and dumplings.',
             'user_id' => $user->id,
         ]);
-
-        // إنشاء أطباق طعام
+        //create dishes
         Dish::create([
             'name' => 'Spaghetti Carbonara',
             'description' => 'Classic Italian pasta with eggs, cheese, pancetta, and pepper.',
@@ -71,11 +73,11 @@ class DatabaseSeeder extends Seeder
         // Create the first manager
         $manager1 = User::create([
             'name' => 'Manager One',
-            'email' => 'manager1@example.com',
+            'email' => 'managerone@example.com',
             'password' => Hash::make('123456789')
 
         ]);
-        // إنشاء أقسام
+        // create department
         Department::create([
             'name' => 'Kitchen',
             'description' => 'Responsible for food preparation.',
@@ -84,7 +86,7 @@ class DatabaseSeeder extends Seeder
         ]);
         $manager2 = User::create([
             'name' => 'Manager Two',
-            'email' => 'manager2@example.com',
+            'email' => 'managerTwo@example.com',
             'password' => Hash::make('123456789')
 
         ]);
@@ -101,6 +103,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make(12345678),
             'is_active' => true,
         ]);
-
+        //create favorite 
+        Favorite::factory()->count(10)->create();
     }
 }

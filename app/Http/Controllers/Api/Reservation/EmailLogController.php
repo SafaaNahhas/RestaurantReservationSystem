@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\EmailLogService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmailLogRequest;
-use App\Http\Resources\EmailLogResource;
+use App\Http\Resources\Email\EmailLogResource;
 
 class EmailLogController extends Controller
 {

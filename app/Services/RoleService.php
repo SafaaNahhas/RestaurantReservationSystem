@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
- use App\Http\Resources\RoleResource;
-use App\Http\Resources\PermissionResource;
+ use App\Http\Resources\RoleAndPermission\RoleResource;
+use App\Http\Resources\RoleAndPermission\PermissionResource;
   use Exception;
 use Illuminate\Support\Facades\Log;
  use Illuminate\Database\Eloquent\ModelNotFoundException;

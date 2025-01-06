@@ -8,7 +8,7 @@ use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
  use App\Services\RoleService;
 use Illuminate\Http\Request;
-use App\Http\Resources\RoleResource;
+use App\Http\Resources\RoleAndPermission\RoleResource;
 
 use App\Http\Controllers\Controller;
 

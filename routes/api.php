@@ -175,6 +175,7 @@ Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
 
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/favorites', [FavoriteController::class, 'getAllFavorites']);
     Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
     Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
@@ -226,4 +227,3 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 //*********** payment route**********************************
 
 Route::post('/process-payment', [PaymentController::class, 'processPayment']);
-Route::get('/fav', [FavoriteController::class, 'getAllFavorites']);

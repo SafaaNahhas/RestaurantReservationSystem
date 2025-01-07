@@ -9,14 +9,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
+use App\Events\ReservationCompleted;
 use App\Http\Controllers\Controller;
 use App\Services\ReservationService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use App\Http\Resources\Reservation\TableReservationResource;
 use App\Http\Resources\Reservation\ShowTableReservationResource;
-use App\Http\Resources\Reservation\FaildTableReservationResource;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 use App\Http\Requests\ReservationRequest\StoreReservationRequest;
+use App\Http\Resources\Reservation\FaildTableReservationResource;
 use App\Http\Requests\ReservationRequest\UpdateReservationRequest;
 
 class ReservationController extends Controller
@@ -51,7 +52,7 @@ class ReservationController extends Controller
             ? self::success(new TableReservationResource($result['reservation']),  $result['message'], $result['status_code'])
             : self::error(isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
     }
-     /**
+    /**
      * Update an existing reservation and return the response as JSON.
      *
      * @param UpdateReservationRequest $request The validated request object containing new reservation data.
@@ -62,13 +63,15 @@ class ReservationController extends Controller
     {
         // Check if the user has permission to update the reservation
         $reservation = Reservation::findOrFail($id); // جلب الحجز للتحقق منه
-        if ($request->user()->cannot('update', $reservation)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('update', $reservation)) {
+            throw new UnauthorizedException(403);
+        }
         // Call the service to update the reservation
         $result = $this->reservationService->updateReservation($request->validated(), $id);
-       // Return the response based on the result
+        // Return the response based on the result
         return $result['status_code'] === 200
             ? self::success(new TableReservationResource($result['reservation']), $result['message'], $result['status_code'])
-            : self::error(isset($result['reserved_tables'])? FaildTableReservationResource::collection($result['reserved_tables']): null,$result['message'],$result['status_code']);
+            : self::error(isset($result['reserved_tables']) ? FaildTableReservationResource::collection($result['reserved_tables']) : null, $result['message'], $result['status_code']);
     }
     /**
      * Get all tables with their reservations.
@@ -116,7 +119,6 @@ class ReservationController extends Controller
         }
 
         return self::success($result['reservation'], 'Reservation confirmed successfully', 200);
-
     }
     /**
      * Reject a reservation.
@@ -133,25 +135,25 @@ class ReservationController extends Controller
      */
     public function rejectReservation(Request $request, $reservationId)
     {
-    $rejectionReason = $request->input('rejection_reason');
-    // Check if the user has permission to reject reservations
-    // if ($request->user()->cannot('reject', Reservation::class)) {
-    //     throw new UnauthorizedException(403);
-    // }
-    $reservation = Reservation::findOrFail($reservationId);
-    if ($request->user()->cannot('confirm', $reservation)) {
-        throw new UnauthorizedException(403);
-    }
-    // Call the service to handle the reservation rejection
-    $result = $this->reservationService->rejectReservation($reservationId, $rejectionReason);
+        $rejectionReason = $request->input('rejection_reason');
+        // Check if the user has permission to reject reservations
+        // if ($request->user()->cannot('reject', Reservation::class)) {
+        //     throw new UnauthorizedException(403);
+        // }
+        $reservation = Reservation::findOrFail($reservationId);
+        if ($request->user()->cannot('confirm', $reservation)) {
+            throw new UnauthorizedException(403);
+        }
+        // Call the service to handle the reservation rejection
+        $result = $this->reservationService->rejectReservation($reservationId, $rejectionReason);
 
-    // If there is an error, return a 400 response with the error message
-    if ($result['error']) {
-        return self::error(null, $result['message'], 400);
-    }
+        // If there is an error, return a 400 response with the error message
+        if ($result['error']) {
+            return self::error(null, $result['message'], 400);
+        }
 
-    // Return the result with a success message and the reservation data
-    return self::success($result['data'], 'Reservation rejected successfully', 200);
+        // Return the result with a success message and the reservation data
+        return self::success($result['data'], 'Reservation rejected successfully', 200);
     }
 
     /**
@@ -225,9 +227,9 @@ class ReservationController extends Controller
         }
         $reservation = $result['reservation'];
 
-        // التحقق من الحالة وإطلاق الإيفنت
-        if ($reservation->status === 'completed') { // الشرط يتحقق إذا اكتملت الخدمة
-            event(new \App\Events\ReservationCompleted($reservation));
+        //check if the status is compleated
+        if ($reservation->status === 'completed') {
+            event(new ReservationCompleted($reservation));
         }
 
         return self::success($result['reservation'], 'Service completed successfully', 200);
@@ -269,7 +271,7 @@ class ReservationController extends Controller
     }
 
     /**
-    * Restore a soft-deleted reservation.
+     * Restore a soft-deleted reservation.
      *
      * @param Request $request The request object.
      * @param int $id The ID of the reservation to restore.

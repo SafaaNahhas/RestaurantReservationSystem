@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Rating;
 
 use App\Models\Rating;
 use Illuminate\Support\Facades\Log;

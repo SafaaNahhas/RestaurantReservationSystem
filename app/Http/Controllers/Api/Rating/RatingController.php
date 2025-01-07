@@ -3,17 +3,13 @@
 namespace App\Http\Controllers\Api\Rating;
 
 use App\Models\Rating;
-use App\Models\Reservation;
 use Illuminate\Http\Request;
-use App\Services\RatingService;
+use App\Services\Rating\RatingService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Rating\RatingResource;
 use App\Http\Requests\Rating\StoreRatingRequest;
 use App\Http\Requests\Rating\UpdateRatingRequest;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Termwind\Components\Raw;
 
 class RatingController extends Controller
 {

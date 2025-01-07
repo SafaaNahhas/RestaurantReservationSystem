@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Favorite;
 
 
 use App\Models\Table;
@@ -31,7 +31,7 @@ class FavoriteService
             $model = $type === 'tables' ? Table::class : FoodCategory::class;
 
             $item = $model::findOrFail($id);
-
+            // check if user already add the item to his favorite list 
             if ($user->favorites()->where('favorable_type', $model)->where('favorable_id', $id)->exists()) {
                 return ['status' => 'exists', 'message' => 'Item already in favorites'];
             }
@@ -94,7 +94,7 @@ class FavoriteService
         }
     }
 
-       /**
+    /**
      * get all deleted favorite
      * @return \Illuminate\Http\JsonResponse
      */

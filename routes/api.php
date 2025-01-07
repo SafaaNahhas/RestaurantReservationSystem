@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Event\EventController;
 
 use App\Http\Controllers\Api\Rating\RatingController;
 use App\Http\Controllers\Api\Email\EmailLogController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Favorite\FavoriteController;
 use App\Http\Controllers\Api\Food\FoodCategoryController;
 use App\Http\Controllers\Api\Reservation\TableController;
@@ -221,3 +222,8 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
     //});
 });
+
+//*********** payment route**********************************
+
+Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+

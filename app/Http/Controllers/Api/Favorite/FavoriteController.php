@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Favorite;
 
 use App\Models\Favorite;
 use Illuminate\Http\Request;
-use App\Services\FavoriteService;
+use App\Services\Favorite\FavoriteService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;

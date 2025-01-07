@@ -10,17 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class RatingPolicy
 {
-    /**
-     * Determine whether the user can show all ratings.
-     */
-    public function show(User $user)
-    {
-        // Allow only Admin and Reservation Manager to view all ratings
-        return $user->hasRole(RoleUser::Admin->value) ||
-            $user->hasRole(RoleUser::ReservationManager->value);
-    }
-
-
+   
 
     public function create(User $user, $userId, $reservationId)
     {

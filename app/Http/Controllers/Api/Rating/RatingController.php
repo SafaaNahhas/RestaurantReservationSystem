@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\Rating;
 
 use App\Models\Rating;
 use Illuminate\Http\Request;
-use App\Services\Rating\RatingService;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Rating\RatingService;
 use App\Http\Resources\Rating\RatingResource;
 use App\Http\Requests\Rating\StoreRatingRequest;
 use App\Http\Requests\Rating\UpdateRatingRequest;
@@ -27,10 +28,14 @@ class RatingController extends Controller
      */
     public function index()
     {
-        $ratings = Rating::select('user_id', 'rating', 'comment')->get();
+        //Try fetching data from the cache If it does not exist Get it from the database and put it in the cache
+        $ratings = Cache::remember('ratings_all', 60, function () {
+            return Rating::select('user_id', 'rating', 'comment')->get();
+        });
+
         return $this->success(RatingResource::collection($ratings));
     }
-
+    //eaadbadria@gmail.com
 
 
     /**
@@ -53,6 +58,9 @@ class RatingController extends Controller
         $validationdata = $request->validated();
         $response = $this->ratingService->create_rating($validationdata, $reservationId, $userId);
         if (!$response) {
+
+            Cache::forget('ratings_all');
+            
             return $this->error();
         } else {
             return $this->success($response, 'rating created successfully', 201);
@@ -68,7 +76,6 @@ class RatingController extends Controller
     public function show(Rating $rating)
     {
         try {
-            $this->authorize('show', Rating::class);
 
             $rating = Rating::select('user_id', 'rating', 'comment')->first();
             return new RatingResource($rating);
@@ -99,6 +106,7 @@ class RatingController extends Controller
         $resault = $this->ratingService->update_rating($rating, $validatedRequest);
 
         if (!$resault) {
+            Cache::forget('ratings_all');
             return $this->error();
         } else {
             return $this->success($resault, 'rating updated successfully', 200);
@@ -116,6 +124,9 @@ class RatingController extends Controller
             throw new UnauthorizedException(403, "You can only delete your own ratings.");
         }
         $rating->delete();
+
+        Cache::forget('ratings_all');
+
         return $this->success();
     }
 

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\Favorite;
 
 use App\Models\Favorite;
 use Illuminate\Http\Request;
-use App\Services\Favorite\FavoriteService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Favorite\FavoriteService;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Http\Requests\Favorite\AddToFavoritesRequest;
+use App\Http\Resources\Favorite\FavoriteResource;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class FavoriteController extends Controller
@@ -18,6 +20,21 @@ class FavoriteController extends Controller
     public function __construct(FavoriteService $favoriteService)
     {
         $this->favoriteService = $favoriteService;
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllFavorites()
+    {
+        $this->authorize('showAllFavorite', Favorite::class);
+        //Try fetching data from the cache If it does not exist Get it from the database and put it in the cache
+        $favorites = Cache::remember('favorite_all', 60, function () {
+            return Favorite::all();
+        });
+
+        return $this->success(FavoriteResource::collection($favorites));
     }
 
     /**
@@ -31,10 +48,14 @@ class FavoriteController extends Controller
         $data = $this->favoriteService->addToFavorites($user, $request->type, $request->id);
 
         if ($data['status'] === 'exists') {
+            Cache::forget('favorite_all');
+
             return $this->error(null, $data['message'], 409);
         }
 
         if ($data['status'] === 'error') {
+            Cache::forget('favorite_all');
+
             return $this->error(null, $data['message'], 500);
         }
 
@@ -64,17 +85,21 @@ class FavoriteController extends Controller
         $data = $this->favoriteService->removeFromFavorites($user, $request->type, $request->id);
 
         if ($data['status'] === 'exists') {
+            Cache::forget('favorite_all');
+
             return $this->error(null, $data['message'], 404);
         }
 
         if ($data['status'] === 'error') {
+            Cache::forget('favorite_all');
+
             return $this->error(null, $data['message'], 500);
         }
 
         return $this->success(null, $data['message'], 200);
     }
 
-     /**
+    /**
      * Get deleted favorite.
      * @return \Illuminate\Http\JsonResponse
      */
@@ -104,7 +129,7 @@ class FavoriteController extends Controller
         $restored = $this->favoriteService->restore_favorite($favoriteId);
 
         if ($restored) {
-            return $this->success($restored,'favorite restored successfully.');
+            return $this->success($restored, 'favorite restored successfully.');
         } else {
             return $this->error('Failed to restore favorite.', 500);
         }
@@ -116,14 +141,14 @@ class FavoriteController extends Controller
      * @param int $favoriteId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function forceDeleteFavorite( $favoriteId)
+    public function forceDeleteFavorite($favoriteId)
     {
         $this->authorize('forceDelete', Favorite::class);
 
 
         $deleted = $this->favoriteService->force_delete_favorite($favoriteId);
         if ($deleted) {
-            return $this->success($deleted,'favorite permanently deleted.');
+            return $this->success($deleted, 'favorite permanently deleted.');
         } else {
             return $this->error('Failed to permanently delete rating.', 500);
         }

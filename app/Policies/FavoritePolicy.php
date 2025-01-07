@@ -19,6 +19,13 @@ class FavoritePolicy
         return $user->hasRole(RoleUser::Admin->value);
     }
     /**
+     * Determine whether the user can show all favorite.
+     */
+    public function showAllFavorite(User $user): bool
+    {
+        return $user->hasRole(RoleUser::Admin->value);
+    }
+    /**
      * Determine whether the user can show the deleting favorite 
      */
     public function getDeleting(User $user): bool

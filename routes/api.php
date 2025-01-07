@@ -226,4 +226,4 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 //*********** payment route**********************************
 
 Route::post('/process-payment', [PaymentController::class, 'processPayment']);
-
+Route::get('/fav', [FavoriteController::class, 'getAllFavorites']);

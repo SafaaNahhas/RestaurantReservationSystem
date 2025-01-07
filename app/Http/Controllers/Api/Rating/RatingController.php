@@ -35,7 +35,6 @@ class RatingController extends Controller
 
         return $this->success(RatingResource::collection($ratings));
     }
-    //eaadbadria@gmail.com
 
 
     /**
@@ -60,7 +59,7 @@ class RatingController extends Controller
         if (!$response) {
 
             Cache::forget('ratings_all');
-            
+
             return $this->error();
         } else {
             return $this->success($response, 'rating created successfully', 201);

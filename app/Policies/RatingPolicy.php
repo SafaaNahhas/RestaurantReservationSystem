@@ -10,19 +10,31 @@ use Illuminate\Support\Facades\Log;
 
 class RatingPolicy
 {
-   
-
+    /*
+     * Verify that the user is the same as the user in the link and that he has the same booking number as the link
+     */
     public function create(User $user, $userId, $reservationId)
     {
+        if ($user->id != $userId) {
+            return false;
+        }
 
-    /**  Verify that the logged-in user is the same as the id in the link
-     *   And check that the reservation belongs to this user
-     */
-        return $user->id == $userId &&
-            $user->reservations->contains('id', $reservationId);
+        return Reservation::where('id', $reservationId)
+            ->where('user_id', $userId)
+            ->exists();
     }
 
 
+
+    /**
+     * Determine whether the user can show the rating.
+     */
+    public function show(User $user, Rating $rating)
+    {
+        // تحقق من الصلاحيات هنا
+        return $user->id == $rating->user_id; // مثال: السماح للمستخدم بقراءة التقييم الخاص به
+    }
+    
     /**
      * Determine whether the user can update the rating.
      */

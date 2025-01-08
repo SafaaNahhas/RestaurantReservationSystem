@@ -27,21 +27,7 @@ class StoreRatingRequest extends FormRequest
         return true;
         }
 
-    /**
-     * Handle a failed authorization attempt.
-     *
-     * @return void
-     *
-     * @throws HttpResponseException
-     */
-    protected function failedAuthorization(): void
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => 'error',
-            'message' => 'You can only rate reservations that you have made.',
-            'errors' => ['reservation' => 'This reservation does not belong to you.']
-        ], 403));
-    }
+   
 
     /**
      * Get the validation rules that apply to the request.

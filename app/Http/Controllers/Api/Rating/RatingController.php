@@ -74,9 +74,11 @@ class RatingController extends Controller
      */
     public function show(Rating $rating)
     {
+        $this->authorize('show', $rating);
+
         try {
 
-            $rating = Rating::select('user_id', 'rating', 'comment')->first();
+            // $rating = Rating::select('user_id', 'rating', 'comment')->first();
             return new RatingResource($rating);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             return response()->json([

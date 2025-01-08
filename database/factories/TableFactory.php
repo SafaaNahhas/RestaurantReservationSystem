@@ -12,7 +12,7 @@ class TableFactory extends Factory
     public function definition()
     {
         return [
-            'table_number' => $this->faker->unique()->word, // استخدم unique() لجعل القيم فريدة
+            'table_number' => $this->faker->unique()->uuid, // استخدم unique() لجعل القيم فريدة
             'location' => $this->faker->randomElement(['indoor', 'outdoor']),
             'seat_count' => $this->faker->numberBetween(2, 10),
         ];

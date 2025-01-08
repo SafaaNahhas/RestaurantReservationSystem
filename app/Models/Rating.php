@@ -26,5 +26,13 @@ class Rating extends Model
     {
         return $this->belongsTo(Reservation::class);
     }
+
+      /**
+     * Scope: Filter ratings based on rating value.
+     */
+    public function scopeFilterByRating($query, $rating)
+    {
+        return $query->where('rating', $rating);
+    }
     
 }

@@ -24,17 +24,33 @@ class RatingController extends Controller
 
     /**
      * Display a listing of the resource.
+     * @param \Illuminate\Http\Request $request The incoming HTTP request containing query parameters.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        //Try fetching data from the cache If it does not exist Get it from the database and put it in the cache
-        $ratings = Cache::remember('ratings_all', 60, function () {
-            return Rating::select('user_id', 'rating', 'comment')->get();
+        // Read the number of items per page from the request, with a default value of 10
+        $perPage = $request->input('per_page', 10);
+
+        $ratingValue = $request->input('rating');
+
+        // Create a cache key based on the number of items per page and the rating value
+        $cacheKey = "ratings.index.per_page_{$perPage}.rating_" . ($ratingValue ?? 'all');
+
+        // Attempt to retrieve data from the cache or store it if not available
+        $ratings = Cache::remember($cacheKey, 60, function () use ($ratingValue, $perPage) {
+            return Rating::query()
+                // Apply the filterByRating scope if a rating value is provided
+                ->when($ratingValue, fn($query) => $query->filterByRating($ratingValue))
+                // Apply pagination based on the specified per-page value
+                ->paginate($perPage);
         });
 
-        return $this->success(RatingResource::collection($ratings));
+        return $this->paginated($ratings, RatingResource::class, 'Ratings fetched successfully', 200);
     }
+
+
+
 
 
     /**
@@ -58,7 +74,7 @@ class RatingController extends Controller
         $response = $this->ratingService->create_rating($validationdata, $reservationId, $userId);
         if (!$response) {
 
-            Cache::forget('ratings_all');
+            Cache::forget('ratings.index.rating_all');
 
             return $this->error();
         } else {
@@ -107,7 +123,7 @@ class RatingController extends Controller
         $resault = $this->ratingService->update_rating($rating, $validatedRequest);
 
         if (!$resault) {
-            Cache::forget('ratings_all');
+            Cache::forget('ratings.index.rating_all');
             return $this->error();
         } else {
             return $this->success($resault, 'rating updated successfully', 200);
@@ -126,7 +142,7 @@ class RatingController extends Controller
         }
         $rating->delete();
 
-        Cache::forget('ratings_all');
+        Cache::forget('ratings.index.rating_all');
 
         return $this->success();
     }

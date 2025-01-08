@@ -175,7 +175,7 @@ Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
 
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/favorites', [FavoriteController::class, 'getAllFavorites']);
+    Route::get('/all_favorites', [FavoriteController::class, 'getAllFavorites']);
     Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
     Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);

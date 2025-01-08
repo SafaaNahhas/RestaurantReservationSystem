@@ -23,19 +23,29 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     *  View a list of favorites with the possibility of filtering using the type.
+     * @param \Illuminate\Http\Request $request The incoming HTTP request containing query parameters.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllFavorites()
+    public function getAllFavorites(Request $request)
     {
         $this->authorize('showAllFavorite', Favorite::class);
-        //Try fetching data from the cache If it does not exist Get it from the database and put it in the cache
-        $favorites = Cache::remember('favorite_all', 60, function () {
-            return Favorite::all();
-        });
 
-        return $this->success(FavoriteResource::collection($favorites));
+        $type = $request->input('type');
+
+        $perPage = $request->input('per_page', 10);
+
+        // Fetching data with filtering and pagination application
+        $favorites = Favorite::when($type, function ($query, $type) {
+            return $query->byType($type); 
+        })->paginate($perPage); 
+
+        return $this->paginated($favorites, FavoriteResource::class, 'Favorite fetched successfully', 200);
     }
+
+
+
+
 
     /**
      * Store a newly created favorite (table or food category) in storage.
@@ -46,6 +56,8 @@ class FavoriteController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $data = $this->favoriteService->addToFavorites($user, $request->type, $request->id);
+
+
 
         if ($data['status'] === 'exists') {
             Cache::forget('favorite_all');

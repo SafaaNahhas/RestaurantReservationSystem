@@ -3,15 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ForgatePasswordTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
     /**
      * A basic feature test example.
      */
@@ -28,6 +27,7 @@ class ForgatePasswordTest extends TestCase
                 'email' => "newhaidar@gmail.com"
             ],
         );
+        
         $response->assertStatus(422); 
     }
     public function test_check_email_exists(): void
@@ -60,6 +60,7 @@ class ForgatePasswordTest extends TestCase
             ],
         );
         $this->assertTrue(Cache::has("haidar@gmail.com"));
+        Cache::clear();
         $response->assertStatus(200); 
     } 
 
@@ -84,6 +85,7 @@ class ForgatePasswordTest extends TestCase
                 'email' => "haidar@gmail.com"
             ],
         );
+        Cache::clear();
         $response->assertStatus(400); 
     } 
 
@@ -100,16 +102,17 @@ class ForgatePasswordTest extends TestCase
                 'email' => "haidar@gmail.com"
             ],
         );
-        $code =Cache::get("haidar@gmail.com");
+        $code=Cache::get("haidar@gmail.com");
         Cache::delete("haidar@gmail.com");
         
         $response = $this->post(
             "/api/checkCode",
             [
                 'email' => "haidar@gmail.com",
-                'code' =>$code
+                'code' => strval($code)
             ],
         );
+        Cache::clear();
         $response->assertStatus(400); 
     }
 
@@ -132,9 +135,10 @@ class ForgatePasswordTest extends TestCase
             "/api/checkCode",
             [
                 'email' => "haidar@gmail.com",
-                'code' =>($code+1)
+                'code' =>strval($code+1)
             ],
         );
+        Cache::clear();
         $response->assertStatus(400); 
     }
 
@@ -157,10 +161,11 @@ class ForgatePasswordTest extends TestCase
             "/api/checkCode",
             [
                 'email' => "haidar@gmail.com",
-                'code' =>$code
+                'code' =>strval($code)
             ],
         );
         $response->assertStatus(200); 
+        Cache::clear();
     }
 
     public function test_check_password_weak_password(): void
@@ -178,6 +183,7 @@ class ForgatePasswordTest extends TestCase
                 'password' =>12345678
             ],
         );
+        Cache::clear();
         $response->assertStatus(422); 
      }
 
@@ -196,6 +202,7 @@ class ForgatePasswordTest extends TestCase
                  'password' =>"Haidar12345678!!"
              ],
          );
+         Cache::clear();
          $response->assertStatus(200); 
       }
 }

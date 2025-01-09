@@ -6,11 +6,10 @@ use App\Http\Requests\Role\AddPermissionsRequest;
 use App\Http\Requests\Role\RemovePermissionsRequest;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
- use App\Services\RoleService;
-use Illuminate\Http\Request;
+ use Illuminate\Http\Request;
 use App\Http\Resources\RoleAndPermission\RoleResource;
-
 use App\Http\Controllers\Controller;
+use App\Services\Roles\RoleService;
 
 class RoleController extends Controller
 {

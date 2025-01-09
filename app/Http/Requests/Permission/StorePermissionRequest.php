@@ -2,8 +2,7 @@
 
 namespace App\Http\Requests\Permission;
 
-use App\Rules\UserPermission;
-use App\Services\PermissionRequestService;
+use App\Services\Permissions\PermissionRequestService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 

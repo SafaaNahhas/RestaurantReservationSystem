@@ -128,10 +128,13 @@ class User extends Authenticatable implements JWTSubject
 
 
 
+    public function notificationSettings()
+    {
+        return $this->hasOne(NotificationSettings::class );
+    }
 
 
 
 
 
 }
-

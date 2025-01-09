@@ -59,6 +59,62 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Assign Roles to Ratings Permissions
         $deleteRating->assignRole([$admin, $reservationManager]);
+
+
+
+        // Tables Permissions
+        $storeTable = Permission::create(['name' => 'store table']);
+        $updateTable = Permission::create(['name' => 'update table']);
+        $softDeleteTable = Permission::create(['name' => 'soft delete table']);
+        $forceDeleteTable = Permission::create(['name' => 'force delete table']);
+        $restoreTable = Permission::create(['name' => 'restor table']);
+
+        $storeTable->assignRole($admin);
+        $updateTable->assignRole($admin);
+        $softDeleteTable->assignRole($admin);
+        $forceDeleteTable->assignRole($admin);
+        $restoreTable->assignRole($admin);
+
+
+        // Roles Permissions
+        $storeRole = Permission::create(['name' => 'store role']);
+        $updateRole = Permission::create(['name' => 'update role']);
+        $deleteRole = Permission::create(['name' => 'delete role']);
+
+        $storeRole->assignRole($admin);
+        $updateRole->assignRole($admin);
+        $deleteRole->assignRole($admin);
+
+
+        // Permissions Permissions
+        $storePermission = Permission::create(['name' => 'store permission']);
+        $updatePermission = Permission::create(['name' => 'update permission']);
+        $deletePermission = Permission::create(['name' => 'delete permission']);
+
+        $storePermission->assignRole($admin);
+        $updatePermission->assignRole($admin);
+        $deletePermission->assignRole($admin);
+
+
+        //  ForgetPassword Permissions
+        $checkEmail = Permission::create(['name' => 'store permission']);
+        $checkCode = Permission::create(['name' => 'update permission']);
+        $changePassword = Permission::create(['name' => 'delete permission']);
+
+        $checkEmail->assignRole([$admin, $reservationManager, $customer, $captin]);
+        $checkCode->assignRole([$admin, $reservationManager, $customer, $captin]);
+        $changePassword->assignRole([$admin, $reservationManager, $customer, $captin]);
+
+
+        // NotificationSettings  Permissions
+        $storeNotificationSettings = Permission::create(['name' => 'store notification settings']);
+        $updateNotificationSettings = Permission::create(['name' => 'update notification settings']);
+        $checkIfNotificationSettingsExsits = Permission::create(['name' => 'check if notification settings exsits']);
+        $resetNotificationSettings = Permission::create(['name' => 'reset notification settings']);
+
+        $storeNotificationSettings->assignRole([$admin, $reservationManager, $customer, $captin]);
+        $updateNotificationSettings->assignRole([$admin, $reservationManager, $customer, $captin]);
+        $checkIfNotificationSettingsExsits->assignRole([$admin, $reservationManager, $customer, $captin]);
+        $resetNotificationSettings->assignRole([$admin, $reservationManager, $customer, $captin]);
     }
 }
- 

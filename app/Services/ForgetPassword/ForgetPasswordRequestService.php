@@ -1,21 +1,24 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ForgetPassword;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RoleRequestService
+class ForgetPasswordRequestService
 {
     /**
-     *  get array of  RoleRequestService attributes 
+     *  get array of  ForgetPasswordRequestService attributes 
      *
      * @return array   of attributes
      */
     public function attributes()
     {
         return  [
-            'name' => 'Role Name',
-         ];
+            'password', 
+            'chat id',
+            'email',
+            'code',
+        ];
     }
     /**
      *  
@@ -28,7 +31,7 @@ class RoleRequestService
         throw new HttpResponseException(response()->json(
             [
                 'status' => 'error',
-                'message' => 'Validation failed. Please check the provided data.',
+                'message' => "Validation failed Please make sure that the values entered are correct",
                 'errors' => $validator->errors()
             ],
             422

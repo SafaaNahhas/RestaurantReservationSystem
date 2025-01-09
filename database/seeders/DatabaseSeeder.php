@@ -75,20 +75,17 @@ class DatabaseSeeder extends Seeder
             'name' => 'Manager One',
             'email' => 'managerone@example.com',
             'password' => Hash::make('123456789')
-
         ]);
         // create department
         Department::create([
             'name' => 'Kitchen',
             'description' => 'Responsible for food preparation.',
             'manager_id' => $manager1->id,
-
         ]);
         $manager2 = User::create([
             'name' => 'Manager Two',
             'email' => 'managerTwo@example.com',
             'password' => Hash::make('123456789')
-
         ]);
         Department::create([
             'name' => 'Service',

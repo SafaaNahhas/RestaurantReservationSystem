@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Permissions;
 
  use App\Http\Resources\RoleAndPermission\PermissionResource;
  use Spatie\Permission\Models\Permission;

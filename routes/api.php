@@ -1,13 +1,5 @@
 <?php
 
-
-use App\Models\User;
-use App\Enums\RoleUser;
-use App\Models\Restaurant;
-use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Food\DishController;
@@ -27,6 +19,7 @@ use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Http\Controllers\Api\RoleAndPermission\RoleController;
 use App\Http\Controllers\Api\Reservation\ReservationController;
 use App\Http\Controllers\Api\RoleAndPermission\PermissionController;
+use App\Http\Controllers\Api\Auth\NotificationSettingsController;
 
 // ***********  Auth Routes ****************************
 
@@ -58,9 +51,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('reservations/{id}/force-delete', [ReservationController::class, 'forceDeleteReservation']);
     Route::post('reservations/{id}/restore', [ReservationController::class, 'restoreReservation']);
     Route::get('reservations/get-soft-deleted', [ReservationController::class, 'getSoftDeletedReservations']);
-
-    Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
 });
+
+Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
 Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
 Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 
@@ -70,7 +63,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
     Route::delete('rating/force-delete/{id}', [RatingController::class, 'forceDeleteRating']); // Permanently delete rating
-
 });
 
 // ********* Category Routes  *********************************
@@ -204,20 +196,18 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 // *******  Roles Routes *******************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('roles', RoleController::class);
-    // Route::get('/deletedRoles', [RoleController::class, 'deletedRoles']);
-    // Route::post('/roles/{role}/restore', [RoleController::class, 'restoreRole']);
-    // Route::delete('/roles/{role}/finalDelete', [RoleController::class, 'forceDeleteRole']);
     Route::post('/roles/{role}/addPermissions', [RoleController::class, 'addPermissionToRole']);
     Route::post('/roles/{role}/removePermission', [RoleController::class, 'removePermissionFromRole']);
-    //});
 });
 // *******  Permissions Routes *******************************
 
-//Route::middleware(middleware: ['auth:api', 'role:Admin'])->group(function () {
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('permissions', PermissionController::class);
-    Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
-    Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
-    Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
-    //});
+});
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('notificationSettings', [NotificationSettingsController::class, 'store']);
+    Route::put('notificationSettings', [NotificationSettingsController::class, 'update']);
+    Route::get('checkIfNotificationSettingsExsits', [NotificationSettingsController::class, 'checkIfNotificationSettingsExsits']);
+    Route::post('resetNotificationSettings', [NotificationSettingsController::class, 'resetNotificationSettings']);
 });

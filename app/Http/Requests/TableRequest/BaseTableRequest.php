@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\TableRequest;
 
-use App\Services\TableRequestService;
+use App\Services\Tables\TableRequestService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;

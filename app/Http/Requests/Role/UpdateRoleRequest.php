@@ -4,7 +4,7 @@ namespace App\Http\Requests\Role;
 
 use App\Rules\NotAdmin;
 use App\Rules\UserRole;
-use App\Services\RoleRequestService;
+use App\Services\Roles\RoleRequestService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 

@@ -104,7 +104,6 @@ class DepartmentService
      * Update an existing department.
      *
      * This method updates the department's basic details (such as name, description, etc.)
-
      *
      * @param Department $department The department object to be updated.
      * @param array $data The validated data to update the department's attributes.

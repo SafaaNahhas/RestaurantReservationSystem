@@ -144,7 +144,7 @@ class RatingController extends Controller
 
         Cache::forget('ratings.index.rating_all');
 
-        return $this->success();
+        return $this->success(null,'Rating deleted successfully',200);
     }
 
 

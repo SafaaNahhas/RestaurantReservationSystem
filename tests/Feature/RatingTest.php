@@ -44,14 +44,30 @@ class RatingTest extends TestCase
         $this->otherCustomerUser->assignRole(RoleUser::Customer->value);
     }
 
+
+    //************************************* user_can_fetch_all_ratings
+
+
     /** @test 
      * check if user can fetch all rating
      */
     public function user_can_fetch_all_ratings()
     {
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 5,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
         // Create some ratings associated with users
-        Rating::factory()->count(5)->create([
-            'user_id' => $this->customerUser->id
+        Rating::factory()->count(1)->create([
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
         ]);
 
         // Act as the customer user and fetch ratings
@@ -67,18 +83,26 @@ class RatingTest extends TestCase
     }
 
 
+    //************************************* user_can_store_a_new_rating
+
     /** @test 
      * check if user can store rating to his resrvation
      */
     public function user_can_store_a_new_rating()
     {
-
         // Create a reservation associated with users
-        $reservation = Reservation::factory()->create([
+        $reservation = Reservation::create([
             'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 1,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
         ]);
 
-        // Rating data
+        //Rating data
         $ratingData = [
             'rating' => 5,
             'comment' => 'Excellent service!',
@@ -90,10 +114,8 @@ class RatingTest extends TestCase
             $ratingData
         );
 
-        // Checking the response status
         $response->assertStatus(201);
 
-        // Checking the presence of the assessment in the database
         $this->assertDatabaseHas('ratings', [
             'reservation_id' => $reservation->id,
             'rating' => 5,
@@ -102,8 +124,7 @@ class RatingTest extends TestCase
     }
 
 
-
-
+    //************************************* user_prevents_unauthorized_rating_creation
 
 
     /** @test
@@ -112,9 +133,15 @@ class RatingTest extends TestCase
     public function user_prevents_unauthorized_rating_creation()
     {
         // Create a reservation associated with users
-
-        $reservation = Reservation::factory()->create([
+        $reservation = Reservation::create([
             'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 2,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
         ]);
 
         // Rating data
@@ -137,6 +164,9 @@ class RatingTest extends TestCase
         ]);
     }
 
+
+    //************************************* user_can_view_a_specific_rating
+
     /** @test
      * check if user can view his ratin
      */
@@ -144,8 +174,15 @@ class RatingTest extends TestCase
     {
 
         // Create a reservation associated with users
-        $reservation = Reservation::factory()->create([
+        $reservation = Reservation::create([
             'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 3,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
         ]);
 
         //create a rating associated with users
@@ -158,7 +195,6 @@ class RatingTest extends TestCase
         ]);
 
         // Submit the request as an existing user with the IDs in the link
-
         $response = $this->actingAs($this->customerUser)->get('/api/ratings/' . $rating->id);
 
         $response->assertStatus(200);
@@ -171,54 +207,84 @@ class RatingTest extends TestCase
         ]);
     }
 
-    //     /** @test */
-    //     public function it_can_update_a_rating()
-    //     {
-    //         $rating = Rating::factory()->create(['user_id' => $this->customerUser->id]);
+    //************************************* user_can_update_a_rating
 
-    //         $updatedData = [
-    //             'rating' => 4,
-    //             'comment' => 'Updated comment.'
-    //         ];
 
-    //         $response = $this->actingAs($this->customerUser)->putJson('/api/ratings/' . $rating->id, $updatedData);
+    /** @test */
+    //check if user can update his rating
+    public function user_can_update_a_rating()
+    {
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 4,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
 
-    //         $response->assertStatus(200);
-    //         $response->assertJson([
-    //             'status' => 'success',
-    //             'message' => 'Rating updated successfully'
-    //         ]);
+        //create a rating associated with users
+        $rating =  Rating::create([
 
-    //         $this->assertDatabaseHas('ratings', $updatedData);
-    //     }
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
+            'rating' => 3,
+            'comment' => "good",
+        ]);
+        $updatedData = [
+            'rating' => 4,
+            'comment' => 'Updated comment.'
+        ];
 
-    //     /** @test */
-    //     public function it_can_delete_a_rating()
-    //     {
-    //         $rating = Rating::factory()->create(['user_id' => $this->customerUser->id]);
+        $response = $this->actingAs($this->customerUser)->putJson('/api/ratings/' . $rating->id, $updatedData);
 
-    //         $response = $this->actingAs($this->customerUser)->delete('/api/ratings/' . $rating->id);
+        $response->assertStatus(200);
+        $response->assertJson([
+            'status' => 'success',
+            'message' => 'rating updated successfully',
+            'data' => true
+        ]);
 
-    //         $response->assertStatus(200);
-    //         $response->assertJson([
-    //             'status' => 'success',
-    //             'message' => 'Rating deleted successfully'
-    //         ]);
+        $this->assertDatabaseHas('ratings', $updatedData);
+    }
 
-    //         $this->assertDatabaseMissing('ratings', ['id' => $rating->id]);
-    //     }
 
-    //     /** @test */
-    //     public function it_prevents_unauthorized_rating_deletion()
-    //     {
-    //         $rating = Rating::factory()->create();
+    //************************************* user_can_delete_a_rating
 
-    //         $response = $this->actingAs($this->customerUser)->delete('/api/ratings/' . $rating->id);
+    /** @test */
+    //check if user can delete his rating
+    public function user_can_delete_a_rating()
+    {
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 6,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
 
-    //         $response->assertStatus(403);
-    //         $response->assertJson([
-    //             'error' => true,
-    //             'message' => 'This action is unauthorized.'
-    //         ]);
-    //     }
+        //create a rating associated with users
+        $rating =  Rating::create([
+
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
+            'rating' => 3,
+            'comment' => "good",
+        ]);
+        $response = $this->actingAs($this->customerUser)->delete('/api/ratings/' . $rating->id);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'status' => 'success',
+            'message' => 'Rating deleted successfully',
+            'data' => NULL,
+        ]);
+    }
 }

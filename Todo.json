@@ -1,1 +1,1 @@
-{"verion":"0.0.1","entries":[{"type":"group","label":"Rating","completed":true,"children":[{"type":"entry","label":"cash","completed":false,"children":[]}]}]}
+{"verion":"0.0.1","entries":[{"type":"group","label":"favorite & rating postman","completed":true,"children":[{"type":"entry","label":"get all favorite","completed":false,"children":[]},{"type":"entry","label":"get alll rating","completed":false,"children":[]}]}]}

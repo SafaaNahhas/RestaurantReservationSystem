@@ -42,11 +42,11 @@ class ReservationService
      * @return array The result of the reservation operation, including status code and message.
      */
     public function storeReservation(array $data)
-        {
+    {
         try {
             $startDate = Carbon::parse($data['start_date']);
             $endDate = Carbon::parse($data['end_date']);
-// Validate reservation dates
+            // Validate reservation dates
             if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
                 return [
                     'status_code' => 422,
@@ -173,181 +173,181 @@ class ReservationService
         }
     }
 
-        /**
-         * Update an existing reservation with new details.
-         *
-         * @param array $data The data to update the reservation with.
-         * @param int $reservationId The ID of the reservation to update.
-         * @return array Response with status, message, and additional data if applicable.
-         */
-        public function updateReservation(array $data, $reservationId)
-        {
-            try {
-                // Find the reservation by ID
-                $reservation = Reservation::find($reservationId);
-               // Check if the reservation exists
-                if (!$reservation) {
-                    return [
-                        'status_code' => 404,
-                        'message' => 'Reservation not found.'
-                    ];
-                }
-                // Parse and validate the start and end dates
-                $startDate = Carbon::parse($data['start_date']);
-                $endDate = Carbon::parse($data['end_date']);
-                // Restrict updates to dates within the next two weeks
-                if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
-                    ];
-                }
-                // Ensure the reservation duration does not exceed 6 hours and is on the same day
-                if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
-                    ];
-                }
-                // Find a suitable table for the reservation
-                $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
-                    return $query->where('table_number', $data['table_number']);
-                }, function ($query) use ($data) {
-                    return $query->where('seat_count', '>=', $data['guest_count'])
-                        ->orderBy('seat_count', 'asc');
-                })
-                    ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $reservationId) {
-                        $query->whereBetween('start_date', [$startDate, $endDate])
-                            ->orWhereBetween('end_date', [$startDate, $endDate])
-                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                                $nestedQuery->where('start_date', '<', $startDate)
-                                            ->where('end_date', '>', $endDate);
-                            })
-                            ->where('id', '!=', $reservationId);
-                    })
-                    ->select(['id', 'table_number', 'seat_count'])
-                    ->first();
-
-                // Validate table seat count
-                if ($selectedTable && $selectedTable->seat_count < $data['guest_count']) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'The selected table does not have enough seats for the number of guests.'
-                    ];
-                }
-                // If no table is available, return a conflict response
-                if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
-                    return [
-                        'status_code' => 422,
-                        'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
-                    ];
-                }
-
-                if (!$selectedTable) {
-                    $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('start_date', [$startDate, $endDate])
-                            ->orWhereBetween('end_date', [$startDate, $endDate])
-                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                                $nestedQuery->where('start_date', '<', $startDate)
-                                            ->where('end_date', '>', $endDate);
-                            });
-                    })
-                        ->with('reservations')
-                        ->select(['id', 'table_number', 'location', 'seat_count', 'department_id'])
-                        ->get();
-
-                    return [
-                        'status_code' => 409,
-                        'message' => isset($data['table_number'])
-                            ? 'Selected table is not available for the selected time.'
-                            : 'No available tables for the selected time.',
-                        'reserved_tables' => $reservedTables
-                    ];
-                }
-                // Update reservation details
-                $reservation->update([
-                    'table_id' => $selectedTable->id,
-                    'start_date' => $data['start_date'],
-                    'end_date' => $data['end_date'],
-                    'guest_count' => $data['guest_count'],
-                    'services' => $data['services'] ?? null,
-                ]);
-
+    /**
+     * Update an existing reservation with new details.
+     *
+     * @param array $data The data to update the reservation with.
+     * @param int $reservationId The ID of the reservation to update.
+     * @return array Response with status, message, and additional data if applicable.
+     */
+    public function updateReservation(array $data, $reservationId)
+    {
+        try {
+            // Find the reservation by ID
+            $reservation = Reservation::find($reservationId);
+            // Check if the reservation exists
+            if (!$reservation) {
                 return [
-                    'status_code' => 200,
-                    'message' => 'Reservation updated successfully.',
-                    'reservation' => $reservation
-                ];
-            } catch (Exception $e) {
-                // Log unexpected errors
-                Log::error('Error updating reservation: ' . $e->getMessage());
-                return [
-                    'status_code' => 500,
-                    'message' => 'An unexpected error occurred.'
+                    'status_code' => 404,
+                    'message' => 'Reservation not found.'
                 ];
             }
-        }
-
-
-        /**
-         * Get all tables with their reservations.
-         *
-         * @return \Illuminate\Database\Eloquent\Collection
-         */
-        public function getAllTablesWithReservations(array $filter = [])
-        {
-            $tables= Table::whereHas('reservations', function ($query) use ($filter) {
-                if (isset($filter['status'])) {
-                    $query->whereIn('status', (array)$filter['status']);
-                }
+            // Parse and validate the start and end dates
+            $startDate = Carbon::parse($data['start_date']);
+            $endDate = Carbon::parse($data['end_date']);
+            // Restrict updates to dates within the next two weeks
+            if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
+                ];
+            }
+            // Ensure the reservation duration does not exceed 6 hours and is on the same day
+            if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
+                ];
+            }
+            // Find a suitable table for the reservation
+            $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
+                return $query->where('table_number', $data['table_number']);
+            }, function ($query) use ($data) {
+                return $query->where('seat_count', '>=', $data['guest_count'])
+                    ->orderBy('seat_count', 'asc');
             })
-            ->with(['reservations' => function ($query) use ($filter) {
-                $query->select('id', 'table_id', 'start_date', 'end_date', 'status');
+                ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $reservationId) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                        ->where('end_date', '>', $endDate);
+                        })
+                        ->where('id', '!=', $reservationId);
+                })
+                ->select(['id', 'table_number', 'seat_count'])
+                ->first();
 
-                if (isset($filter['status'])) {
-                    $query->whereIn('status', (array)$filter['status']);
-                }
-            }])
-            ->get();
+            // Validate table seat count
+            if ($selectedTable && $selectedTable->seat_count < $data['guest_count']) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'The selected table does not have enough seats for the number of guests.'
+                ];
+            }
+            // If no table is available, return a conflict response
+            if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
+                return [
+                    'status_code' => 422,
+                    'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
+                ];
+            }
 
-            return $tables;
+            if (!$selectedTable) {
+                $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                        ->where('end_date', '>', $endDate);
+                        });
+                })
+                    ->with('reservations')
+                    ->select(['id', 'table_number', 'location', 'seat_count', 'department_id'])
+                    ->get();
+
+                return [
+                    'status_code' => 409,
+                    'message' => isset($data['table_number'])
+                        ? 'Selected table is not available for the selected time.'
+                        : 'No available tables for the selected time.',
+                    'reserved_tables' => $reservedTables
+                ];
+            }
+            // Update reservation details
+            $reservation->update([
+                'table_id' => $selectedTable->id,
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'guest_count' => $data['guest_count'],
+                'services' => $data['services'] ?? null,
+            ]);
+
+            return [
+                'status_code' => 200,
+                'message' => 'Reservation updated successfully.',
+                'reservation' => $reservation
+            ];
+        } catch (Exception $e) {
+            // Log unexpected errors
+            Log::error('Error updating reservation: ' . $e->getMessage());
+            return [
+                'status_code' => 500,
+                'message' => 'An unexpected error occurred.'
+            ];
         }
+    }
 
-        /**
-         * Service method to confirm a reservation.
-         *
-         * @param int $reservationId
-         * @return array
-         */
-        public function confirmReservation($reservationId)
-        {
-            try {
-                $reservation = Reservation::with([
-                    'user:id,name,email',
-                    'table:id,table_number'
-                ])->select('id', 'user_id', 'table_id', 'start_date', 'end_date', 'status')
-                ->findOrFail($reservationId);
 
-                if ($reservation->status !== 'pending') {
-                    return [
-                        'error' => true,
-                        'message' => 'Reservation must be in pending state to confirm',
-                    ];
-                }
+    /**
+     * Get all tables with their reservations.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllTablesWithReservations(array $filter = [])
+    {
+        $tables= Table::whereHas('reservations', function ($query) use ($filter) {
+            if (isset($filter['status'])) {
+                $query->whereIn('status', (array)$filter['status']);
+            }
+        })
+        ->with(['reservations' => function ($query) use ($filter) {
+            $query->select('id', 'table_id', 'start_date', 'end_date', 'status');
 
-                if (Carbon::parse($reservation->start_date)->isPast()) {
-                    return [
-                        'error' => true,
-                        'message' => 'Cannot modify past reservations',
-                    ];
-                }
+            if (isset($filter['status'])) {
+                $query->whereIn('status', (array)$filter['status']);
+            }
+        }])
+        ->get();
 
-                $reservation->update(['status' => 'confirmed']);
+        return $tables;
+    }
 
-                Log::info("Reservation table number before sending email: " . $reservation->table->table_number);
+    /**
+     * Service method to confirm a reservation.
+     *
+     * @param int $reservationId
+     * @return array
+     */
+    public function confirmReservation($reservationId)
+    {
+        try {
+            $reservation = Reservation::with([
+                'user:id,name,email',
+                'table:id,table_number'
+            ])->select('id', 'user_id', 'table_id', 'start_date', 'end_date', 'status')
+            ->findOrFail($reservationId);
 
-                Mail::to($reservation->user->email)
-                    ->queue(new ReservationDetailsMail($reservation));
+            if ($reservation->status !== 'pending') {
+                return [
+                    'error' => true,
+                    'message' => 'Reservation must be in pending state to confirm',
+                ];
+            }
+
+            if (Carbon::parse($reservation->start_date)->isPast()) {
+                return [
+                    'error' => true,
+                    'message' => 'Cannot modify past reservations',
+                ];
+            }
+
+            $reservation->update(['status' => 'confirmed']);
+
+            Log::info("Reservation table number before sending email: " . $reservation->table->table_number);
+
+            Mail::to($reservation->user->email)
+                ->queue(new ReservationDetailsMail($reservation));
 
             // Create email log
             $emailLog = $this->emailLogService->createEmailLog(
@@ -385,146 +385,146 @@ class ReservationService
     }
 
 
-        /**
-         * Reject a reservation.
-         *
-         * @param int $reservationId
-         * @param string $rejectionReason
-         * @return array
-         */
-        public function rejectReservation($reservationId, string $rejectionReason): array
-        {
-            try {
-                // Find the reservation or throw an exception if not found
-                $reservation = Reservation::with('user', 'table')->findOrFail($reservationId);
-                if ($reservation->status !== 'pending') {
-                    return [
-                        'error' => true,
-                        'message' => 'Reservation must be in pending state to rejecte',
-                    ];
-                }
-
-                if (Carbon::parse($reservation->start_date)->isPast()) {
-                    return [
-                        'error' => true,
-                        'message' => 'Cannot modify past reservations',
-                    ];
-                }
-
-
-                // Update the reservation status to 'rejected' and store the rejection reason
-
-                $reservation->update(['status' => 'rejected']);
-                $reservation->details()->create([
-                'status' => 'rejected', // Record the status as rejected
-                'rejection_reason' => $rejectionReason, // Store the rejection reason
-                            ]);
-
-                // Log the rejection
-                Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
-
-                // Send rejection email (queue for async processing)
-                Mail::to($reservation->user->email)
-                    ->queue(new ReservationRejectedMail($reservation));
-
-                return [
-                    'error' => false,
-                    'message' => 'Reservation rejected successfully',
-                    'data' => [
-                        'reservation_id' => $reservation->id,
-                        'table_number' => $reservation->table->table_number,
-                        'start_date' => $reservation->start_date,
-                        'end_date' => $reservation->end_date,
-                        'rejection_reason' => $rejectionReason,
-                    ],
-                ];
-            } catch (ModelNotFoundException $e) {
+    /**
+     * Reject a reservation.
+     *
+     * @param int $reservationId
+     * @param string $rejectionReason
+     * @return array
+     */
+    public function rejectReservation($reservationId, string $rejectionReason): array
+    {
+        try {
+            // Find the reservation or throw an exception if not found
+            $reservation = Reservation::with('user', 'table')->findOrFail($reservationId);
+            if ($reservation->status !== 'pending') {
                 return [
                     'error' => true,
-                    'message' => "No reservation found with ID {$reservationId}",
-                    'data' => null,
-                ];
-            }catch (Exception $e) {
-                Log::error('Error rejecting reservation: ' . $e->getMessage());
-                return [
-                    'error' => true,
-                    'message' => 'An unexpected error occurred.',
+                    'message' => 'Reservation must be in pending state to rejecte',
                 ];
             }
+
+            if (Carbon::parse($reservation->start_date)->isPast()) {
+                return [
+                    'error' => true,
+                    'message' => 'Cannot modify past reservations',
+                ];
+            }
+
+
+            // Update the reservation status to 'rejected' and store the rejection reason
+
+            $reservation->update(['status' => 'rejected']);
+            $reservation->details()->create([
+            'status' => 'rejected', // Record the status as rejected
+            'rejection_reason' => $rejectionReason, // Store the rejection reason
+                        ]);
+
+            // Log the rejection
+            Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
+
+            // Send rejection email (queue for async processing)
+            Mail::to($reservation->user->email)
+                ->queue(new ReservationRejectedMail($reservation));
+
+            return [
+                'error' => false,
+                'message' => 'Reservation rejected successfully',
+                'data' => [
+                    'reservation_id' => $reservation->id,
+                    'table_number' => $reservation->table->table_number,
+                    'start_date' => $reservation->start_date,
+                    'end_date' => $reservation->end_date,
+                    'rejection_reason' => $rejectionReason,
+                ],
+            ];
+        } catch (ModelNotFoundException $e) {
+            return [
+                'error' => true,
+                'message' => "No reservation found with ID {$reservationId}",
+                'data' => null,
+            ];
+        } catch (Exception $e) {
+            Log::error('Error rejecting reservation: ' . $e->getMessage());
+            return [
+                'error' => true,
+                'message' => 'An unexpected error occurred.',
+            ];
         }
-        /**
-         * Cancel a reservation.
-         *
-         * @param int $reservationId
-         * @return array
-         */
-        public function cancelReservation($reservationId, string $cancellationReason): array
-        {
-            try {
-                // Find the reservation or throw an exception if not found
-                $reservation = Reservation::with('user', 'table')->findOrFail($reservationId);
+    }
+    /**
+     * Cancel a reservation.
+     *
+     * @param int $reservationId
+     * @return array
+     */
+    public function cancelReservation($reservationId, string $cancellationReason): array
+    {
+        try {
+            // Find the reservation or throw an exception if not found
+            $reservation = Reservation::with('user', 'table')->findOrFail($reservationId);
 
-                if ($reservation->status !== 'pending') {
-                    return [
-                        'error' => true,
-                        'message' => 'Reservation must be in pending state to cancelled',
-                    ];
-                }
+            if ($reservation->status !== 'pending') {
+                return [
+                    'error' => true,
+                    'message' => 'Reservation must be in pending state to cancelled',
+                ];
+            }
 
-                if (Carbon::parse($reservation->start_date)->isPast()) {
-                    return [
-                        'error' => true,
-                        'message' => 'Cannot modify past reservations',
-                    ];
-                }
-                $reservation->update(['status' => 'cancelled']);
+            if (Carbon::parse($reservation->start_date)->isPast()) {
+                return [
+                    'error' => true,
+                    'message' => 'Cannot modify past reservations',
+                ];
+            }
+            $reservation->update(['status' => 'cancelled']);
 
-                $reservation->details()->create([
-                'status' => 'cancelled',        // Record the status as cancelled
-                'cancelled_at' => now(),           // Store the timestamp of cancellation
-                'cancellation_reason' => $cancellationReason,  // Store the cancellation reason
-                ]);
+            $reservation->details()->create([
+            'status' => 'cancelled',        // Record the status as cancelled
+            'cancelled_at' => now(),           // Store the timestamp of cancellation
+            'cancellation_reason' => $cancellationReason,  // Store the cancellation reason
+            ]);
 
-                // Log the cancellation
-                Log::info("Reservation ID {$reservation->id} cancelled by User ID {$reservation->user_id}. Reason: {$cancellationReason}");
-                // Send cancellation email (queue for async processing)
-                Mail::to($reservation->user->email)
-                    ->queue(new ReservationCancelledMail($reservation, false));
-                    // Fetch the department manager
-                $manager = $reservation->table->department->manager;
-                     // Send cancellation email to the manager
-                if ($manager) {
-                    Mail::to($manager->email)
-                        ->queue(new ReservationCancelledMail($reservation, true)); // Pass `true` for the manager
-                }
-                        return [
+            // Log the cancellation
+            Log::info("Reservation ID {$reservation->id} cancelled by User ID {$reservation->user_id}. Reason: {$cancellationReason}");
+            // Send cancellation email (queue for async processing)
+            Mail::to($reservation->user->email)
+                ->queue(new ReservationCancelledMail($reservation, false));
+            // Fetch the department manager
+            $manager = $reservation->table->department->manager;
+            // Send cancellation email to the manager
+            if ($manager) {
+                Mail::to($manager->email)
+                    ->queue(new ReservationCancelledMail($reservation, true)); // Pass `true` for the manager
+            }
+            return [
                     'error' => false,
                     'message' => 'Reservation cancelled successfully',
                     'data' => [
-                        'reservation_id' => $reservation->id,
-                        'table_number' => $reservation->table->table_number,
-                        'start_date' => $reservation->start_date,
-                        'end_date' => $reservation->end_date,
-                        'cancellation_reason' => $cancellationReason,
+            'reservation_id' => $reservation->id,
+            'table_number' => $reservation->table->table_number,
+            'start_date' => $reservation->start_date,
+            'end_date' => $reservation->end_date,
+            'cancellation_reason' => $cancellationReason,
                     ],
                 ];
-            } catch (ModelNotFoundException $e) {
-                Log::warning("Reservation with ID {$reservationId} not found.");
-                return [
-                    'error' => true,
-                    'message' => "No reservation found with ID {$reservationId}",
-                ];
-                } catch (Exception $e) {
-                Log::error('An unexpected error occurred: ' . $e->getMessage());
-                Log::error('Stack trace: ' . $e->getTraceAsString());
+        } catch (ModelNotFoundException $e) {
+            Log::warning("Reservation with ID {$reservationId} not found.");
+            return [
+                'error' => true,
+                'message' => "No reservation found with ID {$reservationId}",
+            ];
+        } catch (Exception $e) {
+            Log::error('An unexpected error occurred: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
-                return [
-                    'error' => true,
-                    'message' => 'An unexpected error occurred. ' . $e->getMessage(),
-                ];
-            }
-
+            return [
+                'error' => true,
+                'message' => 'An unexpected error occurred. ' . $e->getMessage(),
+            ];
         }
+
+    }
 
     /**
      * Start service for a reservation.
@@ -588,10 +588,7 @@ class ReservationService
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
-            // Dispatch job to send a rating request email
-            $emailLogService = new EmailLogService();
 
-            SendRatingRequestJob::dispatch($reservation, $emailLogService);
             return [
                 'error' => false,
                 'reservation' => $reservation,
@@ -745,4 +742,4 @@ class ReservationService
             ];
         }
     }
-    }
+}

@@ -1,66 +1,156 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Restauant Reaervayion System
+This project aims to streamline the restaurant experience by providing a high level of accessibility to restaurant information, facilitating comfortable reservation processes, and enabling electronic payments through a variety of services. Users can explore the restaurant, make reservations, and enjoy a seamless dining experience.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+#
 
-## About Laravel
+## Access Control Summary
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Admin Privileges:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **User Management**:
+    - Add, delete, and restore users.
+    - Assign roles to users.
+2. **Table Management**:
+    - Add, edit, delete, and restore tables.
+3. **Restaurant Information Management**:
+    - Add, edit, delete, and restore restaurant information and images.
+4. **Review Management**:
+    - Delete and restore reviews.
+5. **Department Management**:
+    - Add, edit, delete, and restore departments.
+6. **Dish Management**:
+    - View, add, edit, delete, and restore dishes.
+7. **Category Management**:
+    - View, add, edit, delete, and restore dish categories.
+8. **Favorites Management**:
+    - Delete and restore favorite dishes and tables.
+9. **Event Management**:
+    - Add, edit, delete, and restore events.
+10. **Emergency Management**:
+    - Add, edit, and delete emergency situations.
+11. **Email Log Management**:
+    - View and delete email logs.
+12. **Permission Management**:
+    - Add, edit, delete, and restore permissions.
+13. **Role Management**:
+    - Add and edit roles and their associated permissions.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Manager Privileges:
 
-## Learning Laravel
+1. **Reservation Management**:
+    - Confirm and reject reservations.
+    - Make reservations for all departments.
+    - View and edit reservations.
+    - Delete and restore reservations.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### User Privileges:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Personal Information**:
+    - Create an account, log in, and log out.
+    - View personal information .
+2. **Restaurant Information**:
+    - View restaurant information, tables, and reviews.
+3. **Reservation Actions**:
+    - Create, edit, and cancel reservations.
+4. **Dish Management**:
+    - View dishes by category.
+5. **Favorites Management**:
+    - Add and remove dishes and tables to/from favorites.
+6. **Department Viewing**:
+    - View different departments.
+7. **Electronic Payment**:
+    - Pay the restaurant bill electronically.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Waiter Privileges:
 
-## Laravel Sponsors
+1. **Reservation Handling**:
+    - Confirm customer arrival.
+    - Complete reservation to free up the table for reuse.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Notifications and Emails:
 
-### Premium Partners
+1. **Email Notifications**:
+    - Send email notifications to the manager when a reservation is made.
+    - Notify users via email upon reservation confirmation or rejection.
+    - Notify users of emergencies or specific events.
+    - Send a daily report to the Admin about the restaurant's status.
+    - Send a daily report to each Manager about their respective department's status.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Prerequisites
 
-## Contributing
+-   PHP >= 8.0
+-   Composer
+-   Laravel >= 9.0
+-   MySQL or any database supported by Laravel
+-   Postman for API testing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Advanced Security Features
 
-## Code of Conduct
+-   **JWT Authentication**: Secure access to the API using JWT tokens.
+-   **Rate Limiting**: Protect the API from DDoS attacks through rate limiting.
+-   **CSRF Protection**: Ensure protection against Cross-Site Request Forgery (CSRF) attacks.
+-   **XSS and SQL Injection Protection**: Utilize Laravel's built-in mechanisms to prevent XSS and SQL Injection attacks.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Steps to Run the Project
 
-## Security Vulnerabilities
+1. **Clone the Repository**
+    ```sh
+    git clone https://github.com/SafaaNahhas/RestaurantReservationSystem
+    ```
+2. **Navigate to the Project Directory**
+    ```sh
+    cd RestaurantReservationSystem
+    ```
+3. **Install Dependencies**
+    ```sh
+    composer install
+    ```
+4. **Create Environment File**
+    ```sh
+    cp .env.example .env
+    ```
+5. **Update the .env File** with your database configuration (MySQL credentials, database name, etc.).
+6. **Generate Application Key**
+    ```sh
+    php artisan key:generate
+    ```
+7. **Run Migrations**
+    ```sh
+    php artisan migrate
+    ```
+8. **Seed the Database**
+    ```sh
+    php artisan db:seed
+    ```
+9. **Run the Job Queue**
+    ```sh
+    php artisan queue:work
+    ```
+10. **Run the Application**
+    ```sh
+    php artisan serve
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Important Notes
 
-## License
+-   Pay attention to the validation instructions in the request file for each operation you want to perform.
+-   Test your work manually using Postman or HTTP.
+-   You are welcome to create additional files.
+-   Follow best practices to produce clean and professional results.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Postman:
+
+[Documentation Link](https://documenter.getpostman.com/view/34501481/2sAYJ4k1ig)
+
+## Team Members
+
+-   [Safaa Nahaas (Team Leader)](https://github.com/SafaaNahhas)
+-   [Haider Rayya](https://github.com/HaidarRayya)
+-   [Hiba Altabal](https://github.com/hiba-altabbal95)
+-   [Hussein Hamda](https://github.com/HusseinIte)
+-   [Khatoon Badre](https://github.com/KhatoonBadrea)
+-   [Mohamed Karakit](https://github.com/Dralve)
+-   [Mohammed Almostfa](https://github.com/MohammedAlmostfa)
+-   [Youssef Alkurddi](https://github.com/Youssef2524)
+
+Thank you for using our services.

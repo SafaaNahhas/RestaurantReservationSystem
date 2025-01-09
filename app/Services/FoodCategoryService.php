@@ -35,11 +35,6 @@ class FoodCategoryService
     }
 
 
-
-
-
-
-
     /**
      * Create a new Category.
      *
@@ -56,9 +51,8 @@ class FoodCategoryService
                 'user_id'=>Auth()->id(),
             ]);
         } catch (Exception $e) {
-            Log::error('Error creating Category: ' . $e->getMessage());
-            throw new HttpResponseException(response()->json(
-                [
+            Log::error('Error creating Category:'. $e->getMessage());
+            throw new HttpResponseException(response()->json([
                     'status' => 'error',
                     'message' => "there is something wrong in server",
                 ],

@@ -267,23 +267,23 @@ class DishService
     public function restoreDish($id)
     {
         try {
-            $Dish = Dish::onlyTrashed()->findOrFail($id);
-            $Dish->restore();
-            $Dish->image()->restore();
-            return $$Dish;
+            $dish = Dish::onlyTrashed()->findOrFail($id);
+            $dish->restore();
+            if ($dish->image) {
+                $dish->image()->restore();
+            }
+            return $dish;
         } catch (ModelNotFoundException $e) {
-            Log::error("error" . $e->getMessage());
+            Log::error("Dish not found for restore: " . $e->getMessage());
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any thing",
+                    'message' => "we didn't find anything",
                 ],
                 404
             ));
-
         } catch (Exception $e) {
-            Log::error("error in restore a Dish" . $e->getMessage());
-
+            Log::error("Error in restoring a Dish: " . $e->getMessage());
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
@@ -293,6 +293,7 @@ class DishService
             ));
         }
     }
+    
 
     /**
      * Permanently delete a trashed (soft deleted) resource by its ID.

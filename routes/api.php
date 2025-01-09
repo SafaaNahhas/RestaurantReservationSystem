@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Food\FoodCategoryController;
 use App\Http\Controllers\Api\Reservation\TableController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
 use App\Http\Controllers\Api\Emergency\EmergencyController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Restaurant\DepartmentController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Http\Controllers\Api\RoleAndPermission\RoleController;
@@ -221,3 +222,8 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
     //});
 });
+
+//*********** payment route**********************************
+
+Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');

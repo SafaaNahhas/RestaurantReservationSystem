@@ -169,4 +169,10 @@ class Reservation extends Model
     {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i') : null;
     }
+
+
+    public static function getInServiceReservationsForUser($userId) 
+    {
+    return self::where('user_id', $userId)->where('status', 'in_service')->get();
+    }
 }

@@ -98,7 +98,29 @@ class DepartmentService
         }
     }
 
-
+     /**
+     * Retrieve an department by ID with its reservations.
+     *
+     * @param int $id
+     * @return Department|null
+     */
+    public function getDepartmentById(int $id)
+    {
+        try {
+            // Attempt to find the department
+        $department = Department::findOrFail($id); 
+        
+        // Load related image, tables, and manager
+        $department->load('image', 'tables', 'manager');
+        if (!$department) {
+            return response()->json('Department not found.');
+        }
+            return $department;
+        }  catch (\Exception $e) {
+            // Handle any other unexpected errors
+            throw new \Exception("An error occurred while retrieving the department: " . $e->getMessage());
+        }
+    }
 
     /**
      * Update an existing department.
@@ -183,9 +205,10 @@ class DepartmentService
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getDeletedDepartments()
+    public function AllDeleted()
     {
-        return Department::onlyTrashed()->get();
+        $department=Department::onlyTrashed()->get();
+        return $department;
     }
 
     /**

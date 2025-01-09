@@ -22,6 +22,6 @@ class EventResource extends JsonResource
             'details' => $this->details,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            // 'reservation' => new ReservationResource($this->whenLoaded('reservation')),  // تحميل العلاقة reservation
-        ];    }
+        ];    
+    }
 }

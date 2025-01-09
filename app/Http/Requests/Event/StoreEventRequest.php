@@ -30,7 +30,6 @@ class StoreEventRequest extends FormRequest
             'start_date' => 'required|date|before_or_equal:end_date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'details' => 'nullable|string|max:1000',
-            'reservation_id' => 'required|exists:reservations,id',
         ];
     }
 

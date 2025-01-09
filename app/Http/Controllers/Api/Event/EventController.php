@@ -81,13 +81,13 @@ class EventController extends Controller
      * @param Event $event
      * @return JsonResponse
      */
-    public function show(Event $event)
+    public function show($id)
     {
-        // Return the event data along with its related reservation.
-        return self::success(new EventResource($event->load('reservation')), 'Event retrieved successfully.');
+            // Use EventService to retrieve the event
+            $event = $this->eventService->getEventById($id);
+            return self::success(new EventResource($event), 'Event retrieved successfully.');
 
     }
-
     /**
      * Update the specified event.
      *

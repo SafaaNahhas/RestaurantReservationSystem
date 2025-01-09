@@ -118,14 +118,10 @@ Route::delete('softdeletemaillog', [EmailLogController::class, 'deleteEmailLogs'
 
 // ********* Departments Routes ***********************************
 // Publicly accessible for all authenticated roles
-Route::middleware(['auth:api'])->group(function () {
-    Route::get('department', [DepartmentController::class, 'index']); // Get all departments
-    Route::get('department/{id}', [DepartmentController::class, 'show']); // Get a specific department
-});
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
-    Route::get('department/showDeleted', [DepartmentController::class, 'showDeleted']);
     Route::put('department/{id}/restore', [DepartmentController::class, 'restoreDeleted']);
     Route::delete('department/{id}/delete', [DepartmentController::class, 'forceDeleted']);
+    Route::get('department/alldelet', [DepartmentController::class, 'alldelet']);
     Route::apiResource('department', DepartmentController::class)->except(['index', 'show']);
     // soft delete
     Route::delete('department/{departmentId}/imageSoftDelet/{imageId}', [DepartmentController::class, 'softdeletImage']);
@@ -135,6 +131,10 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::delete('department/{departmentId}/imageDdelet/{imageId}', [DepartmentController::class, 'deletImage']);
     // show deleted image
     Route::get('departments/showDeletedImage', [DepartmentController::class, 'showDeletedImage']);
+});
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('department', [DepartmentController::class, 'index']); // Get all departments
+    Route::get('department/{id}', [DepartmentController::class, 'show']); // Get a specific department
 });
 // Define a route for retrieving deleted email logs
 Route::get('getemailogs', [EmailLogController::class, 'getDeletedEmailLogs']);

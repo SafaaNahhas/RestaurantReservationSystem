@@ -65,13 +65,13 @@ class DepartmentController extends Controller
      * @return JsonResponse
      */
 
-
-    public function show($id): JsonResponse
+    public function show($id)
     {
-        $department = Department::with('image', 'tables', 'manager')->find($id);
-        return self::success(new DepartmentResource($department,'Department retrieved successfully.'));
-    }
+            // Use Department Service to retrieve the department
+            $department = $this->departmentService->getDepartmentById($id);
+            return self::success(new DepartmentResource($department), 'Department retrieved successfully.');
 
+    }
     /**
      *
      * Handle the request to update a department.
@@ -109,33 +109,28 @@ class DepartmentController extends Controller
     }
 
 
-    /**
-        * Retrieve a list of soft-deleted departments.
-        *
-        *
-        * @throws Exception
-        */
-        public function showDeleted(): JsonResponse
-        {
-            try {
-                $softDeleted = Department::whereNotNull('deleted_at')->get();
+     /**
+     * Retrieve a list of soft-deleted departments.
+     *
+     * @return JsonResponse
+     *
+     * @throws Exception
+     */
+    public function alldelet(): JsonResponse
+    {
+        try {
+            $softDeleted = $this->departmentService->AllDeleted();
 
-                if ($softDeleted->isEmpty()) {
-                    return self::error(null, 'No deleted Department found.', 404);
-                }
-
-                return self::success($softDeleted, 'Soft-deleted Departments retrieved successfully.');
-            } catch (\Exception $e) {
-                // Log the error
-                \Log::error('Error retrieving soft-deleted Departments: ' . $e->getMessage());
-                return self::error(null, 'An error occurred while retrieving deleted Departments.', 500);
+            if ($softDeleted->isEmpty()) {
+                return self::error(null, 'No deleted departments found.', 404);
             }
+
+            return self::success($softDeleted, 'Soft-deleted departments retrieved successfully.');
+        } catch (Exception $e) {
+            Log::error('Error retrieving soft-deleted departments: ' . $e->getMessage());
+            return self::error(null, 'An error occurred while retrieving deleted departments.', 500);
         }
-
-
-
-
-
+    }
 
 
     /**

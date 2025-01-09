@@ -6,6 +6,7 @@ use Exception;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\EmailLog;
+use App\Services\EmailLogService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCustomerCreateEvent;
@@ -60,11 +61,32 @@ class EventService
             // send email
 
             $emailLogService = new EmailLogService();
-            SendCustomerCreateEvent::dispatch($event, $customers, $emailLogService);
+            SendCustomerCreateEvent::dispatch($event, $customers,false, $emailLogService);
             return $event;
         } catch (Exception $e) {
             Log::error('Error creating event: ' . $e->getMessage());
             throw new \RuntimeException('Unable to create event.');
+        }
+    }
+
+     /**
+     * Retrieve an event by ID with its reservations.
+     *
+     * @param int $id
+     * @return Event|null
+     */
+    public function getEventById(int $id)
+    {
+        try {
+            // Attempt to find the event
+            $event = Event::findOrFail($id); // Throws ModelNotFoundException if not found            
+            return $event;
+        } catch (ModelNotFoundException $e) {
+            return self::error(null, 'event not found.', 404);
+
+        } catch (\Exception $e) {
+            // Handle any other unexpected errors
+            throw new \Exception("An error occurred while retrieving the event: " . $e->getMessage());
         }
     }
 
@@ -89,7 +111,7 @@ class EventService
             // send email
             $emailLogService = new EmailLogService();
 
-            SendCustomerCreateEvent::dispatch($event, $customers, $emailLogService);
+            SendCustomerCreateEvent::dispatch($event, $customers,true, $emailLogService);
             return $event;
         } catch (Exception $e) {
             // Log the error and throw a runtime exception.
@@ -107,7 +129,7 @@ class EventService
      * @return bool true if the event was deleted successfully.
      * @throws \RuntimeException if an error occurs while deleting the event.
      */
-    public function softdeleteEvent(Event $event)
+    public function deleteEvent(Event $event)
     {
         try {
             // Delete the event and return true to indicate success.

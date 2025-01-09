@@ -3,11 +3,20 @@
 namespace App\Exceptions;
 
 use Throwable;
+use Psr\Log\LogLevel;
 use Illuminate\Support\Facades\Log;
+use Dotenv\Exception\ValidationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {

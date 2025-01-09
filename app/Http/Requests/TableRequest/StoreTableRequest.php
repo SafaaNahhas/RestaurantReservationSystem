@@ -39,11 +39,6 @@ class StoreTableRequest extends BaseTableRequest
                 $commonRules['seat_count'],
                 ['required']
             ),
-            'department_id' => array_merge(
-                $commonRules['department_id'],
-                ['required']
-            ),
-
         ];
     }
 
@@ -67,7 +62,6 @@ class StoreTableRequest extends BaseTableRequest
             'table_number' => $this->table_number,                  // Table number being created
             'location' => $this->location,                          // Location of the table
             'seat_count' => $this->seat_count,                      // Number of seats
-            'department_id' => $this->department_id,                // Associated department
             'ip' => $this->ip(),                                    // Client IP for request tracking
             'user_agent' => $this->userAgent(),                     // Browser/device information
             'request_time' => now()->toDateTimeString(),            // Time of request

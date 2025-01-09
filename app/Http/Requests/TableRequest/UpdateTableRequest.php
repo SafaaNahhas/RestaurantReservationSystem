@@ -50,7 +50,6 @@ class UpdateTableRequest extends BaseTableRequest
     {
         Log::info('Update Table form validation passed', [
             'table_id' => $this->route('table'),                // Target table identifier
-            'department_id' => $this->route('department'),      // Associated department
             'table_number' => $this->table_number,                     // Updated table number
             'location' => $this->location,                             // Updated location
             'seat_count' => $this->seat_count,                         // Updated seat count
@@ -60,11 +59,6 @@ class UpdateTableRequest extends BaseTableRequest
                 ['table_number', 'location', 'seat_count']
             )),
             'updated_by' => auth()->id(),                              // User who made the update
-
-            // Requires authentication: Returns the name of the authenticated user
-            // If user is not authenticated, accessing name will cause an error
-            // Make sure to check auth()->user() is not null before accessing
-            //    'updated_by_name' => auth()->user()->name
         ]);
     }
 }

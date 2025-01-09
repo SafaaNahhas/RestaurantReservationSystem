@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Favorite;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -19,16 +20,16 @@ class RemoveFromFavoriteRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'type' => 'required|in:tables,food_categories', 
-            'id' => 'required|integer',          
+            'type' => 'required|in:tables,food_categories',
+            'id' => 'required|integer',
         ];
     }
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response()->json([
             'rating' => 'error',
@@ -38,14 +39,14 @@ class RemoveFromFavoriteRequest extends FormRequest
         ],422));
     }
 
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'type' => 'type',
             'id' => 'id',
         ];
     }
-    public function messages()
+    public function messages(): array
     {
         return [
             'required' => ':attribute is required',

@@ -55,7 +55,7 @@ class ReservationPolicy
         // السماح بالإلغاء فقط للكستمر الذي أنشأ الحجز
         return $reservation->user_id == $user->id;
     }
-  
+
     public function startService(User $user)
     {
         return $user->hasPermissionTo('start service');

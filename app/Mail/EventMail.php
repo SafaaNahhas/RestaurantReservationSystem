@@ -34,8 +34,8 @@ public $isUpdated;
     {
         $subject = $this->isUpdated
             ? 'Event Updated: ' . $this->event->name
-            : 'New Event Created: ' . $this->event->name;
-    
+            : 'New Event Created ' . $this->event->name;
+
         return $this->subject($subject)
                     ->view('emails.event_emails')
                     ->with([
@@ -43,5 +43,5 @@ public $isUpdated;
                         'isUpdated' => $this->isUpdated,
                     ]);
     }
-    
+
 }

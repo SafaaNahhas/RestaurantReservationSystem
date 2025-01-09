@@ -2,6 +2,14 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
+use Illuminate\Validation\ValidationException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\AuthenticationException;

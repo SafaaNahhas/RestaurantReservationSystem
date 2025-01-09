@@ -227,3 +227,5 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 //*********** payment route**********************************
 
 Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+
+Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');

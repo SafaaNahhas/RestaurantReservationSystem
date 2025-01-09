@@ -304,4 +304,23 @@ class ReservationController extends Controller
 
         return self::success($result['reservations'], 'Soft deleted reservations retrieved successfully', 200);
     }
+
+
+
+    /** * Get reservations with 'in_service' status for a specific user. 
+     * @param int $userId 
+     * @return \Illuminate\Http\Response */
+    public function getInServiceReservations()
+    {
+
+
+        // Retrieve the authenticated user's ID 
+        $userId = Auth()->id();
+
+        // Fetch reservations with 'in_service' status for the given user ID 
+        $reservations = Reservation::getInServiceReservationsForUser($userId);
+
+        // Return the reservations in the response 
+        return response()->json($reservations);
+    }
 }

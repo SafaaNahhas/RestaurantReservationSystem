@@ -44,6 +44,7 @@ class FavoriteService
             return ['status' => 'success', 'message' => 'Added to favorites successfully'];
         } catch (\Exception $e) {
             Log::error('Error in favoriteService@addToFavorites: ' . $e->getMessage());
+            
             return ['status' => 'error', 'message' => 'An unexpected error occurred'];
         }
     }

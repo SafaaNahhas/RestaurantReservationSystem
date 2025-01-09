@@ -28,6 +28,7 @@ class ProcessPaymentRequest extends FormRequest
         return [
             'amount' => 'required|numeric|min:0.5',
             'stripeToken' => 'required|string',
+            'reservation_id' => 'required|integer|exists:reservations,id',
         ];
     }
 

@@ -149,7 +149,7 @@ class ReservationService
                 'manager_email' => $manager->email,
             ]);
             // Notify managers
-            NotifyManagersAboutReservation::dispatch($reservation);
+            // NotifyManagersAboutReservation::dispatch($reservation);
 
             // Return success response
             return [

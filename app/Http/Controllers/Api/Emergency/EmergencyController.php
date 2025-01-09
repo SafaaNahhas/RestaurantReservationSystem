@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Emergency\StoreEmergencyRequest;
 use App\Http\Requests\Emergency\UpdateEmergencyRequest;
 use App\Models\Emergency;
-use App\Services\EmergencyService;
+use App\Services\Emergency\EmergencyService;
 
 /**
  * EmergencyController

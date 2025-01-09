@@ -12,14 +12,14 @@ class DepartmentSeeder extends Seeder
         //create departmen
         $Departments = [
             [
-              'name' => 'Families ',
-                'description' => 'Special section for families',
+              'name' => 'department Indoor ',
+                'description' => 'department Indoor department Indoor',
                 'manager_id' => 1,
               
             ],
             [
-                'name' => 'Girls ',
-                'description' => 'Special section for girls.',
+                'name' => 'department Outdoor  ',
+                'description' => 'department Outdoor department Outdoor',
                 'manager_id' => 2,
                 
             ],

@@ -27,6 +27,7 @@
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Created At</th>
+                <th>Payment_value</th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +40,7 @@
                     <td>{{ $reservation->start_date }}</td>
                     <td>{{ $reservation->end_date }}</td>
                     <td>{{ $reservation->created_at }}</td>
+                    <td>{{ $reservation->payment_value }}</td>
                 </tr>
             @endforeach
         </tbody>

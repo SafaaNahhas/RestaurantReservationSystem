@@ -28,6 +28,7 @@
                 <th>End Date</th>
                 <th>Created At</th>
                 <th>Manager</th>
+                <th>Payment_value</th>
             </tr>
         </thead>
         <tbody>
@@ -41,6 +42,7 @@
                     <td>{{ $reservation->end_date }}</td>
                     <td>{{ $reservation->created_at }}</td>
                     <td>{{ $reservation->manager ? $reservation->manager->name : 'N/A' }}</td>
+                    <td>{{ $reservation->payment_value }}</td>
                 </tr>
             @endforeach
         </tbody>

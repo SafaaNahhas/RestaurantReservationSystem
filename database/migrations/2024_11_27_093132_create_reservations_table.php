@@ -19,6 +19,7 @@ return new class extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->integer('guest_count');
+            $table->decimal('payment_value', 8, 2)->nullable(); 
             $table->text('services')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed', 'rejected'])->default('pending');
             $table->timestamp('cancelled_at')->nullable();

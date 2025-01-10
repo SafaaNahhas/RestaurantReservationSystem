@@ -26,6 +26,7 @@ class ProcessPaymentRequest extends FormRequest
     public function rules()
     {
         return [
+            'reservation_id'=>'required|exists:reservations,id',
             'amount' => 'required|numeric|min:0.5',
             'stripeToken' => 'required|string',
         ];

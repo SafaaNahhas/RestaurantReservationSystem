@@ -16,22 +16,22 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'new admin',
-                'email' => 'newAdmin@example.com',
+                'name' => 'Admin',
+                'email' => 'Admin@example.com',
                 'password' => '123456789',
                 'role' => RoleUser::Admin->value,
             ],
             [
-                'name' => 'manager11',
-                'email' => 'manager11@example.com',
+                'name' => 'manager1',
+                'email' => 'manager1@example.com',
                 'password' => '123456789',
-                'role' => RoleUser::ReservationManager->value,
+                'role' => RoleUser::Manager->value,
             ],
             [
                 'name' => 'manager2',
                 'email' => 'manager2@example.com',
                 'password' => '123456789',
-                'role' => RoleUser::ReservationManager->value,
+                'role' => RoleUser::Manager->value,
             ],
             [
                 'name' => 'Customer',
@@ -46,16 +46,16 @@ class UserSeeder extends Seeder
                 'role' => RoleUser::Customer->value,
             ],
             [
-                'name' => 'captin2',
-                'email' => 'captin2@example.com',
+                'name' => 'Waiter1',
+                'email' => 'Waiter1@example.com',
                 'password' => '123456789',
-                'role' => RoleUser::Captin->value,
+                'role' => RoleUser::Waiter->value,
             ],
             [
-                'name' => 'captin21',
-                'email' => 'captin21@example.com',
+                'name' => 'Waiter2',
+                'email' => 'Waiter2@example.com',
                 'password' => '123456789',
-                'role' => RoleUser::Captin->value,
+                'role' => RoleUser::Waiter->value,
             ],
         ];
 

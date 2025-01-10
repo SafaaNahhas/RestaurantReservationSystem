@@ -22,16 +22,16 @@ class RoleAndPermissionSeeder extends Seeder
             'name' => RoleUser::Admin->value
         ]);
 
+        $manager = Role::create([
+            'name' => RoleUser::Manager->value
+        ]);
         $customer = Role::create([
             'name' => RoleUser::Customer->value
         ]);
 
-        $reservationManager = Role::create([
-            'name' => RoleUser::ReservationManager->value
-        ]);
 
-        $captin = Role::create([
-            'name' => RoleUser::Captin->value
+        $waiter = Role::create([
+            'name' => RoleUser::Waiter->value
         ]);
 
         // Reservation Permissions
@@ -47,18 +47,18 @@ class RoleAndPermissionSeeder extends Seeder
         // Assign Roles to Reservations Permissions
         $storeReservation->assignRole($customer);
         $updateReservation->assignRole($customer);
-        $confirmReservation->assignRole([$admin, $reservationManager]);
-        $rejectReservation->assignRole([$admin, $reservationManager]);
-        $startService->assignRole([$admin, $reservationManager, $captin]);
-        $completeService->assignRole([$admin, $reservationManager, $captin]);
-        $hardDeleteReservation->assignRole([$admin, $reservationManager]);
+        $confirmReservation->assignRole([$admin, $manager]);
+        $rejectReservation->assignRole([$admin, $manager]);
+        $startService->assignRole([$admin, $manager, $waiter]);
+        $completeService->assignRole([$admin, $manager, $waiter]);
+        $hardDeleteReservation->assignRole([$admin, $manager]);
         $cancelUnConfirmed->assignRole($admin);
 
         // Ratings Permissions
         $deleteRating = Permission::create(['name' => 'delete rating']);
 
         // Assign Roles to Ratings Permissions
-        $deleteRating->assignRole([$admin, $reservationManager]);
+        $deleteRating->assignRole([$admin, $manager]);
     }
 }
  

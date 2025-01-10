@@ -402,7 +402,7 @@ private function validateManager($managerId)
         throw new \RuntimeException('Invalid manager ID.');
     }
 
-    if (!$manager->hasRole('Reservation Manager')) {
+    if (!$manager->hasRole('Manager')) {
         throw new \RuntimeException('The selected user is not a Manager.');
     }
 }

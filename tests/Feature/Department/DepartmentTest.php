@@ -15,6 +15,7 @@ class DepartmentTest extends TestCase
 
     protected $adminUser;
     protected $customerUser;
+    protected $manager;
 
     protected function setUp(): void
     {
@@ -22,7 +23,7 @@ class DepartmentTest extends TestCase
         // Create necessary roles
         Role::firstOrCreate(['name' => RoleUser::Admin->value]);
         Role::firstOrCreate(['name' => RoleUser::Customer->value]);
-        Role::firstOrCreate(['name' => RoleUser::ReservationManager->value]);
+        Role::firstOrCreate(['name' => RoleUser::Manager->value]);
 
         // Create users using factories
         $this->adminUser = User::factory()->create();
@@ -31,8 +32,8 @@ class DepartmentTest extends TestCase
         $this->customerUser = User::factory()->create();
         $this->customerUser->assignRole(RoleUser::Customer->value);
 
-        $this->ReservationManager = User::factory()->create();
-        $this->ReservationManager->assignRole(RoleUser::ReservationManager->value);
+        $this->manager = User::factory()->create();
+        $this->manager->assignRole(RoleUser::Manager->value);
     }
 
     /** @test Get list of all departments */
@@ -73,9 +74,9 @@ public function it_returns_empty_list_when_no_departments_exist()
     /** @test Create a department */
     public function test_it_can_create_a_department_with_valid_data()
     {
-        // Create a user with the 'Reservation Manager' role
+        // Create a user with the 'Manager' role
         $user = User::factory()->create();
-        $user->assignRole('Reservation Manager');
+        $user->assignRole('Manager');
     
         // Department data
         $departmentData = [
@@ -176,7 +177,7 @@ public function it_returns_empty_list_when_no_departments_exist()
         // Create a department
         $department = Department::factory()->create();
         $user = User::factory()->create();
-        $user->assignRole('Reservation Manager');
+        $user->assignRole('Manager');
 
         // New department data
         $updatedData = [

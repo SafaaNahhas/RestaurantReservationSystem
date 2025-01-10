@@ -15,9 +15,9 @@ class RatingPolicy
      */
     public function show(User $user)
     {
-        // Allow only Admin and Reservation Manager to view all ratings
+        // Allow only Admin and Manager to view all ratings
         return $user->hasRole(RoleUser::Admin->value) ||
-            $user->hasRole(RoleUser::ReservationManager->value);
+            $user->hasRole(RoleUser::Manager->value);
     }
 
 

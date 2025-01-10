@@ -49,6 +49,9 @@ class FavoriteService
         }
     }
 
+
+    //*************************************************************** */
+
     /**
      * fetch the list of favorite from the user
      * @param $user
@@ -62,6 +65,7 @@ class FavoriteService
         );
     }
 
+//************************************************************************ */
 
     /**
      * remove the favorite recource
@@ -95,6 +99,8 @@ class FavoriteService
         }
     }
 
+//******************************************************************* */
+
     /**
      * get all deleted favorite
      * @return \Illuminate\Http\JsonResponse
@@ -111,6 +117,10 @@ class FavoriteService
             return false;
         }
     }
+
+
+//********************************************************************* */
+
     /**
      * restore the favorite
      * @param  $favoriteId
@@ -133,6 +143,8 @@ class FavoriteService
         }
     }
 
+
+//********************************************************************** */
 
     /**
      * force_delete the favorite

@@ -45,7 +45,7 @@ class FavoriteController extends Controller
 
 
 
-
+//************************************************************************* */
 
     /**
      * Store a newly created favorite (table or food category) in storage.
@@ -74,12 +74,17 @@ class FavoriteController extends Controller
         return $this->success(null, $data['message'], 201);
     }
 
+
+
+    //************************************************************ */
+
     /**
      * Display a listing of the favorite.
      * @return \Illuminate\Http\JsonResponse
      */
     public function getFavorites(): JsonResponse
     {
+
         $user = JWTAuth::parseToken()->authenticate();
         $favorites = $this->favoriteService->getFavorites($user);
 
@@ -111,6 +116,9 @@ class FavoriteController extends Controller
         return $this->success(null, $data['message'], 200);
     }
 
+
+    //************************************************************************* */
+
     /**
      * Get deleted favorite.
      * @return \Illuminate\Http\JsonResponse
@@ -128,6 +136,7 @@ class FavoriteController extends Controller
         }
     }
 
+//************************************************************************* */
 
     /**
      * Restore a deleted favorite.
@@ -147,6 +156,7 @@ class FavoriteController extends Controller
         }
     }
 
+//*********************************************************** */
 
     /**
      * Permanently delete a favorite.

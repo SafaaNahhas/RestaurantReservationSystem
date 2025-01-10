@@ -50,7 +50,7 @@ class RatingController extends Controller
     }
 
 
-
+//************************************************************************************************** */
 
 
     /**
@@ -82,6 +82,7 @@ class RatingController extends Controller
         }
     }
 
+//**************************************************************** */
 
     /**
      * Display the specified rating.
@@ -105,7 +106,7 @@ class RatingController extends Controller
     }
 
 
-
+//************************************************************** */
 
     /**
      * Update the specified resource in storage.
@@ -130,6 +131,9 @@ class RatingController extends Controller
         }
     }
 
+//************************************************************************** */
+
+
     /**
      * Remove the specified resource from storage.
      * @param Rating $rating
@@ -147,6 +151,8 @@ class RatingController extends Controller
         return $this->success(null,'Rating deleted successfully',200);
     }
 
+
+//********************************************************************* */
 
     /**
      * Get deleted ratings.
@@ -167,7 +173,7 @@ class RatingController extends Controller
     }
 
 
-
+//******************************************************************************* */
     /**
      * Restore a deleted rating.
      * @param int $ratingId
@@ -186,6 +192,8 @@ class RatingController extends Controller
         }
     }
 
+
+//******************************************************** */
 
     /**
      * Permanently delete a rating.

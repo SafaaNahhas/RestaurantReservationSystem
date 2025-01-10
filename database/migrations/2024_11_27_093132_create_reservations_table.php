@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'in_service', 'completed', 'rejected'])->default('pending');
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamp('email_sent_at')->nullable();
+            $table->decimal('payment_value', 8, 2)->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['start_date', 'end_date']);

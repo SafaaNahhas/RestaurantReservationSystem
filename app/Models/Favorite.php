@@ -13,8 +13,13 @@ class Favorite extends Model
     use HasFactory;
     use SoftDeletes;
 
+
+    // Mass-assignable attributes
     protected $fillable = ['user_id', 'favorable_type', 'favorable_id'];
 
+/**
+ * morph ralation to linke  with tables & food_category
+ */
     public function favorable()
     {
         return $this->morphTo();

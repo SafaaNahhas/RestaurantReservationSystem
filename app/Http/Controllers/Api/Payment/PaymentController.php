@@ -16,6 +16,9 @@ class PaymentController extends Controller
         $this->paymentService = $paymentService;
     }
 
+
+     
+
     public function processPayment(ProcessPaymentRequest $request)
     {
         // Calling the service for payment processing
@@ -24,6 +27,7 @@ class PaymentController extends Controller
         if (!$charge) {
             return response()->json(['status' => 'error', 'message' => 'Payment failed'], 500);
         } else {
+            
             return response()->json(['status' => 'success', 'message' => 'The payment was made successfully', 'charge_id' => $charge->id], 200);
         }
     }

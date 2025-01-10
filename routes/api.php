@@ -59,6 +59,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('reservations/{id}/force-delete', [ReservationController::class, 'forceDeleteReservation']);
     Route::post('reservations/{id}/restore', [ReservationController::class, 'restoreReservation']);
     Route::get('reservations/get-soft-deleted', [ReservationController::class, 'getSoftDeletedReservations']);
+    Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations']);
 
     Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
 });
@@ -224,8 +225,9 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     //});
 });
 
+
 //*********** payment route**********************************
 
-Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+Route::post('/process-payment', [PaymentController::class, 'processPayment'])->middleware('auth:api');
 
-Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');
+ 

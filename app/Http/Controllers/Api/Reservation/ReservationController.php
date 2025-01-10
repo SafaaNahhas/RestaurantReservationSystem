@@ -13,6 +13,7 @@ use App\Events\ReservationCompleted;
 use App\Http\Controllers\Controller;
 use App\Services\ReservationService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Resources\Reservation\ReservationResource;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use App\Http\Resources\Reservation\TableReservationResource;
 use App\Http\Resources\Reservation\ShowTableReservationResource;
@@ -321,6 +322,6 @@ class ReservationController extends Controller
         $reservations = Reservation::getInServiceReservationsForUser($userId);
 
         // Return the reservations in the response 
-        return response()->json($reservations);
+        return ReservationResource::collection($reservations);
     }
 }

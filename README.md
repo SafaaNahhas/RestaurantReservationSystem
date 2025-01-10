@@ -1,4 +1,4 @@
-Restauant Reaervayion System
+Restaurant Reservation System
 This project aims to streamline the restaurant experience by providing a high level of accessibility to restaurant information, facilitating comfortable reservation processes, and enabling electronic payments through a variety of services. Users can explore the restaurant, make reservations, and enjoy a seamless dining experience.
 
 #
@@ -31,9 +31,9 @@ This project aims to streamline the restaurant experience by providing a high le
 11. **Email Log Management**:
     - View and delete email logs.
 12. **Permission Management**:
-    - Add, edit, delete, and restore permissions.
+    - Add, edit, and delete permissions.
 13. **Role Management**:
-    - Add and edit roles and their associated permissions.
+    - Add, edit, and delete roles and their associated permissions.
 
 ### Manager Privileges:
 
@@ -43,15 +43,16 @@ This project aims to streamline the restaurant experience by providing a high le
     - View and edit reservations.
     - Delete and restore reservations.
 
-### User Privileges:
+### Customer Privileges:
 
 1. **Personal Information**:
-    - Create an account, log in, and log out.
-    - View personal information .
+    - Create an account.
+    - View personal information.
 2. **Restaurant Information**:
     - View restaurant information, tables, and reviews.
 3. **Reservation Actions**:
     - Create, edit, and cancel reservations.
+    - Create, edit, and delete reservation ratings.
 4. **Dish Management**:
     - View dishes by category.
 5. **Favorites Management**:
@@ -67,12 +68,19 @@ This project aims to streamline the restaurant experience by providing a high le
     - Confirm customer arrival.
     - Complete reservation to free up the table for reuse.
 
-### Notifications and Emails:
+## Account Management:
+
+-   Log in, log out, and change password.
+
+## Notifications and Emails:
+
+Users can choose their preferred notification method (email or Telegram notifications) through their account settings.
 
 1. **Email Notifications**:
-    - Send email notifications to the manager when a reservation is made.
-    - Notify users via email upon reservation confirmation or rejection.
-    - Notify users of emergencies or specific events.
+    - Send notifications to the manager when a reservation is made.
+    - Send notifications to users when reservation confirmation or rejection.
+    - Send notifications to users to rate the reservation when it is completed.
+    - Send notifications to users of emergencies or specific events in restaurant to cancel reservation.
     - Send a daily report to the Admin about the restaurant's status.
     - Send a daily report to each Manager about their respective department's status.
 

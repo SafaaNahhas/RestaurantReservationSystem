@@ -29,7 +29,7 @@ class RestaurantService
     {
         try {
             // Attempt to fetch all restaurants with associated emails and phone numbers
-            $restaurant = Cache::remember('restaurant', 60, function () {
+            $restaurant = Cache::remember('restaurant', 1440, function () {
                 return Restaurant::with(["emails", "phoneNumbers", "images"])->get();
             });
             return $restaurant;

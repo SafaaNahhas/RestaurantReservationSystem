@@ -228,6 +228,6 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
 //*********** payment route**********************************
 
-Route::post('/process-payment', [PaymentController::class, 'processPayment'])->middleware('auth:api');
+Route::post('/process-payment', [PaymentController::class, 'processPayment'])->middleware('auth:api')->block(5, 10);
 
  

@@ -17,7 +17,7 @@ class NotificationSettingsService
     public function checkIfNotificationSettingsExsits()
     {
         try {
-            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->first();
+            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->latest()->first();
             if (!$notificationSettings) {
                 return  [
                     'status' => 400,
@@ -81,7 +81,7 @@ class NotificationSettingsService
     public function updateNotificationSettings($notificationSettingsdata)
     {
         try {
-            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->first();
+            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->latest()->first();
 
             if (!$notificationSettings) {
                 return  [
@@ -95,7 +95,7 @@ class NotificationSettingsService
                     'reservation_send_notification' => $notificationSettingsdata['reservation_send_notification'],
                 ]);
                 $notificationSettings = NotificationSettingsResource::make($notificationSettings);
-     
+
                 return  [
                     'status' => 200,
                     'message' => "Update Notification Settings Successfully",
@@ -120,7 +120,7 @@ class NotificationSettingsService
     public function resetNotificationSettings()
     {
         try {
-            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->first();
+            $notificationSettings = NotificationSettings::where('user_id', '=', Auth::user()->id)->latest()->first();
             if (!$notificationSettings) {
                 return  [
                     'status' => 400,
@@ -131,7 +131,7 @@ class NotificationSettingsService
                 return  [
                     'status' => 200,
                     'message' => "Reset Notification Settings Successfully",
-                 ];
+                ];
             }
         } catch (Exception $e) {
             Log::error("error reset notification settings" . $e->getMessage());

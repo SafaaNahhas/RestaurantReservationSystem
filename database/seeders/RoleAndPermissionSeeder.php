@@ -80,10 +80,14 @@ class RoleAndPermissionSeeder extends Seeder
         $storeRole = Permission::create(['name' => 'store role']);
         $updateRole = Permission::create(['name' => 'update role']);
         $deleteRole = Permission::create(['name' => 'delete role']);
+        $assignPermissioToRole = Permission::create(['name' => 'assign permissio to role']);
+        $removePermissioFromRole = Permission::create(['name' => 'remove permissio from role']);
 
         $storeRole->assignRole($admin);
         $updateRole->assignRole($admin);
         $deleteRole->assignRole($admin);
+        $assignPermissioToRole->assignRole($admin);
+        $removePermissioFromRole->assignRole($admin);
 
 
         // Permissions Permissions
@@ -97,9 +101,9 @@ class RoleAndPermissionSeeder extends Seeder
 
 
         //  ForgetPassword Permissions
-        $checkEmail = Permission::create(['name' => 'store permission']);
-        $checkCode = Permission::create(['name' => 'update permission']);
-        $changePassword = Permission::create(['name' => 'delete permission']);
+        $checkEmail = Permission::create(['name' => 'check email']);
+        $checkCode = Permission::create(['name' => 'check code']);
+        $changePassword = Permission::create(['name' => 'change password']);
 
         $checkEmail->assignRole([$admin, $reservationManager, $customer, $captin]);
         $checkCode->assignRole([$admin, $reservationManager, $customer, $captin]);

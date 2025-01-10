@@ -9,18 +9,20 @@ class DepartmentSeeder extends Seeder
 {
     public function run(): void
     {
+      
+
         //create departmen
         $Departments = [
             [
               'name' => 'department Indoor ',
                 'description' => 'department Indoor department Indoor',
-                'manager_id' => 1,
+                'manager_id' => 1, 
               
             ],
             [
                 'name' => 'department Outdoor  ',
                 'description' => 'department Outdoor department Outdoor',
-                'manager_id' => 2,
+                'manager_id' => 2, 
                 
             ],
       

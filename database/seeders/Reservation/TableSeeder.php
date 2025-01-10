@@ -19,31 +19,36 @@ class TableSeeder extends Seeder
                 'table_number' => 'T1',
                 'location' => 'Near Window',
                 'seat_count' => 4,
+                'department_id'=>1,
             
             ],
             [
                 'table_number' => 'T2',
                 'location' => 'Center Hall',
                 'seat_count' => 6,
-            
+                'department_id'=>1,
+
             ],
             [
                 'table_number' => 'T3',
                 'location' => 'Near Entrance',
                 'seat_count' => 2,
-            
+                'department_id'=>1,
+
             ],
             [
                 'table_number' => 'T4',
                 'location' => 'VIP Room',
-                'seat_count' => 10,
-            
+                'seat_count' => 6,
+                'department_id'=>2,
+
             ],
             [
                 'table_number' => 'T5',
                 'location' => 'Terrace',
                 'seat_count' => 4,
-            
+                'department_id'=>2,
+
             ],
         ];
 

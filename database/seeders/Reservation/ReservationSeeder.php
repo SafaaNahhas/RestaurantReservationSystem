@@ -12,26 +12,34 @@ class ReservationSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
-        $tables = Table::all();
       
-
-      
-        for ($i = 0; $i < 8; $i++) {
-            $startDate = Carbon::now()->addDays(rand(1, 30))->addHours(rand(0, 12));
-            $endDate = (clone $startDate)->addHours(rand(1, 4));
             
-            Reservation::create([
-                'user_id' => $users->random()->id,
-                'manager_id' => 1,
-                'table_id' => $tables->random()->id,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'guest_count' => rand(1, 10),
-                'status' => collect(['pending', 'confirmed', 'cancelled', 'in_service', 'completed', 'rejected'])->random(),
-                'cancelled_at' => rand(0, 1) ? Carbon::now()->subDays(rand(1, 30)) : null,
-                'email_sent_at' => rand(0, 1) ? Carbon::now()->subDays(rand(1, 30)) : null,
-            ]);
+            $Reservations=[
+                [
+                'user_id' => 4,
+                'manager_id' => 1, 
+                'table_id' => 2,
+                'start_date' => '2025-01-20 20:10:00',
+                'end_date' => '2025-01-20 22:10:00',
+                'guest_count' => 5,
+                'status' => 'pending',
+                ],
+                [
+                'user_id' => 5,
+                'manager_id' => 2, 
+                'table_id' => 4,
+                'start_date' => '2025-01-22 20:10:00',
+                'end_date' => '2025-01-22 22:10:00',
+                'guest_count' => 5,
+                'status' => 'pending',
+                ],
+
+            ];
+           
+            foreach ($Reservations as $Reservation) {
+                Reservation::create($Reservation);
+            }
+        
         }
     }
-}
+

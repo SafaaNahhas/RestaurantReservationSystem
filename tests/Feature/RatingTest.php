@@ -287,4 +287,152 @@ class RatingTest extends TestCase
             'data' => NULL,
         ]);
     }
+
+
+    //*****************************************only admin can restor the deleted favorite */
+
+
+    //chech if only admin can restor the deleted favorite
+    /** @test */
+    public function test_if_only_admin_can_restor_delete_soft_deleted_rating()
+    {
+        // Create a new user
+        $this->customerUser = User::factory()->create();
+
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 4,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
+        //create a rating associated with users
+        $rating =  Rating::create([
+
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
+            'rating' => 3,
+            'comment' => "good",
+        ]);
+
+        // Assert that the rating item was successfully created
+        $this->assertNotNull($rating, 'Failed to create rating record.');
+
+        // Set the deleted_at field and ensure the update is saved
+        $rating->forceFill(['deleted_at' => now()])->save();
+        $rating->refresh();
+
+        // Verify that the rating item exists in the database with a soft delete flag
+        $this->assertTrue(Rating::withTrashed()->where('id', $rating->id)->exists());
+        $this->assertNotNull($rating->deleted_at);
+
+        // Submit the request to permanently delete the soft-deleted rating item
+        $response = $this->actingAs($this->adminUser)->patchJson(
+            'api/rating/restore/' . $rating->id,
+        );
+
+        $response->assertStatus(200);
+    }
+
+
+    //***********************************************test if only admin can show the daleted rating
+
+    //check if only admin can show the daleted rating
+    /** @test */
+    public function test_if_only_admin_can_show_soft_deleted_rating()
+    {
+        // Create a new user
+        $this->customerUser = User::factory()->create();
+
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 4,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
+        //create a rating associated with users
+        $rating =  Rating::create([
+
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
+            'rating' => 3,
+            'comment' => "good",
+        ]);
+
+        // Assert that the rating item was successfully created
+        $this->assertNotNull($rating, 'Failed to create rating record.');
+
+        // Set the deleted_at field and ensure the update is saved
+        $rating->forceFill(['deleted_at' => now()])->save();
+        $rating->refresh();
+
+        // Verify that the rating item exists in the database with a soft delete flag
+        $this->assertTrue(Rating::withTrashed()->where('id', $rating->id)->exists());
+        $this->assertNotNull($rating->deleted_at);
+
+        // Submit the request to permanently delete the soft-deleted rating item
+        $response = $this->actingAs($this->adminUser)->getJson(
+            'api/rating_deleted',
+        );
+
+        $response->assertStatus(200);
+    }
+
+
+    //*************************************test if only admin can delet soft delete rating */
+
+    //check if only admin can delet soft delete rating
+    /** @test */
+    public function test_if_only_admin_can_permanently_delete_soft_deleted_rating()
+    {
+        // Create a new user
+        $this->customerUser = User::factory()->create();
+
+        // Create a reservation associated with users
+        $reservation = Reservation::create([
+            'user_id' => $this->customerUser->id,
+            'manager_id' => $this->adminUser->id,
+            'table_id' => 4,
+            'start_date' => now()->addDays(3),
+            'end_date' => now()->addDays(3)->addHours(2),
+            'guest_count' => 4,
+            'services' => json_encode(['service1', 'service2']),
+            'status' => 'pending',
+        ]);
+        //create a rating associated with users
+        $rating =  Rating::create([
+
+            'user_id' => $this->customerUser->id,
+            'reservation_id' => $reservation->id,
+            'rating' => 3,
+            'comment' => "good",
+        ]);
+
+        // Assert that the rating item was successfully created
+        $this->assertNotNull($rating, 'Failed to create rating record.');
+
+        // Set the deleted_at field and ensure the update is saved
+        $rating->forceFill(['deleted_at' => now()])->save();
+        $rating->refresh();
+
+        // Verify that the rating item exists in the database with a soft delete flag
+        $this->assertTrue(Rating::withTrashed()->where('id', $rating->id)->exists());
+        $this->assertNotNull($rating->deleted_at);
+
+        // Submit the request to permanently delete the soft-deleted rating item
+        $response = $this->actingAs($this->adminUser)->deleteJson(
+            'api/rating/force-delete/' . $rating->id,
+        );
+
+        $response->assertStatus(200);
+    }
 }

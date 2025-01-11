@@ -13,11 +13,10 @@ class RatingPolicy
     /*
      * Verify that the user is the same as the user in the link and that he has the same booking number as the link
      */
-    public function show(User $user)
+    public function show(User $user, Rating $rating)
     {
-        // Allow only Admin and Manager to view all ratings
-        return $user->hasRole(RoleUser::Admin->value) ||
-            $user->hasRole(RoleUser::Manager->value);
+        return $rating->user_id === $user->id;
+
     }
 
 
@@ -33,19 +32,6 @@ class RatingPolicy
     }
 
 
-
-    /**
-     * Determine whether the user can show the rating.
-     */
-    // public function show(User $user, Rating $rating)
-    // {
-    //     // تحقق من الصلاحيات هنا
-    //     return $user->id == $rating->user_id; // مثال: السماح للمستخدم بقراءة التقييم الخاص به
-    // }
-
-    /**
-     * Determine whether the user can update the rating.
-     */
     public function update(User $user, Rating $rating)
     {
         return $rating->user_id === $user->id;

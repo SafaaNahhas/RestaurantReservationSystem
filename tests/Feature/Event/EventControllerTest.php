@@ -32,6 +32,7 @@ class EventControllerTest extends TestCase
         $this->customerUser->assignRole(RoleUser::Customer->value);
     }
 
+    /**@test */
     // Test to check if the application can list all events
     public function it_can_list_all_events()
     {
@@ -49,6 +50,7 @@ class EventControllerTest extends TestCase
         ]);
     }
 
+    /**@test */
     // Test for creating an event with valid data
     public function it_can_create_an_event()
     {
@@ -110,7 +112,7 @@ class EventControllerTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['end_date']);
     }
-
+    /**@test */
     // Test to show details of a specific event
     public function it_can_show_event_details()
     {
@@ -131,6 +133,7 @@ class EventControllerTest extends TestCase
         ]);
     }
 
+    /**@test */
     // Test for updating an event's details
     public function it_can_update_an_event()
     {
@@ -176,6 +179,7 @@ class EventControllerTest extends TestCase
         $response->assertJsonValidationErrors(['end_date']);
     }
 
+    /**@test */
     // Test to delete an event
     public function it_can_delete_an_event()
     {
@@ -196,6 +200,7 @@ class EventControllerTest extends TestCase
         $this->assertSoftDeleted('events', ['id' => $event->id]);
     }
 
+    /**@test */
     // Test to show all soft-deleted events
     public function it_can_show_deleted_events()
     {
@@ -217,6 +222,7 @@ class EventControllerTest extends TestCase
         ]);
     }
 
+    /**@test */
     // Test to restore a soft-deleted event
     public function it_can_restore_a_deleted_event()
     {
@@ -239,6 +245,7 @@ class EventControllerTest extends TestCase
     }
 
 
+    /**@test */
     // Test to permanently delete a soft-deleted event
     public function it_can_permanently_delete_a_deleted_event()
     {

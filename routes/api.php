@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Food\FoodCategoryController;
 use App\Http\Controllers\Api\Reservation\TableController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
 use App\Http\Controllers\Api\Emergency\EmergencyController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Restaurant\DepartmentController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Http\Controllers\Api\RoleAndPermission\RoleController;
@@ -225,3 +226,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 });
 Route::apiResource('notificationSettings', NotificationSettingsController::class)->only('store','update');
+//*********** payment route**********************************
+
+Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');

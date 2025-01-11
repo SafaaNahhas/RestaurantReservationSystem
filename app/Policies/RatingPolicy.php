@@ -17,7 +17,7 @@ class RatingPolicy
     {
         // Allow only Admin and Reservation Manager to view all ratings
         return $user->hasRole(RoleUser::Admin->value) ||
-            $user->hasRole(RoleUser::ReservationManager->value);
+            $user->hasRole(RoleUser::Manager->value);
     }
 
 
@@ -25,9 +25,9 @@ class RatingPolicy
     public function create(User $user, $userId, $reservationId)
     {
 
-    /**  Verify that the logged-in user is the same as the id in the link
-     *   And check that the reservation belongs to this user
-     */
+        /**  Verify that the logged-in user is the same as the id in the link
+         *   And check that the reservation belongs to this user
+         */
         return $user->id == $userId &&
             $user->reservations->contains('id', $reservationId);
     }

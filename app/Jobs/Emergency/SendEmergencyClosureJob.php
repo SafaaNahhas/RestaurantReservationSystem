@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Emergency;
 
 use App\Models\Restaurant;
 use Illuminate\Bus\Queueable;

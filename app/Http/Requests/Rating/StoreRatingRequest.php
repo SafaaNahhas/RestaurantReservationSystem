@@ -16,7 +16,7 @@ class StoreRatingRequest extends FormRequest
      * Check if user is authorized to rate this reservation.
      *
      * Steps:
-     * 1. Get reservation_id from URL (?reservation_id=123)
+     * 1. Get reservation_id & user_id from URL (?reservation_id=123 & user_id=3)
      * 2. Get current logged-in user ID
      * 3. Check if reservation exists and belongs to user
      * 4. Return true/false based on check result
@@ -27,21 +27,7 @@ class StoreRatingRequest extends FormRequest
         return true;
         }
 
-    /**
-     * Handle a failed authorization attempt.
-     *
-     * @return void
-     *
-     * @throws HttpResponseException
-     */
-    protected function failedAuthorization(): void
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => 'error',
-            'message' => 'You can only rate reservations that you have made.',
-            'errors' => ['reservation' => 'This reservation does not belong to you.']
-        ], 403));
-    }
+   
 
     /**
      * Get the validation rules that apply to the request.
@@ -73,7 +59,7 @@ class StoreRatingRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'user_id' => auth()->id()                    // Set authenticated user as rating creator
+            'user_id' => auth()->id() // Set authenticated user as rating creator
         ]);
     }
 

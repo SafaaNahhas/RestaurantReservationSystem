@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Favorite;
 
 
 use App\Models\Table;
@@ -31,7 +31,7 @@ class FavoriteService
             $model = $type === 'tables' ? Table::class : FoodCategory::class;
 
             $item = $model::findOrFail($id);
-
+            // check if user already add the item to his favorite list 
             if ($user->favorites()->where('favorable_type', $model)->where('favorable_id', $id)->exists()) {
                 return ['status' => 'exists', 'message' => 'Item already in favorites'];
             }
@@ -44,9 +44,13 @@ class FavoriteService
             return ['status' => 'success', 'message' => 'Added to favorites successfully'];
         } catch (\Exception $e) {
             Log::error('Error in favoriteService@addToFavorites: ' . $e->getMessage());
+            
             return ['status' => 'error', 'message' => 'An unexpected error occurred'];
         }
     }
+
+
+    //*************************************************************** */
 
     /**
      * fetch the list of favorite from the user
@@ -61,6 +65,7 @@ class FavoriteService
         );
     }
 
+//************************************************************************ */
 
     /**
      * remove the favorite recource
@@ -94,7 +99,9 @@ class FavoriteService
         }
     }
 
-       /**
+//******************************************************************* */
+
+    /**
      * get all deleted favorite
      * @return \Illuminate\Http\JsonResponse
      */
@@ -110,6 +117,10 @@ class FavoriteService
             return false;
         }
     }
+
+
+//********************************************************************* */
+
     /**
      * restore the favorite
      * @param  $favoriteId
@@ -132,6 +143,8 @@ class FavoriteService
         }
     }
 
+
+//********************************************************************** */
 
     /**
      * force_delete the favorite

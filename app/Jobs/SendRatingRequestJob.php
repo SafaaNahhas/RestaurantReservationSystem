@@ -52,10 +52,9 @@ class SendRatingRequestJob implements ShouldQueue
 
             // Create links for the rating request email
             $createLink = url("/api/rating?reservation_id={$this->reservation->id}&user_id={$user->id}");
-            $viewLink = url("/api/rating/{$this->reservation->id}");
 
             // Send the rating request email
-            Mail::to($user->email)->send(new RatingRequestMail($createLink, $viewLink));
+            Mail::to($user->email)->send(new RatingRequestMail($createLink));
 
             // Create a log entry for the sent email
             $emailLog = $this->emailLogService->createEmailLog(

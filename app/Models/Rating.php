@@ -22,9 +22,20 @@ class Rating extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Relationship: A rating belongs to a reservation.
+     */
+
     public function reservation()
     {
         return $this->belongsTo(Reservation::class);
     }
-    
+
+    /**
+     * Scope: Filter ratings based on rating value.
+     */
+    public function scopeFilterByRating($query, $rating)
+    {
+        return $query->where('rating', $rating);
+    }
 }

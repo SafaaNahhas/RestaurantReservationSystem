@@ -13,7 +13,7 @@ class TableFactory extends Factory
     {
         return [
             'table_number' => $this->faker->unique()->word, // استخدم unique() لجعل القيم فريدة
-            'location' => $this->faker->randomElement(['indoor', 'outdoor']),
+             'location' => $this->faker->randomElement(['indoor', 'outdoor']),
             'seat_count' => $this->faker->numberBetween(2, 10),
         ];
     }

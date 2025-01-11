@@ -144,7 +144,7 @@ class RestaurantTest extends TestCase
         $restaurantupdataedby = $restaurantData['data'][0]['updated_at'];
 
         // Update the restaurant details via the API
-        $response = $this->actingAs($this->adminUser)->putJson('/api/restaurant/'.$restaurantId, $restaurantData);
+        $response = $this->actingAs($this->adminUser)->putJson('/api/restaurant/' . $restaurantId, $restaurantData);
 
         // Assert that the response status is 200 (OK)
         $response->assertStatus(200);
@@ -162,8 +162,8 @@ class RestaurantTest extends TestCase
                 'rating' => 5,
                 'website' => 'https://www.alsaadderestaurant.com',
                 'description' => 'Alsaadde Restaurant - Best Food in Town',
-                'created_at' =>  $restaurantcreatedby ,
-                'updated_at' =>   $restaurantupdataedby ,
+                'created_at' =>  $restaurantcreatedby,
+                'updated_at' =>   $restaurantupdataedby,
             ]
         ]);
     }

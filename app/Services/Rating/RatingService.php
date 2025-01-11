@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Rating;
 
 use App\Models\Rating;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +34,7 @@ class RatingService
         }
     }
 
-
+    //************************************************************************ */
 
     /**
      * update the rating
@@ -61,6 +61,8 @@ class RatingService
     }
 
 
+    //******************************************************************** */
+
     /**
      * get all deleted rating
      * @return \Illuminate\Http\JsonResponse
@@ -77,6 +79,10 @@ class RatingService
             return false;
         }
     }
+
+
+    //****************************************************************** */
+
     /**
      * restore the rating
      * @param  $ratingId
@@ -98,6 +104,8 @@ class RatingService
             return false;
         }
     }
+
+    //************************************************************************ */
 
 
     /**

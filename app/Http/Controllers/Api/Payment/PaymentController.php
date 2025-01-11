@@ -16,16 +16,24 @@ class PaymentController extends Controller
         $this->paymentService = $paymentService;
     }
 
+
+    /**
+     * Process a payment.
+     *
+     * @param ProcessPaymentRequest $request The request containing payment details.
+     * @return IlluminateHttpJsonResponse The response indicating the status of the payment.
+     */
+
     public function processPayment(ProcessPaymentRequest $request)
     {
-
-        //  Calling the service for payment processing
+        // Calling the service for payment processing
         $charge = $this->paymentService->processPayment($request->validated());
 
         if (!$charge) {
-            return $this->error();
+            return response()->json(['status' => 'error', 'message' => 'Payment failed'], 500);
         } else {
-            return $this->success( ' The payment was made successfully', 200);
+
+            return response()->json(['status' => 'success', 'message' => 'The payment was made successfully', 'charge_id' => $charge->id], 200);
         }
     }
 }

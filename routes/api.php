@@ -10,12 +10,12 @@ use App\Http\Controllers\Api\Event\EventController;
 use App\Http\Controllers\Api\Rating\RatingController;
 use App\Http\Controllers\Api\Email\EmailLogController;
 // use App\Http\Controllers\NotificationSettingsController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Favorite\FavoriteController;
 use App\Http\Controllers\Api\Food\FoodCategoryController;
 use App\Http\Controllers\Api\Reservation\TableController;
 use App\Http\Controllers\Api\Auth\ForgetPasswordController;
 use App\Http\Controllers\Api\Emergency\EmergencyController;
-use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Restaurant\DepartmentController;
 use App\Http\Controllers\Api\Restaurant\RestaurantController;
 use App\Http\Controllers\Api\RoleAndPermission\RoleController;
@@ -56,6 +56,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/reservations/most-frequent-user', [ReservationController::class, 'getMostFrequentUser']);
 
 
+    Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations']);
 
 });
 
@@ -174,6 +175,7 @@ Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
 
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/all_favorites', [FavoriteController::class, 'getAllFavorites']);
     Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
     Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);

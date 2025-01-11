@@ -75,7 +75,7 @@ class Reservation extends Model
      */
     public function rating()
     {
-        return $this->hasOne(Rating::class);// One-to-one relationship with Rating
+        return $this->hasOne(Rating::class); // One-to-one relationship with Rating
     }
 
     /**
@@ -85,7 +85,7 @@ class Reservation extends Model
      */
     public function details()
     {
-        return $this->hasOne(ReservationDetail::class);// One-to-one relationship with ReservationDetail
+        return $this->hasOne(ReservationDetail::class); // One-to-one relationship with ReservationDetail
     }
 
 
@@ -171,8 +171,8 @@ class Reservation extends Model
     }
 
 
-    public static function getInServiceReservationsForUser($userId) 
+    public static function getInServiceReservationsForUser($userId)
     {
-    return self::where('user_id', $userId)->where('status', 'in_service')->get();
+        return self::where('user_id', $userId)->where('status', 'in_service')->get();
     }
 }

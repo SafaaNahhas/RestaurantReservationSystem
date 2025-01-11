@@ -16,14 +16,12 @@ class DepartmentResource extends JsonResource
     public function toArray(Request $request): array
     {
          return [
-            'id' => $this->id,
+            'id' => $this->id ,
             'name' => $this->name ,
             'description' => $this->description,
             'image' => $this->image,
             'manager' => $this->manager ? $this->manager->name : 'manger is not found',  
-            // 'manager' => new UserResource($this->whenLoaded('manager')),
-            // 'image' => new ImageResource($this->whenLoaded('image')),  
-            // 'tables' => TableResource::collection($this->whenLoaded('tables')),  
+            'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -12,12 +12,6 @@ class Event extends Model
     use SoftDeletes;
 
     // Mass-assignable attributes
-    protected $fillable = ['event_name', 'start_date', 'end_date', 'details', 'reservation_id'];
-    /**
-     * Relationship: An event belongs to a reservation.
-     */
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
-    }
+    protected $fillable = ['event_name', 'start_date', 'end_date', 'details'];
+    
 }

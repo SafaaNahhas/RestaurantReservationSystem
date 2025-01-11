@@ -16,9 +16,18 @@ use App\Models\Reservation;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
-use Illuminate\Support\Facades\Hash;
-use Database\Seeders\RestaurantSeeder;
+use Database\Seeders\Food\DishSeeder;
+use Database\Seeders\Event\EventSeeder;
+use Database\Seeders\Rating\RatingSeeder;
+use Database\Seeders\Favorite\FavoriteSeeder;
+use Database\Seeders\Food\FoodCategorySeeder;
+use Database\Seeders\Reservation\TableSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
+use Database\Seeders\Restaurant\DepartmentSeeder;
+use Database\Seeders\Restaurant\RestaurantSeeder;
+use Database\Seeders\Reservation\ReservationSeeder;
+
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +39,14 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermissionSeeder::class,
             UserSeeder::class,
+            DepartmentSeeder::class,
+            FoodCategorySeeder::class,
+            DishSeeder::class,
+            TableSeeder::class,
+            ReservationSeeder::class,
+            RatingSeeder::class,
+            FavoriteSeeder::class,
+            EventSeeder::class,
             RestaurantSeeder::class,
         ]);
 
@@ -75,17 +92,20 @@ class DatabaseSeeder extends Seeder
             'name' => 'Manager One',
             'email' => 'managerone@example.com',
             'password' => Hash::make('123456789')
+
         ]);
         // create department
         Department::create([
             'name' => 'Kitchen',
             'description' => 'Responsible for food preparation.',
             'manager_id' => $manager1->id,
+
         ]);
         $manager2 = User::create([
             'name' => 'Manager Two',
             'email' => 'managerTwo@example.com',
             'password' => Hash::make('123456789')
+
         ]);
         Department::create([
             'name' => 'Service',

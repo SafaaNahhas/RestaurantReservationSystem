@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Restaurant;
 
 use App\Models\Email;
 use App\Models\PhoneNumber;

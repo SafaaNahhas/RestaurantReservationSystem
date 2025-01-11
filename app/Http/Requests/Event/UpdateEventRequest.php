@@ -30,7 +30,6 @@ class UpdateEventRequest extends FormRequest
             'start_date' => 'sometimes|date|before_or_equal:end_date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'details' => 'nullable|string|max:1000',
-            'reservation_id' => 'sometimes|exists:reservations,id',
         ];
     }
 

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->timestamp('start_date');
             $table->timestamp('end_date')->nullable();
             $table->text('details')->nullable();
-            $table->foreignId('reservation_id')->constrained('reservations')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
 

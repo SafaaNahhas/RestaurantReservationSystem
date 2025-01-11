@@ -16,38 +16,25 @@ class SendCustomerCreateEvent implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
     public $event;
-
-    // public $customerEmails;
-    // public $isUpdated;
-
-    //     /**
-    //      * Create a new job instance.
-    //      *
-    //      * @param $event
-    //      * @param $customerEmails
-    //      */
-    // public function __construct($event, $customerEmails, $isUpdated = false)
-    // {
-    //     $this->event = $event;
-    //     $this->customerEmails = $customerEmails;
-    //     $this->isUpdated = $isUpdated;
     public $customers;
+    public $isUpdated;
     protected $emailLogService;
-    protected $isUpdated;
 
     /**
      * Create a new job instance.
      *
      * @param mixed $event The event instance.
      * @param array $customers The list of customer emails.
+     * @param bool $isUpdated Whether the event was updated.
      * @param EmailLogService $emailLogService The email log service instance.
      */
-    public function __construct($event, $customers, EmailLogService $emailLogService, $isUpdated = false)
+
+    public function __construct($event, $customers, $isUpdated = false, EmailLogService $emailLogService)
     {
         $this->event = $event;
         $this->customers = $customers;
+        $this->isUpdated = $isUpdated;
         $this->emailLogService = $emailLogService;
         $this->isUpdated = $isUpdated;
     }
@@ -59,17 +46,13 @@ class SendCustomerCreateEvent implements ShouldQueue
      */
     public function handle()
     {
-
-        // foreach ($this->customerEmails as $email) {
-        //     Mail::to($email)->send(new EventMail($this->event, $this->isUpdated));
-
         foreach ($this->customers as $customer) {
             try {
                 // Send the event email to the customer
                 Mail::to($customer->email)->send(new EventMail($this->event, $this->isUpdated));
 
                 // Log the sent email
-                $emailLog=  $this->emailLogService->createEmailLog(
+                $emailLog = $this->emailLogService->createEmailLog(
                     $customer->id,
                     'Event Creation',
                     'Event creation email for event ID ' . $this->event->id . ' sent to ' . $customer->id
@@ -90,7 +73,6 @@ class SendCustomerCreateEvent implements ShouldQueue
                     'error_trace' => $e->getTraceAsString(),
                 ]);
             }
-
         }
     }
 }

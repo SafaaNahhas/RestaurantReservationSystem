@@ -22,13 +22,18 @@ class RoleAndPermissionSeeder extends Seeder
             'name' => RoleUser::Admin->value
         ]);
 
+        $manager = Role::create([
+            'name' => RoleUser::Manager->value
+        ]);
         $customer = Role::create([
             'name' => RoleUser::Customer->value
         ]);
 
+
         $manager = Role::create([
             'name' => RoleUser::Manager->value
         ]);
+
 
         $waiter = Role::create([
             'name' => RoleUser::Waiter->value
@@ -61,7 +66,7 @@ class RoleAndPermissionSeeder extends Seeder
         $softDeleteReservation->assignRole([$admin, $manager]);
         $restoreReservation->assignRole([$admin, $manager]);
         $viewSoftDeletedReservations->assignRole([$admin, $manager]);
-        $cancelUnConfirmed->assignRole($admin);
+
         // $getAllTablesWithReservations->assignRole($admin);
         $viewMostFrequentUser->assignRole($admin);
         $viewReservationsByManager->assignRole([$admin, $manager]);
@@ -74,7 +79,6 @@ class RoleAndPermissionSeeder extends Seeder
 
 
         $deleteRating->assignRole([$admin, $manager]);
-
 
 
         // Tables Permissions
@@ -135,6 +139,7 @@ class RoleAndPermissionSeeder extends Seeder
         $updateNotificationSettings->assignRole([$admin, $manager, $customer, $waiter]);
         $checkIfNotificationSettingsExsits->assignRole([$admin, $manager, $customer, $waiter]);
         $resetNotificationSettings->assignRole([$admin, $manager, $customer, $waiter]);
+
     }
 
 }

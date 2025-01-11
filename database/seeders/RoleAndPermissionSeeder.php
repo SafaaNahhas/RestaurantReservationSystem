@@ -29,12 +29,6 @@ class RoleAndPermissionSeeder extends Seeder
             'name' => RoleUser::Customer->value
         ]);
 
-
-        $manager = Role::create([
-            'name' => RoleUser::Manager->value
-        ]);
-
-
         $waiter = Role::create([
             'name' => RoleUser::Waiter->value
         ]);

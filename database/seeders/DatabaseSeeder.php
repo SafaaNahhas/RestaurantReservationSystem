@@ -27,8 +27,6 @@ use Database\Seeders\Restaurant\DepartmentSeeder;
 use Database\Seeders\Restaurant\RestaurantSeeder;
 use Database\Seeders\Reservation\ReservationSeeder;
 
-
-
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -57,7 +55,7 @@ class DatabaseSeeder extends Seeder
 
         $user = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@example.com',
+            'email' => 'admin4@example.com',
             'phone' => '1234567890',
             'password' => bcrypt('password123'),
             'is_active' => true,
@@ -91,7 +89,7 @@ class DatabaseSeeder extends Seeder
         $manager1 = User::create([
             'name' => 'Manager One',
             'email' => 'managerone@example.com',
-            'password' => Hash::make('123456789')
+            'password' => '123456789'
 
         ]);
         // create department
@@ -104,7 +102,7 @@ class DatabaseSeeder extends Seeder
         $manager2 = User::create([
             'name' => 'Manager Two',
             'email' => 'managerTwo@example.com',
-            'password' => Hash::make('123456789')
+       'password' => '123456789'
 
         ]);
         Department::create([
@@ -117,7 +115,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'haidar',
             'email' => 'haidar@gmail.com',
             'phone' => '1234567890',
-            'password' => Hash::make(12345678),
+       'password' => '123456789',
             'is_active' => true,
         ]);
         //create favorite

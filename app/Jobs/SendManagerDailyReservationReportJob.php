@@ -39,7 +39,7 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
             Log::info('GenerateDailyReservationReport job started.');
 
             $today = Carbon::today();
-            $managers = User::role('reservation manager')->get();
+            $managers = User::role('manager')->get();
 
             foreach ($managers as $manager) {
                 $reservations = Reservation::with(['user', 'table'])

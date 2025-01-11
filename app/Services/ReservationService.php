@@ -298,25 +298,6 @@ class ReservationService
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    // public function getAllTablesWithReservations(array $filter = [])
-    // {
-    //     try {
-    //     $cacheKey = 'tables_with_reservations_'  . md5(json_encode($filter));
-    //     $cacheTTL = 600;
-    //     return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
-    //         return Table::with(['reservations' => function ($query) use ($filter) {
-    //             if (isset($filter['status'])) {
-    //                 $query->where('status', $filter['status']);
-    //             }
-    //         }])->get();
-    //     });
-    //     } catch (Exception $e) {
-    //         // Log the exception for debugging purposes
-    //         Log::error('Error fetching tables with reservations: ' . $e->getMessage());
-    //         // Return an empty collection or handle the error as needed
-    //         return collect([]);
-    //     }
-    // }
     public function getAllTablesWithReservations(array $filter = [])
     {
         try {
@@ -353,7 +334,7 @@ class ReservationService
     {
         try {
             // Find the reservation or throw an exception if not found
-            $reservation = Reservation::with('user', 'table', 'user.notificationSettings:id,user_id,method_send_notification,telegram_chat_id,reservation_send_notification')
+            $reservation = Reservation::with('user', 'table', 'user.notificationSettings:id,user_id,method_send_notification,telegram_chat_id,send_notification_options')
                 ->findOrFail($reservationId);
             if ($reservation->status !== 'pending') {
                 return [
@@ -374,10 +355,10 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} confirmed by User ID {$reservation->user_id}.");
             $notificationSettings = $reservation->user->notificationSettings;
-            // // Check if reservation_send_notification is already an array or needs to be decoded
-            // $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
-            //     ? $notificationSettings->reservation_send_notification
-            //     : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
+            // // Check if send_notification_options is already an array or needs to be decoded
+            // $sendNotificationOptions = is_array($notificationSettings->send_notification_options)
+            //     ? $notificationSettings->send_notification_options
+            //     : (json_decode($notificationSettings->send_notification_options, true) ?: []);
             // // Check if "confirm" is in the decoded array
             // if ($notificationSettings && in_array("confirm", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
@@ -453,7 +434,7 @@ class ReservationService
     {
         try {
             // Find the reservation or throw an exception if not found
-            $reservation = Reservation::with('user', 'table', 'user.notificationSettings:id,user_id,method_send_notification,telegram_chat_id,reservation_send_notification')
+            $reservation = Reservation::with('user', 'table', 'user.notificationSettings:id,user_id,method_send_notification,telegram_chat_id,send_notification_options')
                 ->findOrFail($reservationId);
 
             if ($reservation->status !== 'pending') {
@@ -479,10 +460,10 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
             $notificationSettings = $reservation->user->notificationSettings;
-            // // Check if reservation_send_notification is already an array or needs to be decoded
-            // $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
-            //     ? $notificationSettings->reservation_send_notification
-            //     : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
+            // // Check if send_notification_options is already an array or needs to be decoded
+            // $sendNotificationOptions = is_array($notificationSettings->send_notification_options)
+            //     ? $notificationSettings->send_notification_options
+            //     : (json_decode($notificationSettings->send_notification_options, true) ?: []);
             // // Check if "reject" is in the decoded array
             // if ($notificationSettings && in_array("reject", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
@@ -605,7 +586,7 @@ class ReservationService
             // Send cancellation notification to the user if they opted for it
             $notificationSettings = $reservation->user->notificationSettings;
 
-            // if ($notificationSettings && in_array('cancel', $notificationSettings->reservation_send_notification)) {
+            // if ($notificationSettings && in_array('cancel', $notificationSettings->send_notification_options)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "❌ Reservation Cancelled!\n\n";

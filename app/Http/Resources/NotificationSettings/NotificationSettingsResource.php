@@ -16,9 +16,8 @@ class NotificationSettingsResource extends JsonResource
     {
         return [
             'method_send_notification' => $this->method_send_notification,
-            'telegram_chat_id' => $this->telegram_chat_id ?? '', 
-            'reservation_send_notification' => $this->reservation_send_notification, 
-
+            'telegram_chat_id' => $this->telegram_chat_id ?? '',
+            'send_notification_options' => $this->send_notification_options,
         ];
     }
 }

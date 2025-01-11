@@ -10,19 +10,16 @@ class NotificationSettingsRequestService
      *  get array of  NotificationSettingsRequestService attributes 
      *
      * @return array   of attributes
-     */   
+     */
     public function attributes()
     {
         return  [
-            'method_send_notification' , 
-            'telegram_chat_id'  ,
-            'reservation_send_notification' ,
-         ];
+            'method_send_notification',
+            'telegram_chat_id',
+            'send_notification_options',
+        ];
     }
-    /*            'method_send_notification' => "Method Send Notification", 
-            'telegram_chat_id' => "Telegram Chat Id",
-            'reservation_send_notification' => "Reservation Send Notification" ,
-    */
+
     /**
      * 
      *  

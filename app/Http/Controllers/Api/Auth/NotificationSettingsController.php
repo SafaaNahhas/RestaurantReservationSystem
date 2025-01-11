@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Models\NotificationSettings;
-use App\Http\Controllers\Controller;
+ use App\Http\Controllers\Controller;
 use App\Http\Requests\NotificationSettings\StoreNotificationSettings;
 use App\Http\Requests\NotificationSettings\UpdateNotificationSettings;
 use App\Services\NotificationSettings\NotificationSettingsService;
@@ -45,7 +44,7 @@ class NotificationSettingsController extends Controller
     {
         $notificationSettingsdata = $request->validated();
         $notificationSettings =  $this->notificationSettingsService->createNotificationSettings($notificationSettingsdata);
-        return $this->success($notificationSettings, "Create Notification Settings Successfully", 200);
+        return $this->success($notificationSettings, "Create Notification Settings Successfully", 201);
     }
 
     /**

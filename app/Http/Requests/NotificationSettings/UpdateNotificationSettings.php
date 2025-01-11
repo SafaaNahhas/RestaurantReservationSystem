@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 use App\Rules\CheckMethodSendNotification;
-use App\Rules\CheckReservationSendNotification;
+use App\Rules\CheckSendNotificationOptions;
 
 class UpdateNotificationSettings extends FormRequest
 {
@@ -34,7 +34,7 @@ class UpdateNotificationSettings extends FormRequest
         return [
             'method_send_notification' => ['sometimes', 'string', new CheckMethodSendNotification],
             'telegram_chat_id' => ['sometimes', 'nullable', 'integer'],
-            'reservation_send_notification' => ['sometimes', 'array', new CheckReservationSendNotification],
+            'send_notification_options' => ['sometimes', 'array', new CheckSendNotificationOptions],
         ];
     }
 

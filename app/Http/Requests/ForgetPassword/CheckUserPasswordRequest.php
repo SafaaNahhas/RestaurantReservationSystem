@@ -33,6 +33,7 @@ class CheckUserPasswordRequest extends FormRequest
             'password' => [
                 'required',
                 'min:8',
+                'string',
                 'regex:/[a-z]/',
                 'regex:/[A-Z]/',
                 'regex:/[0-9]/',

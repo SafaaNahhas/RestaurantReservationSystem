@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests\AuthRequest;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -38,7 +39,16 @@ class RegisterRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'min:8',
+                'string',
+                'confirmed',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&]/',
+            ],
         ];
     }
 
@@ -67,6 +77,7 @@ class RegisterRequest extends FormRequest
             'password.string' => 'The password must be a string.',
             'password.min' => 'The password must be at least :min characters.',
             'password.confirmed' => 'The password confirmation does not match.',
+            'password.regex' => 'The password must contain an uppercase letter, a lowercase letter, a number and one of the following symbols: @$!%*#?&'
         ];
     }
 

@@ -32,11 +32,6 @@ class StoreReservationRequest extends FormRequest
 
             'guest_count' => 'required|integer|min:1',
             'services' => 'nullable|string',
-            // إضافة التحقق من طريقة الإشعار
-            'notification_method' => 'required|boolean',  // يمكن أن تكون true أو false
-
-            // إذا كانت طريقة الإشعار هي Telegram، يجب التحقق من وجود معرف Telegram
-            'telegram_chat_id' => 'nullable|required_if:notification_method,true|string',
         ];
     }
 

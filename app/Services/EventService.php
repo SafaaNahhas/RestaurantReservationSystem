@@ -86,10 +86,13 @@ class EventService
             $event->update($data);
             // get all email to customer
             $customers = Role::findByName('Customer')->users;
+
+            $isUpdated = true;
+
             // send email
             $emailLogService = new EmailLogService();
 
-            SendCustomerCreateEvent::dispatch($event, $customers, $emailLogService);
+            SendCustomerCreateEvent::dispatch($event, $customers, $emailLogService, $isUpdated);
             return $event;
         } catch (Exception $e) {
             // Log the error and throw a runtime exception.

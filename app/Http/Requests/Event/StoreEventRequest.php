@@ -30,7 +30,6 @@ class StoreEventRequest extends FormRequest
             'start_date' => 'required|date|before_or_equal:end_date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'details' => 'nullable|string|max:1000',
-            'reservation_id' => 'required|exists:reservations,id',
         ];
     }
 
@@ -60,10 +59,6 @@ class StoreEventRequest extends FormRequest
             // Details error message
             'details.string' => 'The details must be a string.',
             'details.max' => 'The details cannot exceed :max characters.',
-
-            // Reservation error messages
-            'reservation_id.required' => 'The reservation is required.',
-            'reservation_id.exists' => 'The selected reservation is invalid.',
         ];
     }
 
@@ -95,7 +90,6 @@ class StoreEventRequest extends FormRequest
             'start_date' => $this->start_date,                // Event start timing
             'end_date' => $this->end_date,                    // Event end timing
             'details' => $this->details,                      // Event description
-            'reservation_id' => $this->reservation_id,        // Linked reservation
             'ip' => $this->ip(),                              // Client IP for audit trail
             'user_agent' => $this->userAgent(),               // Browser/device information
         ]);

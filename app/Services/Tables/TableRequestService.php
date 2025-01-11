@@ -21,7 +21,7 @@ class TableRequestService
             'table_number' => ['string', 'min:2', 'max:255'],
             'location' => ['string', 'min:6', 'max:255'],
             'seat_count' => ['integer', 'gt:0'],
-         ];
+        ];
     }
 
     /**
@@ -45,7 +45,11 @@ class TableRequestService
             'seat_count.required' => 'The :attribute is required.',
             'seat_count.integer' => 'The :attribute must be a number.',
             'seat_count.gt' => 'The :attribute must be greater than 0.',
-    ];
+
+            // Department validation messages
+            'department_id.required' => 'The :attribute is required.',
+            'department_id.exists' => 'The Selected :attribute does not exist.',
+        ];
     }
 
     /**
@@ -59,7 +63,8 @@ class TableRequestService
             'table_number' => 'Table Number',
             'location' => 'Location',
             'seat_count' => 'Seats',
-         ];
+            'department_id' => 'Department',
+        ];
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Emergency;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -27,7 +28,7 @@ class UpdateEmergencyRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -35,7 +36,7 @@ class UpdateEmergencyRequest extends FormRequest
             'name'        => 'nullable|string|min:3|max:200',
             'start_date'  => 'nullable|date|after_or_equal:today',
             'end_date'    => 'nullable|date|after:start_date',
-            'description' => 'nullable',
+            'description' => 'nullable|string',
         ];
     }
 
@@ -47,10 +48,10 @@ class UpdateEmergencyRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name'        => 'emergency name',
-            'start_date'  => 'The date the emergency began',
-            'end_date'    => 'The end date of the emergency',
-            'description' => 'Description of the emergency',
+            'name'        => 'Emergency situation',
+            'start_date'  => 'Emergency start date',
+            'end_date'    => 'Emergency end date',
+            'description' => 'Emergency situation details',
         ];
     }
 
@@ -62,10 +63,21 @@ class UpdateEmergencyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'date'           => ':attribute is in an incorrect format.',
-            'after_or_equal' => ':attribute must be today or a future date.',
-            'after'          => ':attribute must be after the start time.',
-            'string'         => ':attribute must be a string.',
+            // Name validation messages
+            'name.string' => 'The :attribute name must be string.',
+            'name.min' => 'The :attribute name must be at least :min characters.',
+            'name.max' => 'The :attribute name cannot exceed :max characters.',
+
+            // Start Date validation messages
+            'start_date.date' => 'The :attribute must be a valid date.',
+            'start_date.after_or_equal' => 'The :attribute cannot be in the past.',
+
+            // End Date validation messages
+            'end_date.date' => 'The :attribute must be a valid date',
+            'end_date.after' => 'The :attribute must be after the start date',
+
+            // Description validation messages
+            'description.string' => 'The :attribute must be text',
         ];
     }
 

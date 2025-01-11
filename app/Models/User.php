@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Rating;
 use App\Models\EmailLog;
 use App\Models\Reservation;
 use App\Models\FoodCategory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -34,7 +35,7 @@ class User extends Authenticatable implements JWTSubject
         'is_active',
     ];
 
-    protected $dates = ['deleted_at'];
+    protected array $dates = ['deleted_at'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -61,7 +62,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return mixed
      */
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
@@ -71,57 +72,77 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return array
      */
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return [];
     }
 
     /**
      * Relationship: A user can manage one department.
+     *
+     * @return HasOne
      */
-    public function department()
+    public function department(): HasOne
     {
         return $this->hasOne(Department::class, 'manager_id');
     }
 
     /**
      * Relationship: A user has many reservations.
+     *
+     * @return HasMany
      */
-    public function reservations()
+    public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
     }
+
     /**
      * Relationship: A user has many food categories.
+     *
+     * @return HasMany
      */
-    public function foodCategories()
+    public function foodCategories(): HasMany
     {
         return $this->hasMany(FoodCategory::class);
     }
+
     /**
      * Relationship: A user has many email logs.
+     *
+     * @return HasMany
      */
-    public function emailLogs()
+    public function emailLogs(): HasMany
     {
         return $this->hasMany(EmailLog::class);
     }
+
     /**
      * Relationship: A user has many ratings.
+     *
+     * @return HasMany
      */
-    public function ratings()
+    public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
     }
 
-    public function favorites()
+    /**
+     * Relationship: A user has many favorites.
+     *
+     * @return HasMany
+     */
+    public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
     }
 
     /**
      * Relationship: A user has many reservation logs.
+     *
+     * @return HasMany
      */
-    public function reservationLogs()
+    public function reservationLogs(): HasMany
     {
         return $this->hasMany(ReservationLog::class, 'changed_by');
     }
@@ -131,7 +152,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(NotificationSettings::class );
     }
-
 
 
 

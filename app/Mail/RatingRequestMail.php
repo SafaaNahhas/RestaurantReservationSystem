@@ -12,15 +12,13 @@ class RatingRequestMail extends Mailable
     use Queueable, SerializesModels;
 
     public $createLink;
-    public $viewLink;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($createLink, $viewLink)
+    public function __construct($createLink)
     {
         $this->createLink = $createLink;
-        $this->viewLink = $viewLink;
     }
 
     /**
@@ -30,14 +28,12 @@ class RatingRequestMail extends Mailable
     {
         Log::info('Building the RatingRequestMail.', [
             'create_link' => $this->createLink,
-            'view_link' => $this->viewLink,
         ]);
 
         return $this->subject('Rate Your Reservation')
             ->view('emails.rating_request')
             ->with([
                 'createLink' => $this->createLink,
-                'viewLink' => $this->viewLink,
             ]);
     }
 }

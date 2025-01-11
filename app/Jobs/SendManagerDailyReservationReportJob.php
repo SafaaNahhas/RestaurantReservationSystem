@@ -47,16 +47,30 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
                     ->whereDate('created_at', $today)
                     ->get();
 
-                $confirmedCount = $reservations->where('status', 'confirmed')->count();
-                $cancelledCount = $reservations->where('status', 'cancelled')->count();
                 $pendingCount = $reservations->where('status', 'pending')->count();
+                $confirmedCount = $reservations->where('status', 'confirmed')->count();
+                $inServiceCount = $reservations->where('status', 'in_service')->count();
+                $completedCount = $reservations->where('status', 'completed')->count();
+                $cancelledCount = $reservations->where('status', 'cancelled')->count();
+                $rejectedCount = $reservations->where('status', 'rejected')->count();
 
                 $data = [
                     'date' => $today->toFormattedDateString(),
                     'reservations' => $reservations,
-                    'confirmedCount' => $confirmedCount,
-                    'cancelledCount' => $cancelledCount,
                     'pendingCount' => $pendingCount,
+                    'confirmedCount' => $confirmedCount,
+                    'inServiceCount' => $inServiceCount,
+                    'completedCount' => $completedCount,
+                    'cancelledCount' => $cancelledCount,
+                    'rejectedCount' => $rejectedCount,
+                    'statusColors' => [
+                        'pending' => '#FFA500',    // Orange
+                        'confirmed' => '#2B7A0B',  // Green
+                        'in_service' => '#3B82F6', // Blue
+                        'completed' => '#059669',  // Emerald Green
+                        'cancelled' => '#B31312',  // Red
+                        'rejected' => '#7A1212',   // Dark Red
+                    ],
                 ];
 
                 try {

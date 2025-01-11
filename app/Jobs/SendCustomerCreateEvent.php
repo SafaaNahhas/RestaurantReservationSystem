@@ -35,6 +35,7 @@ class SendCustomerCreateEvent implements ShouldQueue
     //     $this->isUpdated = $isUpdated;
     public $customers;
     protected $emailLogService;
+    protected $isUpdated;
 
     /**
      * Create a new job instance.
@@ -43,11 +44,12 @@ class SendCustomerCreateEvent implements ShouldQueue
      * @param array $customers The list of customer emails.
      * @param EmailLogService $emailLogService The email log service instance.
      */
-    public function __construct($event, $customers, EmailLogService $emailLogService)
+    public function __construct($event, $customers, EmailLogService $emailLogService, $isUpdated = false)
     {
         $this->event = $event;
         $this->customers = $customers;
         $this->emailLogService = $emailLogService;
+        $this->isUpdated = $isUpdated;
     }
 
     /**
@@ -64,7 +66,7 @@ class SendCustomerCreateEvent implements ShouldQueue
         foreach ($this->customers as $customer) {
             try {
                 // Send the event email to the customer
-                Mail::to($customer->email)->send(new EventMail($this->event));
+                Mail::to($customer->email)->send(new EventMail($this->event, $this->isUpdated));
 
                 // Log the sent email
                 $emailLog=  $this->emailLogService->createEmailLog(
@@ -91,7 +93,4 @@ class SendCustomerCreateEvent implements ShouldQueue
 
         }
     }
-
-
-
 }

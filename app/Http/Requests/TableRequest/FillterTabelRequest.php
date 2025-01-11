@@ -19,7 +19,6 @@ class FillterTabelRequest extends BaseTableRequest
             'table_number' => ['sometimes', 'string'],
             'location' => ['sometimes', 'string'],
             'seat_count' => ['sometimes', 'integer'],
-            'department_id' => ['sometimes', 'integer', 'exists:departments,id'],
         ];
     }
 }

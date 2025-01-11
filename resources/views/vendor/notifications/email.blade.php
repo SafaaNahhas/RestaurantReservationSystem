@@ -11,7 +11,7 @@
             <table cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
                 <!-- Header -->
                 <tr>
-                    <td bgcolor="#B31312" style="padding: 30px; text-align: center;">
+                    <td bgcolor="#F4A261" style="padding: 30px; text-align: center;">
                         <h1 style="color: #ffffff; margin: 0;">{{ config('app.name') }}</h1>
                     </td>
                 </tr>
@@ -29,7 +29,7 @@
                                     {{ $line }}
                                 </p>
                             @elseif ($line === 'Reservation Details:')
-                                <h3 style="color: #B31312; margin-top: 20px; margin-bottom: 15px; border-bottom: 2px solid #B31312; padding-bottom: 10px;">
+                                <h3 style="color: #F4A261; margin-top: 20px; margin-bottom: 15px; border-bottom: 2px solid #F4A261; padding-bottom: 10px;">
                                     {{ $line }}
                                 </h3>
                             @elseif (str_starts_with($line, 'Date:') || str_starts_with($line, 'Time:') || str_starts_with($line, 'Number of Guests:') || str_starts_with($line, 'Table Number:') || str_starts_with($line, 'Additional Services:'))
@@ -50,14 +50,14 @@
                                             Status:
                                         </td>
                                         <td>
-                            <span style="background-color: #B31312; color: #ffffff; padding: 5px 10px; border-radius: 4px;">
+                            <span style="background-color: #F4A261; color: #ffffff; padding: 5px 10px; border-radius: 4px;">
                                 Pending
                             </span>
                                         </td>
                                     </tr>
                                 </table>
                             @elseif ($line === 'Please review this reservation request.')
-                                <p style="color: #B31312; font-size: 15px; margin-top: 20px; margin-bottom: 15px; font-weight: 500; text-align: center;">
+                                <p style="color: #F4A261; font-size: 15px; margin-top: 20px; margin-bottom: 15px; font-weight: 500; text-align: center;">
                                     {{ $line }}
                                 </p>
                             @elseif ($line === 'Thank you.')
@@ -76,7 +76,7 @@
                                 <tr>
                                     <td align="center">
                                         <a href="{{ $actionUrl }}"
-                                           style="background-color: #B31312;
+                                           style="background-color: #F4A261;
                                   color: #ffffff;
                                   display: inline-block;
                                   padding: 12px 24px;
@@ -110,7 +110,7 @@
                             <p style="color: #718096; font-size: 13px; margin: 0;">
                                 @lang("If you're having trouble clicking the \":actionText\" button, copy and paste the URL below into your web browser:", ['actionText' => $actionText])
                                 <br>
-                                <a href="{{ $actionUrl }}" style="color: #B31312; text-decoration: underline;">
+                                <a href="{{ $actionUrl }}" style="color: #F4A261; text-decoration: underline;">
                                     {{ $actionUrl }}
                                 </a>
                             </p>

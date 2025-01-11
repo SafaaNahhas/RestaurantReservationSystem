@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Reservation;
 use App\Models\Restaurant;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -27,11 +28,11 @@ class EmergencyClosureMail extends Mailable
 
     public function build()
     {
-        return $this->subject('اعتذار عن إلغاء الحجز')
+        return $this->subject('Apology for cancellation of reservation')
             ->view('emails.emergency_closure')
             ->with([
                 'restaurantName' => $this->restaurant->name,
-                'reservationDate' => $this->reservation->start_date,
+                'reservationDate' => Carbon::parse($this->reservation->start_date)->format('Y-m-d'),
                 'customer_name'   => $this->reservation->user->name
             ]);
     }

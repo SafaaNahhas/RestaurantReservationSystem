@@ -5,8 +5,6 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Event;
 use App\Enums\RoleUser;
-use App\Models\Reservation;
-use App\Services\RatingService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -25,9 +23,7 @@ class EventControllerTest extends TestCase
         Role::firstOrCreate(['name' => RoleUser::Admin->value]);
         Role::firstOrCreate(['name' => RoleUser::Customer->value]);
 
-        // Inject the RatingService for future use
-        $this->ratingService = app(RatingService::class);
-
+      
         // Create users (admin and customer) using factories and assign roles
         $this->adminUser = User::factory()->create();
         $this->adminUser->assignRole(RoleUser::Admin->value);
@@ -58,8 +54,7 @@ class EventControllerTest extends TestCase
     // Test for creating an event with valid data
     public function it_can_create_an_event()
     {
-        // Create a reservation to associate with the event
-        $reservation = Reservation::factory()->create();
+     
 
         // Event data to create a new event
         $eventData = [
@@ -83,9 +78,7 @@ class EventControllerTest extends TestCase
     // Test to check if the event creation fails when the name is missing
     public function test_it_fails_to_create_event_without_name()
     {
-        // Create a reservation for the event
-        $reservation = Reservation::factory()->create();
-
+       
         // Event data missing the 'event_name'
         $eventData = [
             'start_date' => '2025-03-01',
@@ -103,8 +96,7 @@ class EventControllerTest extends TestCase
     // Test to check if the event creation fails with invalid date range (end date before start date)
     public function test_it_fails_to_create_event_with_invalid_dates()
     {
-        // Create a reservation for the event
-        $reservation = Reservation::factory()->create();
+       
 
         // Event data with invalid dates (end date before start date)
         $eventData = [
@@ -148,9 +140,6 @@ class EventControllerTest extends TestCase
     {
         // Create an event to update
         $event = Event::factory()->create();
-        
-        // Create a reservation for the event
-        $reservation = Reservation::factory()->create();
 
         // New data to update the event
         $updatedData = [
@@ -175,7 +164,6 @@ class EventControllerTest extends TestCase
     public function test_it_fails_to_update_event_with_invalid_dates()
     {
         $event = Event::factory()->create();
-        $reservation = Reservation::factory()->create();
 
         // Invalid event data with end date before start date
         $updatedData = [

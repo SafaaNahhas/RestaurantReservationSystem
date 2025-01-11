@@ -17,7 +17,7 @@ class ReservationSeeder extends Seeder
             $Reservations=[
                 [
                 'user_id' => 4,
-                'manager_id' => 1, 
+                'manager_id' => 2, 
                 'table_id' => 2,
                 'start_date' => '2025-01-20 20:10:00',
                 'end_date' => '2025-01-20 22:10:00',
@@ -26,7 +26,7 @@ class ReservationSeeder extends Seeder
                 ],
                 [
                 'user_id' => 5,
-                'manager_id' => 2, 
+                'manager_id' => 3, 
                 'table_id' => 4,
                 'start_date' => '2025-01-22 20:10:00',
                 'end_date' => '2025-01-22 22:10:00',

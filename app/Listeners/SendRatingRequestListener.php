@@ -2,8 +2,9 @@
 
 namespace App\Listeners;
 
-use App\Events\ReservationCompleted;
+use App\Services\EmailLogService;
 use App\Jobs\SendRatingRequestJob;
+use App\Events\ReservationCompleted;
 
 class SendRatingRequestListener
 {
@@ -12,6 +13,10 @@ class SendRatingRequestListener
      */
     public function handle(ReservationCompleted $event)
     {
-        SendRatingRequestJob::dispatch($event->reservation);
+
+        $emailLogService = new EmailLogService();
+
+        SendRatingRequestJob::dispatch($event->reservation, $emailLogService);
+
     }
 }

@@ -113,7 +113,6 @@ class ReservationService
                     'message' => 'The department does not have a manager.',
                 ];
             }
-            // قبل إنشاء الحجز
             $notificationSettings = auth()->user()->notificationSettings;
 
             if (!$notificationSettings) {

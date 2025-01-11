@@ -9,6 +9,7 @@ use App\Models\PhoneNumber;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -28,7 +29,9 @@ class RestaurantService
     {
         try {
             // Attempt to fetch all restaurants with associated emails and phone numbers
-            $restaurant = Restaurant::with(["emails", "phoneNumbers", "images"])->get();
+            $restaurant = Cache::remember('restaurant', 1440, function () {
+                return Restaurant::with(["emails", "phoneNumbers", "images"])->get();
+            });
             return $restaurant;
         } catch (Exception $e) {
             // Log the error and throw an exception if there is a failure in fetching restaurant data
@@ -36,7 +39,6 @@ class RestaurantService
             throw new HttpException(500, 'Cannot get restaurant data');
         }
     }
-
 
     /**
      * Store a new restaurant, including emails, phone numbers, and images.
@@ -103,6 +105,8 @@ class RestaurantService
             }
             // Commit the transaction if all is well
             DB::commit();
+            Cache::forget('restaurant');
+
             return $data;
         } catch (HttpResponseException $e) {
             // Handle specific HttpResponseException
@@ -114,7 +118,6 @@ class RestaurantService
             throw new HttpException(500, 'Cannot insert restaurant data: ' . $e->getMessage());
         }
     }
-
 
     /**
      * Update an existing restaurant's data, including emails and phone numbers.
@@ -211,7 +214,6 @@ class RestaurantService
         }
     }
 
-
     /**
      * Delete an email by its ID.
      *
@@ -243,7 +245,6 @@ class RestaurantService
             ], 500));
         }
     }
-
 
     /**
      * Delete a phone number by its ID.
@@ -323,7 +324,6 @@ class RestaurantService
             ], 500));
         }
     }
-
 
     /**
      * Get all soft-deleted images associated with restaurants.

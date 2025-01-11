@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->enum('method_send_notification', ['mail', 'telegram']);
             $table->unsignedInteger('telegram_chat_id')->nullable();
-            $table->json('reservation_send_notification');
-            $table->foreignId('user_id')->constrained('users');
+            $table->json('send_notification_options');
+            $table->foreignId('user_id')->unique()->constrained('users');
             $table->timestamps();
         });
-    }   
+    }
     /**
      * Reverse the migrations.
      */

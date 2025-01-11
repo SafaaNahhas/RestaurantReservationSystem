@@ -17,16 +17,13 @@ class NotificationSettings extends Model
     protected $fillable = [
         'method_send_notification',
         'telegram_chat_id',
-        'reservation_send_notification',
+        'send_notification_options',
         'user_id'
-     ];
+    ];
 
-     protected $casts = ['reservation_send_notification' => 'array'];
-
-
+    protected $casts = ['send_notification_options' => 'array'];
     public function user()
     {
-        return $this->belongsTo(User::class );
+        return $this->belongsTo(User::class);
     }
-
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Requests\NotificationSettings;
 
 use App\Rules\CheckMethodSendNotification;
-use App\Rules\CheckReservationSendNotification;
+use App\Rules\CheckSendNotificationOptions;
 use App\Services\NotificationSettings\NotificationSettingsRequestService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,9 +31,9 @@ class StoreNotificationSettings extends FormRequest
     public function rules(): array
     {
         return [
-            'method_send_notification' =>['required', 'string', new CheckMethodSendNotification],
-            'telegram_chat_id'=>['sometimes','nullable', 'integer'],
-            'reservation_send_notification'=>['required', 'array', new CheckReservationSendNotification],
+            'method_send_notification' => ['required', 'string', new CheckMethodSendNotification],
+            'telegram_chat_id' => ['sometimes', 'nullable', 'integer'],
+            'send_notification_options' => ['required', 'array', new CheckSendNotificationOptions],
         ];
     }
 

@@ -55,7 +55,7 @@ class NotificationSettingsService
             $notificationSettings = NotificationSettings::create([
                 'method_send_notification' => $notificationSettingsdata['method_send_notification'],
                 'telegram_chat_id' => $notificationSettingsdata['method_send_notification'] == "telegram" ? $notificationSettingsdata['telegram_chat_id'] : null,
-                'reservation_send_notification' => $notificationSettingsdata['reservation_send_notification'],
+                'send_notification_options' => $notificationSettingsdata['send_notification_options'],
                 'user_id' => Auth::user()->id
             ]);
             $notificationSettings = NotificationSettingsResource::make($notificationSettings);
@@ -92,7 +92,7 @@ class NotificationSettingsService
                 $notificationSettings->update([
                     'method_send_notification' => $notificationSettingsdata['method_send_notification'],
                     'telegram_chat_id' => $notificationSettingsdata['method_send_notification'] == "telegram" ? $notificationSettingsdata['telegram_chat_id'] : null,
-                    'reservation_send_notification' => $notificationSettingsdata['reservation_send_notification'],
+                    'send_notification_options' => $notificationSettingsdata['send_notification_options'],
                 ]);
                 $notificationSettings = NotificationSettingsResource::make($notificationSettings);
 

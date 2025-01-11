@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Reservation;
 
 use App\Http\Requests\TableRequest\StoreTableRequest;
-use App\Services\TableService;
-use App\Http\Controllers\Controller;
+ use App\Http\Controllers\Controller;
 use App\Http\Requests\TableRequest\FillterTabelRequest;
 use App\Http\Requests\TableRequest\UpdateTableRequest;
 use App\Http\Resources\Table\TableResource;
+use App\Services\Tables\TableService;
 
 class TableController extends Controller
 {

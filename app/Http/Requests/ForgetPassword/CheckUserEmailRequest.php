@@ -3,9 +3,9 @@
 namespace App\Http\Requests\ForgetPassword;
 
 use App\Rules\CheckUserEmail;
-use App\Services\ForgetPasswordRequestService;
-use Illuminate\Contracts\Validation\Validator;
+ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Services\ForgetPassword\ForgetPasswordRequestService;
 
 class CheckUserEmailRequest extends FormRequest
 {

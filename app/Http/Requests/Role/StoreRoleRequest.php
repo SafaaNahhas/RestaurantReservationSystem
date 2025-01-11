@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Role;
 
 use App\Rules\UserRole;
-use App\Services\RoleRequestService;
+use App\Services\Roles\RoleRequestService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 

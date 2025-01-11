@@ -1,25 +1,30 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\NotificationSettings;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ForgetPasswordRequestService
+class NotificationSettingsRequestService
 {
     /**
-     *  get array of  ForgetPasswordRequestService attributes 
+     *  get array of  NotificationSettingsRequestService attributes 
      *
      * @return array   of attributes
-     */
+     */   
     public function attributes()
     {
         return  [
-            'password',
-            'email',
-            'code',
-        ];
+            'method_send_notification' , 
+            'telegram_chat_id'  ,
+            'reservation_send_notification' ,
+         ];
     }
+    /*            'method_send_notification' => "Method Send Notification", 
+            'telegram_chat_id' => "Telegram Chat Id",
+            'reservation_send_notification' => "Reservation Send Notification" ,
+    */
     /**
+     * 
      *  
      * @param $validator
      *

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Permissions;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 

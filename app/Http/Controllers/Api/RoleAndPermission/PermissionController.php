@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\RoleAndPermission;
 
 use App\Http\Requests\Permission\StorePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
- use App\Services\PermissionService;
-use Illuminate\Http\Request;
+ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RoleAndPermission\PermissionResource;
+use App\Services\Permissions\PermissionService;
 
 class PermissionController extends Controller
 {

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgetPassword\CheckUserCodeRequest;
 use App\Http\Requests\ForgetPassword\CheckUserEmailRequest;
 use App\Http\Requests\ForgetPassword\CheckUserPasswordRequest;
-use App\Services\ForgetPasswordService;
+use App\Services\ForgetPassword\ForgetPasswordService;
 
 class ForgetPasswordController extends Controller
 {

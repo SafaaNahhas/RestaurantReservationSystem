@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Tables;
 
 use App\Http\Resources\Table\TableResource;
 use App\Models\Department;
@@ -24,7 +24,8 @@ class TableService
         try {
             Department::findOrFail($department_id);
 
-            $tables = Table::byTableNumber($fillters['table_number'])
+            $tables = Table::where('department_id','=',$department_id)
+                ->byTableNumber($fillters['table_number'])
                 ->bySeatCount($fillters['seat_count'])
                 ->byLocation($fillters['location'])
                 ->paginate(4);

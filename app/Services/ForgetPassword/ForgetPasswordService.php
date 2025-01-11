@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ForgetPassword;
 
 use App\Mail\SendForgetPasswordCodeMail;
 use App\Models\User;

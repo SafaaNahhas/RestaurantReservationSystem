@@ -71,5 +71,70 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Assign Roles to Ratings Permissions
         $deleteRating->assignRole([$admin, $manager]);
+
+
+        $deleteRating->assignRole([$admin, $manager]);
+
+
+
+        // Tables Permissions
+        $storeTable = Permission::create(['name' => 'store table']);
+        $updateTable = Permission::create(['name' => 'update table']);
+        $softDeleteTable = Permission::create(['name' => 'soft delete table']);
+        $forceDeleteTable = Permission::create(['name' => 'force delete table']);
+        $restoreTable = Permission::create(['name' => 'restor table']);
+
+        $storeTable->assignRole($admin);
+        $updateTable->assignRole($admin);
+        $softDeleteTable->assignRole($admin);
+        $forceDeleteTable->assignRole($admin);
+        $restoreTable->assignRole($admin);
+
+
+        // Roles Permissions
+        $storeRole = Permission::create(['name' => 'store role']);
+        $updateRole = Permission::create(['name' => 'update role']);
+        $deleteRole = Permission::create(['name' => 'delete role']);
+        $assignPermissioToRole = Permission::create(['name' => 'assign permissio to role']);
+        $removePermissioFromRole = Permission::create(['name' => 'remove permissio from role']);
+
+        $storeRole->assignRole($admin);
+        $updateRole->assignRole($admin);
+        $deleteRole->assignRole($admin);
+        $assignPermissioToRole->assignRole($admin);
+        $removePermissioFromRole->assignRole($admin);
+
+
+        // Permissions Permissions
+        $storePermission = Permission::create(['name' => 'store permission']);
+        $updatePermission = Permission::create(['name' => 'update permission']);
+        $deletePermission = Permission::create(['name' => 'delete permission']);
+
+        $storePermission->assignRole($admin);
+        $updatePermission->assignRole($admin);
+        $deletePermission->assignRole($admin);
+
+
+        //  ForgetPassword Permissions
+        $checkEmail = Permission::create(['name' => 'check email']);
+        $checkCode = Permission::create(['name' => 'check code']);
+        $changePassword = Permission::create(['name' => 'change password']);
+
+        $checkEmail->assignRole([$admin, $manager, $customer, $waiter]);
+        $checkCode->assignRole([$admin, $manager, $customer, $waiter]);
+        $changePassword->assignRole([$admin, $manager, $customer, $waiter]);
+
+
+        // NotificationSettings  Permissions
+        $storeNotificationSettings = Permission::create(['name' => 'store notification settings']);
+        $updateNotificationSettings = Permission::create(['name' => 'update notification settings']);
+        $checkIfNotificationSettingsExsits = Permission::create(['name' => 'check if notification settings exsits']);
+        $resetNotificationSettings = Permission::create(['name' => 'reset notification settings']);
+
+        $storeNotificationSettings->assignRole([$admin, $manager, $customer, $waiter]);
+        $updateNotificationSettings->assignRole([$admin, $manager, $customer, $waiter]);
+        $checkIfNotificationSettingsExsits->assignRole([$admin, $manager, $customer, $waiter]);
+        $resetNotificationSettings->assignRole([$admin, $manager, $customer, $waiter]);
     }
+
 }

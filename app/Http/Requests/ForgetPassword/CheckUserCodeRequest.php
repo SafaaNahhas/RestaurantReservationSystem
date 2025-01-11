@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ForgetPassword;
 
-use App\Services\ForgetPasswordRequestService;
+use App\Services\ForgetPassword\ForgetPasswordRequestService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -30,7 +30,7 @@ class CheckUserCodeRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email'],
-            'code' => ['required', 'integer', 'digits:6'],
+            'code' => ['required', 'string', 'digits:6'],
         ];
     }
     public function attributes(): array

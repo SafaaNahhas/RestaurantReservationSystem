@@ -39,11 +39,6 @@ class StoreTableRequest extends BaseTableRequest
                 $commonRules['seat_count'],
                 ['required']
             ),
-            'department_id' => array_merge(
-                $commonRules['department_id'],
-                ['required']
-            ),
-
         ];
     }
 

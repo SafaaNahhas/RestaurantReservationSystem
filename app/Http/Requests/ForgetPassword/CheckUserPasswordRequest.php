@@ -3,8 +3,8 @@
 namespace App\Http\Requests\ForgetPassword;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Services\ForgetPasswordRequestService;
-use Illuminate\Contracts\Validation\Validator;
+ use Illuminate\Contracts\Validation\Validator;
+ use App\Services\ForgetPassword\ForgetPasswordRequestService;
 
 class CheckUserPasswordRequest extends FormRequest
 {

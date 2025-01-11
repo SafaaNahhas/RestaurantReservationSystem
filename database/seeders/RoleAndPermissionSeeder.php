@@ -38,7 +38,6 @@ class RoleAndPermissionSeeder extends Seeder
         $updateReservation = Permission::create(['name' => 'update reservation']);
         $confirmReservation = Permission::create(['name' => 'confirm reservation']);
         $rejectReservation = Permission::create(['name' => 'reject reservation']);
-        $cancelUnConfirmed = Permission::create(['name' => 'cancel unconfirmed reservation']);
         $startService = Permission::create(['name' => 'start service']);
         $completeService = Permission::create(['name' => 'complete service']);
         $hardDeleteReservation = Permission::create(['name' => 'hard delete reservation']);

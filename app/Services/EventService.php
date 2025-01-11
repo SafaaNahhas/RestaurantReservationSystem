@@ -10,6 +10,7 @@ use App\Services\EmailLogService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCustomerCreateEvent;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * EventService - Provides functionality for managing events.

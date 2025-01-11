@@ -113,14 +113,16 @@ class ReservationService
                     'message' => 'The department does not have a manager.',
                 ];
             }
+            // Check if the authenticated user has filled in the notification settings
             $notificationSettings = auth()->user()->notificationSettings;
 
             if (!$notificationSettings) {
                 return [
                     'status_code' => 422,
-                    'message' => 'Notification settings must be configured before making a reservation.',
+                    'message' => 'Notification settings must be configured before making a reservation.'
                 ];
             }
+
 
             // Create the reservation
             $reservation = Reservation::create([
@@ -296,18 +298,42 @@ class ReservationService
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
+    // public function getAllTablesWithReservations(array $filter = [])
+    // {
+    //     try {
+    //     $cacheKey = 'tables_with_reservations_'  . md5(json_encode($filter));
+    //     $cacheTTL = 600;
+    //     return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
+    //         return Table::with(['reservations' => function ($query) use ($filter) {
+    //             if (isset($filter['status'])) {
+    //                 $query->where('status', $filter['status']);
+    //             }
+    //         }])->get();
+    //     });
+    //     } catch (Exception $e) {
+    //         // Log the exception for debugging purposes
+    //         Log::error('Error fetching tables with reservations: ' . $e->getMessage());
+    //         // Return an empty collection or handle the error as needed
+    //         return collect([]);
+    //     }
+    // }
     public function getAllTablesWithReservations(array $filter = [])
     {
         try {
-        $cacheKey = 'tables_with_reservations_'  . md5(json_encode($filter));
-        $cacheTTL = 600;
-        return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
-            return Table::with(['reservations' => function ($query) use ($filter) {
-                if (isset($filter['status'])) {
-                    $query->where('status', $filter['status']);
-                }
-            }])->get();
-        });
+            $cacheKey = 'tables_with_reservations_' . md5(json_encode($filter));
+            $cacheTTL = 600;
+
+            return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
+                return Table::whereHas('reservations', function ($query) use ($filter) {
+                    if (isset($filter['status'])) {
+                        $query->where('status', $filter['status']);
+                    }
+                })->with(['reservations' => function ($query) use ($filter) {
+                    if (isset($filter['status'])) {
+                        $query->where('status', $filter['status']);
+                    }
+                }])->get();
+            });
         } catch (Exception $e) {
             // Log the exception for debugging purposes
             Log::error('Error fetching tables with reservations: ' . $e->getMessage());
@@ -315,6 +341,7 @@ class ReservationService
             return collect([]);
         }
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Service method to confirm a reservation.
@@ -347,12 +374,12 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} confirmed by User ID {$reservation->user_id}.");
             $notificationSettings = $reservation->user->notificationSettings;
-            // Check if reservation_send_notification is already an array or needs to be decoded
-            $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
-                ? $notificationSettings->reservation_send_notification
-                : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
-            // Check if "confirm" is in the decoded array
-            if ($notificationSettings && in_array("confirm", $sendNotificationOptions)) {
+            // // Check if reservation_send_notification is already an array or needs to be decoded
+            // $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
+            //     ? $notificationSettings->reservation_send_notification
+            //     : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
+            // // Check if "confirm" is in the decoded array
+            // if ($notificationSettings && in_array("confirm", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "✅ Reservation Confirmed!\n\n";
@@ -370,24 +397,25 @@ class ReservationService
                     // Send confirmation email
                     Mail::to($reservation->user->email)
                         ->queue(new ReservationDetailsMail($reservation));
-                } else {
+                }
+                 else {
                     return [
                         'error' => true,
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            } else {
-                return [
-                    'error' => false,
-                    'message' => 'Reservation confirmed successfully, but User has not opted for confirmation notifications.',
-                    'data' => [
-                        'reservation_id' => $reservation->id,
-                        'table_number' => $reservation->table->table_number,
-                        'start_date' => $reservation->start_date,
-                        'end_date' => $reservation->end_date,
-                    ],
-                ];
-            }
+            // } else {
+            //     return [
+            //         'error' => false,
+            //         'message' => 'Reservation confirmed successfully, but User has not opted for confirmation notifications.',
+            //         'data' => [
+            //             'reservation_id' => $reservation->id,
+            //             'table_number' => $reservation->table->table_number,
+            //             'start_date' => $reservation->start_date,
+            //             'end_date' => $reservation->end_date,
+            //         ],
+            //     ];
+            // }
             // Return response with notification status included
             return [
                 'error' => false,
@@ -451,12 +479,12 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
             $notificationSettings = $reservation->user->notificationSettings;
-            // Check if reservation_send_notification is already an array or needs to be decoded
-            $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
-                ? $notificationSettings->reservation_send_notification
-                : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
-            // Check if "reject" is in the decoded array
-            if ($notificationSettings && in_array("reject", $sendNotificationOptions)) {
+            // // Check if reservation_send_notification is already an array or needs to be decoded
+            // $sendNotificationOptions = is_array($notificationSettings->reservation_send_notification)
+            //     ? $notificationSettings->reservation_send_notification
+            //     : (json_decode($notificationSettings->reservation_send_notification, true) ?: []);
+            // // Check if "reject" is in the decoded array
+            // if ($notificationSettings && in_array("reject", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "❌ Reservation Rejected!\n\n";
@@ -481,19 +509,20 @@ class ReservationService
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            } else {
-                return [
-                    'error' => false,
-                    'message' => 'Reservation rejected successfully But User has not opted for rejection notifications.',
-                    'data' => [
-                        'reservation_id' => $reservation->id,
-                        'table_number' => $reservation->table->table_number,
-                        'start_date' => $reservation->start_date,
-                        'end_date' => $reservation->end_date,
-                        'rejection_reason' => $rejectionReason,
-                    ],
-                ];
-            }
+            // }
+            // else {
+            //     return [
+            //         'error' => false,
+            //         'message' => 'Reservation rejected successfully But User has not opted for rejection notifications.',
+            //         'data' => [
+            //             'reservation_id' => $reservation->id,
+            //             'table_number' => $reservation->table->table_number,
+            //             'start_date' => $reservation->start_date,
+            //             'end_date' => $reservation->end_date,
+            //             'rejection_reason' => $rejectionReason,
+            //         ],
+            //     ];
+            // }
             // Return response with notification status included
             return [
                 'error' => false,
@@ -576,7 +605,7 @@ class ReservationService
             // Send cancellation notification to the user if they opted for it
             $notificationSettings = $reservation->user->notificationSettings;
 
-            if ($notificationSettings && in_array('cancel', $notificationSettings->reservation_send_notification)) {
+            // if ($notificationSettings && in_array('cancel', $notificationSettings->reservation_send_notification)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "❌ Reservation Cancelled!\n\n";
@@ -602,19 +631,19 @@ class ReservationService
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            } else {
-                return [
-                    'error' => false,
-                    'message' => 'Reservation cancelled successfully, but User has not opted for cancellation notifications.',
-                    'data' => [
-                        'reservation_id' => $reservation->id,
-                        'table_number' => $reservation->table->table_number,
-                        'start_date' => $reservation->start_date,
-                        'end_date' => $reservation->end_date,
-                        'cancellation_reason' => $cancellationReason,
-                    ],
-                ];
-            }
+            // } else {
+            //     return [
+            //         'error' => false,
+            //         'message' => 'Reservation cancelled successfully, but User has not opted for cancellation notifications.',
+            //         'data' => [
+            //             'reservation_id' => $reservation->id,
+            //             'table_number' => $reservation->table->table_number,
+            //             'start_date' => $reservation->start_date,
+            //             'end_date' => $reservation->end_date,
+            //             'cancellation_reason' => $cancellationReason,
+            //         ],
+            //     ];
+            // }
 
             // Send cancellation email to the manager (if any)
             $manager = $reservation->table->department->manager;
@@ -715,9 +744,9 @@ class ReservationService
                 Cache::forget('tables_with_reservations_pending');
             }
             Cache::forget('tables_with_reservations_all');
-            // Dispatch job to send a rating request email
-            $emailLogService = new EmailLogService();
-            SendRatingRequestJob::dispatch($reservation, $emailLogService);
+            // // Dispatch job to send a rating request email
+            // $emailLogService = new EmailLogService();
+            // SendRatingRequestJob::dispatch($reservation, $emailLogService);
             return [
                 'error' => false,
                 'reservation' => $reservation,

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Event\EventController;
 
 use App\Http\Controllers\Api\Rating\RatingController;
 use App\Http\Controllers\Api\Email\EmailLogController;
+use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\Api\Favorite\FavoriteController;
 use App\Http\Controllers\Api\Food\FoodCategoryController;
 use App\Http\Controllers\Api\Reservation\TableController;
@@ -52,15 +53,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/reservations/{id}/start-service', [ReservationController::class, 'startService']);
     Route::post('/reservations/{id}/complete-service', [ReservationController::class, 'completeService']);
     Route::post('reservations/auto-cancel', [ReservationController::class, 'cancelUnconfirmedReservations']);
-    // Route::delete('reservations/{id}/hard-delete', [ReservationController::class, 'hardDeleteReservation']);
     Route::get('/tables-with-reservations', [ReservationController::class, 'getAllTablesWithReservations']);
     Route::delete('reservations/{id}/soft-delete', [ReservationController::class, 'softDeleteReservation']);
     Route::delete('reservations/{id}/force-delete', [ReservationController::class, 'forceDeleteReservation']);
     Route::post('reservations/{id}/restore', [ReservationController::class, 'restoreReservation']);
     Route::get('reservations/get-soft-deleted', [ReservationController::class, 'getSoftDeletedReservations']);
+    Route::get('/reservations/manager/{managerId}', [ReservationController::class, 'getReservationsByManager']);
+    Route::get('/reservations/most-frequent-user', [ReservationController::class, 'getMostFrequentUser']);
 
-    Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
+
+
 });
+Route::post('/changePassword', [ForgetPasswordController::class, 'changePassword']);
 Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
 Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 
@@ -220,4 +224,6 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
     Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
     //});
+
 });
+Route::apiResource('notificationSettings', NotificationSettingsController::class)->only('store','update');

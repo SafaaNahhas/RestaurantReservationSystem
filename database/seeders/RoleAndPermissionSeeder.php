@@ -43,6 +43,12 @@ class RoleAndPermissionSeeder extends Seeder
         $startService = Permission::create(['name' => 'start service']);
         $completeService = Permission::create(['name' => 'complete service']);
         $hardDeleteReservation = Permission::create(['name' => 'hard delete reservation']);
+        $softDeleteReservation = Permission::create(['name' => 'soft delete reservation']);
+        $restoreReservation = Permission::create(['name' => 'restorereservation']);
+        $viewSoftDeletedReservations = Permission::create(['name' => 'view soft delete reservation']);
+        // $getAllTablesWithReservations = Permission::create(['name' => 'getAllTablesWithReservations']);
+        $viewMostFrequentUser = Permission::create(['name' => 'viewMostFrequentUser']);
+        $viewReservationsByManager = Permission::create(['name' => 'viewReservationsByManager']);
 
         // Assign Roles to Reservations Permissions
         $storeReservation->assignRole($customer);
@@ -52,7 +58,13 @@ class RoleAndPermissionSeeder extends Seeder
         $startService->assignRole([$admin, $reservationManager, $captin]);
         $completeService->assignRole([$admin, $reservationManager, $captin]);
         $hardDeleteReservation->assignRole([$admin, $reservationManager]);
+        $softDeleteReservation->assignRole([$admin, $reservationManager]);
+        $restoreReservation->assignRole([$admin, $reservationManager]);
+        $viewSoftDeletedReservations->assignRole([$admin, $reservationManager]);
         $cancelUnConfirmed->assignRole($admin);
+        // $getAllTablesWithReservations->assignRole($admin);
+        $viewMostFrequentUser->assignRole($admin);
+        $viewReservationsByManager->assignRole([$admin, $reservationManager]);
 
         // Ratings Permissions
         $deleteRating = Permission::create(['name' => 'delete rating']);
@@ -61,4 +73,3 @@ class RoleAndPermissionSeeder extends Seeder
         $deleteRating->assignRole([$admin, $reservationManager]);
     }
 }
- 

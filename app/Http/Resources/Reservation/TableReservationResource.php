@@ -28,6 +28,7 @@ class TableReservationResource extends JsonResource
             'guest_count' => $this->guest_count,
             'status' => $this->status,
         ],
+        'message_type' => $this->notification_method ? 'telegram' : 'email', // تحديد نوع الرسالة بناءً على notification_method
         ];
 
     }}

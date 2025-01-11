@@ -28,10 +28,15 @@ class StoreReservationRequest extends FormRequest
         return [
             'table_number' => 'nullable|exists:tables,table_number',
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'nullable|date|after:start_date',
+            'end_date' => 'required|date|after:start_date',
 
             'guest_count' => 'required|integer|min:1',
             'services' => 'nullable|string',
+            // إضافة التحقق من طريقة الإشعار
+            'notification_method' => 'required|boolean',  // يمكن أن تكون true أو false
+
+            // إذا كانت طريقة الإشعار هي Telegram، يجب التحقق من وجود معرف Telegram
+            'telegram_chat_id' => 'nullable|required_if:notification_method,true|string',
         ];
     }
 

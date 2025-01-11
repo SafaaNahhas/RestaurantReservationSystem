@@ -36,7 +36,7 @@ class ReservationFactory extends Factory
             'guest_count' => $this->faker->numberBetween(1, 10), // عدد الضيوف بين 1 و 10
             'services' => $this->faker->sentence(), // خدمات عشوائية
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'cancelled']), // حالة عشوائية
-            'cancelled_at' => $this->faker->optional()->dateTimeBetween('-1 month', 'now'), // قد تكون NULL أو تاريخ عشوائي
+            // 'cancelled_at' => $this->faker->optional()->dateTimeBetween('-1 month', 'now'), // قد تكون NULL أو تاريخ عشوائي
             'created_at' => now(),
             'updated_at' => now(),
         ];

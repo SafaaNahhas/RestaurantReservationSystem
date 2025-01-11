@@ -11,51 +11,49 @@ use PgSql\Lob;
 
 class ReservationPolicy
 {
+    /**
+     * Check if the user can store a reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
     public function store(User $user)
     {
         return $user->hasPermissionTo('store reservation');
     }
-    // public function update(User $user)
-    // {
-    //     return $user->hasPermissionTo('update reservation');
-    // }
     public function update(User $user, Reservation $reservation)
     {
-        // السماح بالتعديل فقط للكستمر الذي أنشأ الحجز
-        return $reservation->user_id == $user->id;
+        return $user->hasPermissionTo('update reservation');
     }
-    // public function confirm(User $user)
+
+    // public function update(User $user, Reservation $reservation)
     // {
-    //     return $user->hasPermissionTo('confirm reservation');
+    //     return $reservation->user_id == $user->id;
     // }
+    // public function getAllTablesWithReservations(User $user)
+    // {
+    //     return $user->hasPermissionTo('getAllTablesWithReservations');
+    // }
+
     public function confirm(User $user, Reservation $reservation)
     {
-        // السماح بتأكيد الحجز فقط لمدير القسم أو الأدمن
+        // Allow access if the user is an admin or the manager of the department
         return $user->hasRole(RoleUser::Admin->value) ||
             ($reservation->table && $reservation->table->department->manager_id == $user->id);
     }
-    // public function reject(User $user)
-    // {
-    //     return $user->hasPermissionTo('reject reservation');
-    // }
+
     public function reject(User $user, Reservation $reservation)
     {
-        // السماح برفض الحجز فقط لمدير القسم أو الأدمن
+        // Allow access if the user is an admin or the manager of the department
         return $user->hasRole(RoleUser::Admin->value) ||
             ($reservation->table && $reservation->table->department->manager_id == $user->id);
     }
-    // public function cancel(User $user, Reservation $reservation)
-    // {
-    //     return $user->hasRole(RoleUser::Admin->value) ||
-    //         $reservation->manager_id == $user->id    ||
-    //         $reservation->user_id == $user->id;
-    // }
+
     public function cancel(User $user, Reservation $reservation)
     {
-        // السماح بالإلغاء فقط للكستمر الذي أنشأ الحجز
         return $reservation->user_id == $user->id;
     }
-  
+
     public function startService(User $user)
     {
         return $user->hasPermissionTo('start service');
@@ -65,12 +63,73 @@ class ReservationPolicy
     {
         return $user->hasPermissionTo('complete service');
     }
-
-    public function delete(User $user)
+    /**
+     * Determine if the user can soft delete a reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function softDeleteReservation(User $user)
+    {
+        return $user->hasPermissionTo('soft delete reservation');
+    }
+    /**
+     * Determine if the user can force delete a reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function forceDeleteReservation(User $user)
     {
         return $user->hasPermissionTo('hard delete reservation');
     }
 
+    /**
+     * Determine if the user can restore a soft-deleted reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function restoreReservation(User $user)
+    {
+        return $user->hasPermissionTo('restorereservation');
+    }
+
+    /**
+     * Determine if the user can view soft-deleted reservations.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function viewSoftDeletedReservations(User $user)
+    {
+        return $user->hasPermissionTo('view soft delete reservation');
+}
+    /**
+     * Check if the user can view reservations by manager.
+     *
+     * @param User $user
+     * @param Reservation $reservation
+     * @return bool
+     */
+    public function viewReservationsByManager(User $user, Reservation $reservation)
+    {
+        // Allow access if the user is an admin or the manager of the department
+        return $user->hasRole(RoleUser::Admin->value) ||
+            ($reservation->table && $reservation->table->department->manager_id == $user->id);
+    }
+
+    /**
+     * Check if the user can view the most frequent user.
+     *
+     * @param  User  $user
+     * @return bool
+     */
+    public function viewMostFrequentUser(User $user)
+    {
+        // Allow access only if the user is an admin
+        return $user->hasRole(RoleUser::Admin->value);
+    }
     /**
      * Determine if the given user can create a rating for the reservation.
      *

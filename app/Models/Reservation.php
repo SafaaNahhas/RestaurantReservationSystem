@@ -19,12 +19,12 @@ class Reservation extends Model
 
     // Mass-assignable attributes
 
-    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'cancelled_at', 'email_sent_at',];
+    protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'email_sent_at'];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'cancelled_at' => 'datetime',
+        // 'cancelled_at' => 'datetime',
         'email_sent_at' => 'datetime'
     ];
 

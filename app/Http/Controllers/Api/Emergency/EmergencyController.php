@@ -67,12 +67,12 @@ class EmergencyController extends Controller
      * Update an existing emergency.
      *
      * @param UpdateEmergencyRequest $request The validated request data.
-     * @param Emergency $emergency The emergency to be updated.
+     * @param int $emergency_id The emergency to be updated.
      * @return \Illuminate\Http\JsonResponse A JSON response with the updated emergency record.
      */
-    public function update(UpdateEmergencyRequest $request, Emergency $emergency)
+    public function update(UpdateEmergencyRequest $request,int $emergency_id)
     {
-        $result = $this->emergencyService->updateEmergency($request->validated(), $emergency);
+        $result = $this->emergencyService->updateEmergency($request->validated(), $emergency_id);
         return self::success(
             $result,
             'Emergency Updated Successfully',
@@ -83,12 +83,12 @@ class EmergencyController extends Controller
     /**
      * Show a specific emergency.
      *
-     * @param Emergency $emergency The emergency to retrieve.
+     * @param int $emergency_id The emergency to retrieve.
      * @return \Illuminate\Http\JsonResponse A JSON response with the emergency record.
      */
-    public function show(Emergency $emergency)
+    public function show(int $emergency_id)
     {
-        $result = $this->emergencyService->showEmergecy($emergency);
+        $result = $this->emergencyService->showEmergecy($emergency_id);
         return self::success(
             $result,
             'Emergency Retrieved Successfully',
@@ -99,12 +99,12 @@ class EmergencyController extends Controller
     /**
      * Delete an emergency.
      *
-     * @param Emergency $emergency The emergency to delete.
+     * @param int  $emergency_id The emergency to delete.
      * @return \Illuminate\Http\JsonResponse A JSON response confirming deletion.
      */
-    public function destroy(Emergency $emergency)
+    public function destroy(int $emergency_id)
     {
-        $this->emergencyService->deleteEmergency($emergency);
+        $this->emergencyService->deleteEmergency($emergency_id);
         return self::success(
             null,
             'Emergency Deleted Successfully',

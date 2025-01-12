@@ -217,11 +217,6 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::apiResource('permissions', PermissionController::class);
-    Route::get('/deletedPermissions', [PermissionController::class, 'deletedPermissions']);
-    Route::post('/permissions/{permission}/restore', [PermissionController::class, 'restorePermission']);
-    Route::delete('/permissions/{permission}/finalDelete', [PermissionController::class, 'forceDeletePermission']);
-    //});
-
 });
 
 Route::middleware(['auth:api'])->group(function () {

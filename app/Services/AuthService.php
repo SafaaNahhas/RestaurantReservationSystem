@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Enums\RoleUser;
 use App\Models\User;
+use App\Enums\RoleUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class AuthService
@@ -25,10 +26,18 @@ class AuthService
     public function login($credentials)
     {
         if (!$token = Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return [
+                'error' => true,
+                'message' => 'Unauthorized',
+                'status' => 401,
+            ];
         }
 
-        return response()->json($this->respondWithToken($token));
+        return [
+            'error' => false,
+            'data' => $this->respondWithToken($token),
+            'status' => 200,
+        ];
     }
 
     /**
@@ -44,9 +53,12 @@ class AuthService
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
         $user->save();
-        // assign customer role to user
+
+        // Assign customer role to user
         $user->assignRole(RoleUser::Customer);
-        $token = Auth::login($user);
+
+        // Generate token using JWT
+        $token = JWTAuth::fromUser($user);
 
         return [
             'message' => 'User created successfully',

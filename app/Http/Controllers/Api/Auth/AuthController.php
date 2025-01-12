@@ -45,8 +45,13 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $response = $this->authService->login($credentials);
 
-        return response()->json($response);
+        if ($response['error']) {
+            return response()->json(['message' => $response['message']], $response['status']);
+        }
+
+        return response()->json($response['data'], $response['status']);
     }
+
 
     /**
      * Handle the registration request.
@@ -56,10 +61,13 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {
-        $response = $this->authService->register($request->all());
+        $validatedData = $request->validated();
+
+        $response = $this->authService->register($validatedData);
 
         return response()->json($response, $response['status']);
     }
+
 
     /**
      * Handle the logout request.
@@ -90,17 +98,14 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         try {
-            // استرجاع المستخدم الذي تم توثيقه بناءً على التوكن
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
 
-            // إرجاع بيانات المستخدم مع الـ 200 OK
             return response()->json(['user' => $user], 200);
         } catch (JWTException $e) {
-            // في حال حدوث أي خطأ في التوكن
             return response()->json(['error' => 'Token is invalid'], 401);
         }
     }

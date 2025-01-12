@@ -6,16 +6,16 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Services\ReservationService;
+use App\Services\Reservation\ReservationService;
+use App\Http\Resources\Reservation\ReservationResource;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
 use App\Http\Resources\Reservation\TableReservationResource;
 use App\Http\Resources\Reservation\ShowTableReservationResource;
 use App\Http\Requests\ReservationRequest\StoreReservationRequest;
 use App\Http\Resources\Reservation\FaildTableReservationResource;
 use App\Http\Requests\ReservationRequest\CancelReservationRequest;
 use App\Http\Requests\ReservationRequest\UpdateReservationRequest;
-use App\Http\Resources\Reservation\ReservationResource;
-use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
 
 class ReservationController extends Controller
 {
@@ -264,9 +264,11 @@ class ReservationController extends Controller
         return response()->json(['error' => false,'most_frequent_user' => $result['most_frequent_user'],], 200);
     }
     ////////////////////////////////////////////////////////////////////////////////////////
-  /** * Get reservations with 'in_service' status for a specific user.
+    /**
+     * Get reservations with 'in_service' status for a specific user.
      *
-     * @return \Illuminate\Http\Response */
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function getInServiceReservations()
     {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Reservation;
 
 use Exception;
 use Carbon\Carbon;
@@ -361,12 +361,6 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} confirmed by User ID {$reservation->user_id}.");
             $notificationSettings = $reservation->user->notificationSettings;
-            // // Check if send_notification_options is already an array or needs to be decoded
-            // $sendNotificationOptions = is_array($notificationSettings->send_notification_options)
-            //     ? $notificationSettings->send_notification_options
-            //     : (json_decode($notificationSettings->send_notification_options, true) ?: []);
-            // // Check if "confirm" is in the decoded array
-            // if ($notificationSettings && in_array("confirm", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "✅ Reservation Confirmed!\n\n";
@@ -391,18 +385,7 @@ class ReservationService
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            // } else {
-            //     return [
-            //         'error' => false,
-            //         'message' => 'Reservation confirmed successfully, but User has not opted for confirmation notifications.',
-            //         'data' => [
-            //             'reservation_id' => $reservation->id,
-            //             'table_number' => $reservation->table->table_number,
-            //             'start_date' => $reservation->start_date,
-            //             'end_date' => $reservation->end_date,
-            //         ],
-            //     ];
-            // }
+
             // Return response with notification status included
             return [
                 'error' => false,
@@ -466,12 +449,6 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
             $notificationSettings = $reservation->user->notificationSettings;
-            // // Check if send_notification_options is already an array or needs to be decoded
-            // $sendNotificationOptions = is_array($notificationSettings->send_notification_options)
-            //     ? $notificationSettings->send_notification_options
-            //     : (json_decode($notificationSettings->send_notification_options, true) ?: []);
-            // // Check if "reject" is in the decoded array
-            // if ($notificationSettings && in_array("reject", $sendNotificationOptions)) {
                 $botToken = env('TELEGRAM_BOT_TOKEN');
                 $chatId = $notificationSettings->telegram_chat_id;
                 $message = "❌ Reservation Rejected!\n\n";
@@ -496,20 +473,6 @@ class ReservationService
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            // }
-            // else {
-            //     return [
-            //         'error' => false,
-            //         'message' => 'Reservation rejected successfully But User has not opted for rejection notifications.',
-            //         'data' => [
-            //             'reservation_id' => $reservation->id,
-            //             'table_number' => $reservation->table->table_number,
-            //             'start_date' => $reservation->start_date,
-            //             'end_date' => $reservation->end_date,
-            //             'rejection_reason' => $rejectionReason,
-            //         ],
-            //     ];
-            // }
             // Return response with notification status included
             return [
                 'error' => false,

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Events\EmergencyOccurred;
 use App\Jobs\Emergency\SendEmergencyClosureJob;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,9 +42,9 @@ class Emergency extends Model
                     // Update the reservation status to "cancelled"
                     $reservation->update(['status' => 'cancelled']);
                 }
-                $emailLogService = new EmailLogService();
+                $notificationLogService = new NotificationLogService();
                 // Dispatch a job to notify affected reservations about the emergency closure
-                SendEmergencyClosureJob::dispatch($affectedReservations, $emailLogService);
+                SendEmergencyClosureJob::dispatch($affectedReservations, $notificationLogService);
             });
         });
     }

@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
  use App\Services\NotificationLogService;
  use Illuminate\Console\Command;
-use App\Services\EmailLogService;
-use Illuminate\Support\Facades\Log;
+ use Illuminate\Support\Facades\Log;
  use App\Jobs\SendDailyReservationReportJob;
 
 class SendDailyReservationReport extends Command

@@ -112,9 +112,9 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return HasMany
      */
-    public function emailLogs(): HasMany
+    public function notificationLogs(): HasMany
     {
-        return $this->hasMany(EmailLog::class);
+        return $this->hasMany(NotificationLog::class);
     }
 
     /**
@@ -150,11 +150,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function notificationSettings()
     {
-        return $this->hasOne(NotificationSettings::class );
+        return $this->hasOne(NotificationSettings::class);
     }
-
-
-
-
-
 }

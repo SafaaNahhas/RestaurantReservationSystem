@@ -3,12 +3,12 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use App\Jobs\SendManagerDailyReservationReportJob;
 
 class SendManagerDailyReservationReport extends Command
 {
-    /**
+    /** 
      * The name and signature of the console command.
      *
      * @var string
@@ -28,9 +28,9 @@ class SendManagerDailyReservationReport extends Command
     public function handle()
     {
         $this->info('Dispatching daily reservation report jobs for managers...');
-        $emailLogService = new EmailLogService();
+        $notificationLogService = new NotificationLogService();
 
-        SendManagerDailyReservationReportJob::dispatch($emailLogService);
+        SendManagerDailyReservationReportJob::dispatch($notificationLogService);
 
         $this->info('Daily reservation report jobs for managers dispatched successfully!');
     }

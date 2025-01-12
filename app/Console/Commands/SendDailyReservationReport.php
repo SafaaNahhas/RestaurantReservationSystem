@@ -2,13 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
-use App\Models\Reservation;
-use Illuminate\Console\Command;
-use App\Services\EmailLogService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Jobs\SendDailyReservationReportJob;
+ use App\Services\NotificationLogService;
+ use Illuminate\Console\Command;
+ use Illuminate\Support\Facades\Log;
+ use App\Jobs\SendDailyReservationReportJob;
 
 class SendDailyReservationReport extends Command
 {
@@ -37,9 +34,9 @@ class SendDailyReservationReport extends Command
     {
         Log::info('Starting scheduled command to dispatch SendDailyReservationReport job.');
         $this->info('Dispatching daily reservations report job...');
-        $emailLogService = new EmailLogService();
+        $notificationLogService = new NotificationLogService();
 
-        SendDailyReservationReportJob::dispatch($emailLogService);
+        SendDailyReservationReportJob::dispatch($notificationLogService);
         $this->info('Daily reservations report job dispatched successfully!');
         Log::info('SendDailyReservationReport job successfully dispatched.');
     }

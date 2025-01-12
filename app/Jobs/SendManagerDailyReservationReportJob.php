@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\EmailLog;
 use App\Models\Reservation;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -20,14 +20,14 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected EmailLogService $emailLogService;
+    protected NotificationLogService $notificationLogService;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(EmailLogService $emailLogService)
+    public function __construct(NotificationLogService $notificationLogService)
     {
-        $this->emailLogService = $emailLogService;
+        $this->notificationLogService = $notificationLogService;
     }
 
     /**
@@ -76,17 +76,18 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
                 try {
                     Mail::send('emails.manager_daily_reservation_report', $data, function ($message) use ($manager) {
                         $message->to($manager->email)
-                                ->subject('Daily Reservations Report for Your Department');
+                            ->subject('Daily Reservations Report for Your Department');
                     });
 
-                    $emailLog = $this->emailLogService->createEmailLog(
-                        $manager->id,
-                        'Manger Daily Reservations',
-                        'Daily Reservation Report in '.now()
+                    $emailLog = $this->notificationLogService->createNotificationLog(
+                        user_id: $manager->id,
+                        notification_method: 'mail',
+                        reason_notification_send: 'Manger Daily Reservations',
+                        description: 'Daily Reservation Report in ' . now()
                     );
                 } catch (\Exception $e) {
                     Log::error('Error in sending email to manager ' . $manager->id . ': ' . $e->getMessage());
-                    $this->emailLogService->updateEmailLog(
+                    $this->notificationLogService->updateNotificationLog(
                         $emailLog,
                         'Failed to send Daily Reservation Report to manager ' . $manager->id . ' at ' . now()
                     );

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
 
-class emaillogrequest extends FormRequest
+class NotificationLogRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,9 +28,10 @@ class emaillogrequest extends FormRequest
         return [
             'status' => 'nullable|string|in:sent,failed',
             'created_at' => 'nullable|date',
-            'email_type' => 'nullable|string|max:255',
+            'notification_method' => 'nullable|string|max:255',
+            'reason_notification_send' => 'nullable|string|max:255',
             'user_id' => 'nullable|integer|exists:users,id',
-            'emaillog_id' => 'nullable|integer|exists:email_logs,id',
+            'notificationlog_id' => 'nullable|integer|exists:notification_logs,id',
         ];
     }
 
@@ -44,9 +45,10 @@ class emaillogrequest extends FormRequest
         Log::info('Email Log form validation passed', [
             'status' => $this->status,           // Email delivery status
             'created_at' => $this->created_at,   // Email timestamp
-            'email_type' => $this->email_type,   // Type of email sent
+            'notification_method' => $this->notification_method,   // Type of email sent
+            'reason_notification_send' => $this->reason_notification_send,   // Type of email sent
             'user_id' => $this->user_id,         // Associated user
-            'emaillog_id' => $this->emaillog_id, // Email log reference
+            'notification_id' => $this->notification_id, // Email log reference
             'ip' => $this->ip(),                 // Client IP for audit
             'user_agent' => $this->userAgent(),  // Browser/device info
             'timestamp' => now(),                // Server timestamp

@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use Exception;
-use App\Models\User;
 use App\Models\Event;
-use App\Models\EmailLog;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCustomerCreateEvent;
@@ -55,22 +53,22 @@ class EventService
      */
     public function createEvent(array $data)
     {
-        try {
-            $event = Event::create($data);
-            // get all email to customer
-            $customers = Role::findByName('Customer')->users;
-            // send email
+        $event = Event::create($data);
+        // get all email to customer
+        $customers = Role::findByName('Customer')->users;
+        // send email
 
-            $emailLogService = new EmailLogService();
-            SendCustomerCreateEvent::dispatch($event, $customers,false, $emailLogService);
-            return $event;
+        $notificationLogService = new NotificationLogService();
+        SendCustomerCreateEvent::dispatch($event, $customers, false, $notificationLogService);
+        return $event;
+        try {
         } catch (Exception $e) {
             Log::error('Error creating event: ' . $e->getMessage());
             throw new \RuntimeException('Unable to create event.');
         }
     }
 
-     /**
+    /**
      * Retrieve an event by ID with its reservations.
      *
      * @param int $id
@@ -84,7 +82,6 @@ class EventService
             return $event;
         } catch (ModelNotFoundException $e) {
             return self::error(null, 'event not found.', 404);
-
         } catch (\Exception $e) {
             // Handle any other unexpected errors
             throw new \Exception("An error occurred while retrieving the event: " . $e->getMessage());
@@ -113,9 +110,9 @@ class EventService
             $isUpdated = true;
 
             // send email
-            $emailLogService = new EmailLogService();
+            $notificationLogService = new NotificationLogService();
 
-            SendCustomerCreateEvent::dispatch($event, $customers,true, $emailLogService);
+            SendCustomerCreateEvent::dispatch($event, $customers, true, $notificationLogService);
             return $event;
         } catch (Exception $e) {
             // Log the error and throw a runtime exception.
@@ -144,5 +141,4 @@ class EventService
             throw new \RuntimeException('Unable to delete event.');
         }
     }
-
 }

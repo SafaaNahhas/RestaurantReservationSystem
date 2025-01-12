@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Reservation;
-use App\Models\User;
 use App\Notifications\PendingReservationNotification;
 use App\Services\EmailLogService;
 use Illuminate\Bus\Queueable;
@@ -130,7 +129,6 @@ class NotifyManagersAboutReservation implements ShouldQueue
                 'manager_id' => $departmentManager->id,
                 'department_id' => $this->reservation->table->department_id
             ]);
-
         } catch (Throwable $e) {
             Log::error('Error sending notification to department manager', [
                 'reservation_id' => $this->reservation->id,
@@ -164,5 +162,3 @@ class NotifyManagersAboutReservation implements ShouldQueue
         }
     }
 }
-
-

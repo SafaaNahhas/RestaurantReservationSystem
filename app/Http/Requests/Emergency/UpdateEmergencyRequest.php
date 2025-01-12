@@ -37,6 +37,7 @@ class UpdateEmergencyRequest extends FormRequest
             'start_date'  => 'nullable|date|after_or_equal:today',
             'end_date'    => 'nullable|date|after:start_date',
             'description' => 'nullable|string',
+            'is_active'   => 'nullable|boolean'
         ];
     }
 
@@ -52,6 +53,7 @@ class UpdateEmergencyRequest extends FormRequest
             'start_date'  => 'Emergency start date',
             'end_date'    => 'Emergency end date',
             'description' => 'Emergency situation details',
+            'is_active'      => 'Emergency status'
         ];
     }
 
@@ -78,6 +80,9 @@ class UpdateEmergencyRequest extends FormRequest
 
             // Description validation messages
             'description.string' => 'The :attribute must be text',
+
+            // is_active validation messages
+            'is_active.boolean'  => 'The :attribute must be boolean value'
         ];
     }
 
@@ -95,6 +100,7 @@ class UpdateEmergencyRequest extends FormRequest
             'start_date'  => $this->start_date,
             'end_date'    => $this->end_date,
             'description' => !empty($this->description) ? $this->description : null,
+            'is_active'   => $this->is_active
         ]);
     }
 

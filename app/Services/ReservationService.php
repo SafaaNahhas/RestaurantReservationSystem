@@ -6,7 +6,7 @@ use Exception;
 use Carbon\Carbon;
 use App\Models\Table;
 use App\Models\Reservation;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use App\Jobs\SendRatingRequestJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,10 +21,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReservationService
 {
-    protected $emailLogService;
-    public function __construct(EmailLogService $emailLogService)
+    protected $notificationLogService;
+    public function __construct(NotificationLogService  $notificationLogService)
     {
-        $this->emailLogService = $emailLogService;
+        $this->notificationLogService = $notificationLogService;
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -39,7 +39,7 @@ class ReservationService
      * @return array The result of the reservation operation, including status code and message.
      */
     public function storeReservation(array $data)
-        {
+    {
         try {
             $startDate = Carbon::parse($data['start_date']);
             $endDate = Carbon::parse($data['end_date']);
@@ -47,12 +47,14 @@ class ReservationService
             if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
                 return [
                     'status_code' => 422,
-                    'message' => 'Reservations cannot be made for dates more than two weeks from today.'];
+                    'message' => 'Reservations cannot be made for dates more than two weeks from today.'
+                ];
             }
             if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
                 return [
                     'status_code' => 422,
-                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.' ];
+                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
+                ];
             }
             // Fetch the table with department and manager relationships
             $selectedTable = Table::with('department.manager')
@@ -60,14 +62,14 @@ class ReservationService
                     return $query->where('table_number', $data['table_number']);
                 }, function ($query) use ($data) {
                     return $query->where('seat_count', '>=', $data['guest_count'])
-                                ->orderBy('seat_count', 'asc');
+                        ->orderBy('seat_count', 'asc');
                 })
                 ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('start_date', [$startDate, $endDate])
                         ->orWhereBetween('end_date', [$startDate, $endDate])
                         ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
                             $nestedQuery->where('start_date', '<', $startDate)
-                                        ->where('end_date', '>', $endDate);
+                                ->where('end_date', '>', $endDate);
                         });
                 })
                 ->select(['id', 'table_number', 'seat_count', 'department_id'])
@@ -85,7 +87,7 @@ class ReservationService
                         ->orWhereBetween('end_date', [$startDate, $endDate])
                         ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
                             $nestedQuery->where('start_date', '<', $startDate)
-                                        ->where('end_date', '>', $endDate);
+                                ->where('end_date', '>', $endDate);
                         });
                 })
                     ->with('reservations')
@@ -133,13 +135,13 @@ class ReservationService
                 'status' => 'pending',
                 'manager_id' => $selectedTable->load('department.manager')->department->manager->id ?? null,
             ]);
-             // Clear relevant cache keys
+            // Clear relevant cache keys
             Cache::forget('tables_with_reservations_all');
             if (isset($data['status'])) {
                 Cache::forget('tables_with_reservations_' . $data['status']);
             }
             // Notify managers
-            NotifyManagersAboutReservation::dispatch($reservation, $this->emailLogService);
+            NotifyManagersAboutReservation::dispatch($reservation, $this->notificationLogService);
             // Get the department and manager details
             $department = $selectedTable->department;
             $manager = $department->manager;
@@ -167,7 +169,9 @@ class ReservationService
             Log::error('Error storing reservation: ' . $e->getMessage());
             return [
                 'status_code' => 500,
-                'message' => 'An unexpected error occurred.' ];}
+                'message' => 'An unexpected error occurred.'
+            ];
+        }
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -186,9 +190,10 @@ class ReservationService
             if (!$reservation) {
                 return [
                     'status_code' => 404,
-                    'message' => 'Reservation not found.'];
+                    'message' => 'Reservation not found.'
+                ];
             }
-             // Ensure the reservation is in "pending" state before allowing updates
+            // Ensure the reservation is in "pending" state before allowing updates
             if ($reservation->status !== 'pending') {
                 return [
                     'status_code' => 422,
@@ -202,7 +207,8 @@ class ReservationService
             if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
                 return [
                     'status_code' => 422,
-                    'message' => 'Reservations cannot be updated for dates more than two weeks from today.'];
+                    'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
+                ];
             }
             // Ensure the reservation duration does not exceed 6 hours and is on the same day
             if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
@@ -223,7 +229,7 @@ class ReservationService
                         ->orWhereBetween('end_date', [$startDate, $endDate])
                         ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
                             $nestedQuery->where('start_date', '<', $startDate)
-                                        ->where('end_date', '>', $endDate);
+                                ->where('end_date', '>', $endDate);
                         })
                         ->where('id', '!=', $reservationId);
                 })
@@ -249,7 +255,7 @@ class ReservationService
                         ->orWhereBetween('end_date', [$startDate, $endDate])
                         ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
                             $nestedQuery->where('start_date', '<', $startDate)
-                                        ->where('end_date', '>', $endDate);
+                                ->where('end_date', '>', $endDate);
                         });
                 })
                     ->with('reservations')
@@ -271,7 +277,7 @@ class ReservationService
                 'guest_count' => $data['guest_count'],
                 'services' => $data['services'] ?? null,
             ]);
-             // Clear relevant cache keys
+            // Clear relevant cache keys
             Cache::forget('tables_with_reservations_all');
             if (isset($data['status'])) {
                 Cache::forget('tables_with_reservations_' . $data['status']);
@@ -299,15 +305,15 @@ class ReservationService
     public function getAllTablesWithReservations(array $filter = [])
     {
         try {
-        $cacheKey = 'tables_with_reservations_'  . md5(json_encode($filter));
-        $cacheTTL = 600;
-        return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
-            return Table::with(['reservations' => function ($query) use ($filter) {
-                if (isset($filter['status'])) {
-                    $query->where('status', $filter['status']);
-                }
-            }])->get();
-        });
+            $cacheKey = 'tables_with_reservations_'  . md5(json_encode($filter));
+            $cacheTTL = 600;
+            return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
+                return Table::with(['reservations' => function ($query) use ($filter) {
+                    if (isset($filter['status'])) {
+                        $query->where('status', $filter['status']);
+                    }
+                }])->get();
+            });
         } catch (Exception $e) {
             // Log the exception for debugging purposes
             Log::error('Error fetching tables with reservations: ' . $e->getMessage());
@@ -634,7 +640,6 @@ class ReservationService
                     'cancellation_reason' => $cancellationReason,
                 ],
             ];
-
         } catch (ModelNotFoundException $e) {
             Log::warning("Reservation with ID {$reservationId} not found.");
             return [
@@ -710,14 +715,14 @@ class ReservationService
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
-             // Clear cache for related reservation data
-             if ($reservation->status === 'pending') {
+            // Clear cache for related reservation data
+            if ($reservation->status === 'pending') {
                 Cache::forget('tables_with_reservations_pending');
             }
             Cache::forget('tables_with_reservations_all');
             // Dispatch job to send a rating request email
-            $emailLogService = new EmailLogService();
-            SendRatingRequestJob::dispatch($reservation, $emailLogService);
+            $notificationLogService = new NotificationLogService();
+            SendRatingRequestJob::dispatch($reservation, $notificationLogService);
             return [
                 'error' => false,
                 'reservation' => $reservation,
@@ -741,7 +746,7 @@ class ReservationService
             // Retrieve the reservation
             $reservation = Reservation::findOrFail($reservationId);
             // Ensure the reservation meets the conditions for soft deletion
-            if (!in_array($reservation->status, ['completed', 'rejected','cancelled']) ) {
+            if (!in_array($reservation->status, ['completed', 'rejected', 'cancelled'])) {
                 return [
                     'error' => true,
                     'message' => 'Soft delete is only allowed for completed, rejected,cancelled or past reservations.',
@@ -847,7 +852,7 @@ class ReservationService
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
-    * Retrieve all soft-deleted reservations.
+     * Retrieve all soft-deleted reservations.
      *
      * @return array Response containing soft-deleted reservations or an error message.
      */
@@ -888,11 +893,11 @@ class ReservationService
             $reservations = Reservation::whereHas('table.department', function ($query) use ($managerId) {
                 $query->where('manager_id', $managerId);
             })
-            ->when(isset($filter['status']), function ($query) use ($filter) {
-                $query->whereIn('status', (array)$filter['status']);
-            })
-            ->with(['table:id,table_number', 'user:id,name,email'])
-            ->get();
+                ->when(isset($filter['status']), function ($query) use ($filter) {
+                    $query->whereIn('status', (array)$filter['status']);
+                })
+                ->with(['table:id,table_number', 'user:id,name,email'])
+                ->get();
             return [
                 'error' => false,
                 'reservations' => $reservations,
@@ -938,7 +943,8 @@ class ReservationService
             Log::error('Error fetching most frequent user: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'An unexpected error occurred. ' . $e->getMessage(),            ];
+                'message' => 'An unexpected error occurred. ' . $e->getMessage(),
+            ];
         }
     }
-    }
+}

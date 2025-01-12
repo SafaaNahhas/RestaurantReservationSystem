@@ -11,7 +11,6 @@ use App\Services\Favorite\FavoriteService;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Http\Requests\Favorite\AddToFavoritesRequest;
 use App\Http\Resources\Favorite\FavoriteResource;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class FavoriteController extends Controller
 {
@@ -37,15 +36,15 @@ class FavoriteController extends Controller
 
         // Fetching data with filtering and pagination application
         $favorites = Favorite::when($type, function ($query, $type) {
-            return $query->byType($type); 
-        })->paginate($perPage); 
+            return $query->byType($type);
+        })->paginate($perPage);
 
         return $this->paginated($favorites, FavoriteResource::class, 'Favorite fetched successfully', 200);
     }
 
 
 
-//************************************************************************* */
+    //************************************************************************* */
 
     /**
      * Store a newly created favorite (table or food category) in storage.
@@ -136,7 +135,7 @@ class FavoriteController extends Controller
         }
     }
 
-//************************************************************************* */
+    //************************************************************************* */
 
     /**
      * Restore a deleted favorite.
@@ -156,7 +155,7 @@ class FavoriteController extends Controller
         }
     }
 
-//*********************************************************** */
+    //*********************************************************** */
 
     /**
      * Permanently delete a favorite.

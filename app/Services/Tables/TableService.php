@@ -24,7 +24,7 @@ class TableService
         try {
             Department::findOrFail($department_id);
 
-            $tables = Table::where('department_id','=',$department_id)
+            $tables = Table::where('department_id', '=', $department_id)
                 ->byTableNumber($fillters['table_number'])
                 ->bySeatCount($fillters['seat_count'])
                 ->byLocation($fillters['location'])
@@ -36,7 +36,7 @@ class TableService
             throw new HttpResponseException(response()->json(
                 [
                     'status' => 'error',
-                    'message' => "we didn't find any relation",
+                    'message' => "we didn't find any thing",
                 ],
                 404
             ));

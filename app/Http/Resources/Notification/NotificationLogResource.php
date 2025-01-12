@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Email;
+namespace App\Http\Resources\Notification;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmailLogResource extends JsonResource
+class NotificationLogResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,7 +17,8 @@ class EmailLogResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'email_type' => $this->email_type,
+            'notification_method' => $this->notification_method,
+            'reason_notification_send' => $this->reason_notification_send,
             'status' => $this->status,
             'description' => $this->description,
             'created_at' => $this->created_at,

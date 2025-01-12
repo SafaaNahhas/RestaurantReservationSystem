@@ -44,7 +44,15 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        Table::factory()->count(5)->create();
+        for ($i = 0; $i < 5; $i++) {
+            $table = [
+                'table_number' =>  Str::random(3) . random_int(1, 3),
+                'location' =>  Str::random(30),
+                'seat_count' =>  random_int(1, 10),
+                'department_id' => $department->id,
+            ];
+            Table::create($table);
+        }
 
         $response = $this->get("api/departments/$department->id/tables", [
             "Authorization" => 'Bearer ' . $token,
@@ -56,8 +64,15 @@ class TableTest extends TestCase
         $data = $this->startCode();
         $department = $data['department'];
         $token = $data['token'];
-
-        Table::factory()->count(5)->create();
+        for ($i = 0; $i < 5; $i++) {
+            $table = [
+                'table_number' =>  Str::random(3) . random_int(1, 3),
+                'location' =>  Str::random(30),
+                'seat_count' =>  random_int(1, 10),
+                'department_id' => $department->id,
+            ];
+            Table::create($table);
+        }
         $x = ($department->id) + 100;
         $response = $this->get("api/departments/$x/tables", [
             "Authorization" => 'Bearer ' . $token,
@@ -70,7 +85,14 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $response = $this->get("api/departments/$department->id/tables/$table->id", [
             "Authorization" => 'Bearer ' . $token,
         ]);
@@ -81,8 +103,13 @@ class TableTest extends TestCase
         $data = $this->startCode();
         $department = $data['department'];
         $token = $data['token'];
-
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $x = ($department->id) + 100;
         $response = $this->get("api/departments/$x/tables", [
             "Authorization" => 'Bearer ' . $token,
@@ -95,7 +122,14 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $x = ($table->id) + 100;
         $response = $this->get("api/departments/$department->id/tables/$x", [
             "Authorization" => 'Bearer ' . $token,
@@ -128,8 +162,9 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
+        $x = ($department->id) + 100;
         $response = $this->post(
-            "api/departments/$department->id/tables",
+            "api/departments/$x/tables",
             [
                 'table_number' => Str::random(30),
                 'location' => Str::random(30),
@@ -139,10 +174,10 @@ class TableTest extends TestCase
                 "Authorization" => 'Bearer ' . $token,
             ]
         );
-        $response->assertStatus(422);
+        $response->assertStatus(404);
     }
 
-    public function test_create_new_table_deplucted_table_number(): void
+    public function test_create_new_table_duplicate_table_number(): void
     {
         $data = $this->startCode();
         $department = $data['department'];
@@ -182,7 +217,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
 
         $response = $this->put(
             "api/departments/$department->id/tables/$table->id",
@@ -203,7 +244,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
 
         $x = ($table->id) + 100;
         $response = $this->put(
@@ -220,14 +267,32 @@ class TableTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_update_table_deplucted_table_number(): void
+    public function test_update_table_duplicate_table_number(): void
     {
         $data = $this->startCode();
         $department = $data['department'];
         $token = $data['token'];
 
-        $table1 = Table::factory()->create();
-        $table2 = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table1 = Table::create($table);
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table2 = Table::create($table);
 
         $response = $this->put(
             "api/departments/$department->id/tables/$table2->id",
@@ -249,7 +314,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
 
         $response = $this->delete(
             "api/departments/$department->id/tables/$table->id",
@@ -267,7 +338,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
 
         $x = ($table->id) + 100;
 
@@ -287,7 +364,16 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        Table::factory()->count(5)->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            $table = [
+                'table_number' =>  Str::random(3) . random_int(1, 3),
+                'location' =>  Str::random(30),
+                'seat_count' =>  random_int(1, 10),
+                'department_id' => $department->id,
+            ];
+            Table::create($table);
+        }
         $tables = Table::all();
         foreach ($tables as $table) {
             $table->delete();
@@ -304,7 +390,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $table->delete();
         $response = $this->post(
             "api/departments/$department->id/tables/$table->id/restore",
@@ -321,7 +413,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $table->delete();
 
         $x = ($table->id) + 100;
@@ -341,7 +439,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $this->delete(
             "api/departments/$department->id/tables/$table->id/delete",
             headers: [
@@ -363,7 +467,13 @@ class TableTest extends TestCase
         $department = $data['department'];
         $token = $data['token'];
 
-        $table = Table::factory()->create();
+        $table = [
+            'table_number' =>  Str::random(3) . random_int(1, 3),
+            'location' =>  Str::random(30),
+            'seat_count' =>  random_int(1, 10),
+            'department_id' => $department->id,
+        ];
+        $table = Table::create($table);
         $this->delete(
             "api/departments/$department->id/tables/$table->id/delete",
             headers: [

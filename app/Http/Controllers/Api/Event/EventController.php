@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Event;
 
 
-use Log;
 use Exception;
 use App\Models\Event;
 use App\Services\EventService;
@@ -12,7 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Event\EventResource;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
-
+use Illuminate\Support\Facades\Log;
 
 /**
  * EventController - Handles operations related to events.
@@ -70,7 +69,6 @@ class EventController extends Controller
 
         // Return a success response indicating that the event was created successfully.
         return self::success(new EventResource($event), 'Event created successfully.', 201);
-
     }
 
     /**
@@ -83,10 +81,9 @@ class EventController extends Controller
      */
     public function show($id)
     {
-            // Use EventService to retrieve the event
-            $event = $this->eventService->getEventById($id);
-            return self::success(new EventResource($event), 'Event retrieved successfully.');
-
+        // Use EventService to retrieve the event
+        $event = $this->eventService->getEventById($id);
+        return self::success(new EventResource($event), 'Event retrieved successfully.');
     }
     /**
      * Update the specified event.
@@ -105,7 +102,6 @@ class EventController extends Controller
 
         // Return a success response indicating that the event was updated successfully.
         return self::success(new EventResource($updatedEvent), 'Event updated successfully.');
-
     }
 
     /**
@@ -123,11 +119,10 @@ class EventController extends Controller
 
         // Return a success response indicating that the event was deleted successfully.
         return self::success(null, 'Event deleted successfully.');
-
     }
 
 
- /**
+    /**
      * Retrieve a list of soft-deleted Event.
      *
      * @return JsonResponse
@@ -166,7 +161,7 @@ class EventController extends Controller
             return self::error(null, 'Event not found.', 404);
         } catch (\Exception $e) {
             // Log the error
-            \Log::error('Error restoring event: ' . $e->getMessage());
+            Log::error('Error restoring event: ' . $e->getMessage());
             return self::error(null, 'An error occurred while restoring the event.', 500);
         }
     }
@@ -187,9 +182,8 @@ class EventController extends Controller
             return self::error(null, 'Event not found.', 404);
         } catch (Exception $e) {
             // Log the error
-            \Log::error('Error permanently deleting event: ' . $e->getMessage());
+            Log::error('Error permanently deleting event: ' . $e->getMessage());
             return self::error(null, 'An error occurred while permanently deleting the event.', 500);
         }
     }
-
 }

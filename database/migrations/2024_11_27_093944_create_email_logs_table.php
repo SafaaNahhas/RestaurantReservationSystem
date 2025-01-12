@@ -8,13 +8,15 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+
     public function up(): void
     {
-        Schema::create('email_logs', function (Blueprint $table) {
+        Schema::create('notifications_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('email_type');
+            $table->enum('notification_method', ['mail', 'telegram']);
             $table->enum('status', ['sent', 'failed', 'pending'])->default('pending');
+            $table->string('reason_notification_send');
             $table->string('description');
             $table->softDeletes();
             $table->timestamps();
@@ -26,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('email_logs');
+        Schema::dropIfExists('notifications_logs');
     }
 };

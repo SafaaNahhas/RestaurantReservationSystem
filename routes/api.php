@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\RoleAndPermission\RoleController;
 use App\Http\Controllers\Api\Reservation\ReservationController;
 use App\Http\Controllers\Api\RoleAndPermission\PermissionController;
 use App\Http\Controllers\Api\Auth\NotificationSettingsController;
+use App\Http\Controllers\Api\Notification\NotificationLogController;
 
 // ***********  Auth Routes ****************************
 
@@ -54,10 +55,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('reservations/get-soft-deleted', [ReservationController::class, 'getSoftDeletedReservations']);
     Route::get('/reservations/manager/{managerId}', [ReservationController::class, 'getReservationsByManager']);
     Route::get('/reservations/most-frequent-user', [ReservationController::class, 'getMostFrequentUser']);
-
-
     Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations']);
-
 });
 
 
@@ -110,11 +108,22 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::post('departments/{department}/tables/{table}/restore', [TableController::class, 'restoreTable']);
     Route::delete('departments/{department}/tables/{table}/forceDelete', [TableController::class, 'forceDeleteTable']);
 });
-// Define API resource routes for EmailLog
-Route::apiResource('emaillog', EmailLogController::class);
 
-// Define a route for soft deleting email logs
-Route::delete('softdeletemaillog', [EmailLogController::class, 'deleteEmailLogs']);
+// ***********  NotificationLog Routes **********************
+Route::middleware(['auth:api'])->group(function () {
+    // Define API resource routes for notification log
+    Route::get('notificationLogs', [NotificationLogController::class, 'index']);
+    // Define a route for soft deleting notification logs
+    Route::get('notificationLogs/{notificationlogs}', [NotificationLogController::class, 'show']);
+    // Define a route for soft deleting notification logs
+    Route::delete('softDeleteNotificationLogs', [NotificationLogController::class, 'deleteNotificationLogs']);
+    // Define a route for retrieving deleted notification logs
+    Route::get('getDeletedNotificationLogs', [NotificationLogController::class, 'getDeletedNotificationLogs']);
+    // Define a route for permanently deleting a soft-deleted notification log
+    Route::delete('permanentlyDeleteNotificationLog/{notificationlogs}', [NotificationLogController::class, 'permanentlyDeleteNotificationLog']);
+    // Define a route for restoring a soft-deleted notification log
+    Route::post('restore/{notificationlogs}', [NotificationLogController::class, 'restoreNotificationLog']);
+});
 
 
 // ********* Departments Routes ***********************************
@@ -137,8 +146,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('department', [DepartmentController::class, 'index']); // Get all departments
     Route::get('department/{id}', [DepartmentController::class, 'show']); // Get a specific department
 });
-// Define a route for retrieving deleted email logs
-Route::get('getemailogs', [EmailLogController::class, 'getDeletedEmailLogs']);
 
 // ************ Event Routes *************************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
@@ -190,13 +197,10 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::get('show-deleted-users', [UserController::class, 'trashedUsers']);
     Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
 });
-// Define a route for permanently deleting a soft-deleted email log
-Route::delete('premanentdeletemaillog/', [EmailLogController::class, 'permanentlyDeleteEmailLog']);
 Route::middleware(['auth:api'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'update']);
-    // Define a route for restoring a soft-deleted email log
-    Route::post('restore/', [EmailLogController::class, 'restoreEmailLog']);
 });
+
 // ********** Emergency Routes *****************************
 
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
@@ -225,9 +229,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('notificationSettings', [NotificationSettingsController::class, 'update']);
     Route::get('checkIfNotificationSettingsExsits', [NotificationSettingsController::class, 'checkIfNotificationSettingsExsits']);
     Route::post('resetNotificationSettings', [NotificationSettingsController::class, 'resetNotificationSettings']);
-
 });
-Route::apiResource('notificationSettings', NotificationSettingsController::class)->only('store','update');
+Route::apiResource('notificationSettings', NotificationSettingsController::class)->only('store', 'update');
 //*********** payment route**********************************
 
 Route::post('/process-payment', [PaymentController::class, 'processPayment']);

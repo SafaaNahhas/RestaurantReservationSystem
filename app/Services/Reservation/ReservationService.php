@@ -56,24 +56,9 @@ class ReservationService
                     'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
                 ];
             }
-            // Fetch the table with department and manager relationships
-            $selectedTable = Table::with('department.manager')
-                ->when(isset($data['table_number']), function ($query) use ($data) {
-                    return $query->where('table_number', $data['table_number']);
-                }, function ($query) use ($data) {
-                    return $query->where('seat_count', '>=', $data['guest_count'])
-                        ->orderBy('seat_count', 'asc');
-                })
-                ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                            $nestedQuery->where('start_date', '<', $startDate)
-                                ->where('end_date', '>', $endDate);
-                        });
-                })
-                ->select(['id', 'table_number', 'seat_count', 'department_id'])
-                ->first();
+          // Use findAvailableTable to find a suitable table
+          $selectedTable = $this->findAvailableTable($data, $startDate, $endDate);
+
             // Handle table availability and department/manager validations
             if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
                 return [
@@ -82,14 +67,7 @@ class ReservationService
                 ];
             }
             if (!$selectedTable) {
-                $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                            $nestedQuery->where('start_date', '<', $startDate)
-                                ->where('end_date', '>', $endDate);
-                        });
-                })
+                $reservedTables = Table::whereHas('reservations')
                     ->with('reservations')
                     ->select(['id', 'table_number', 'seat_count'])
                     ->get();
@@ -195,6 +173,7 @@ class ReservationService
                     'message' => 'Reservation not found.'
                 ];
             }
+
             // Ensure the reservation is in "pending" state before allowing updates
             if ($reservation->status !== 'pending') {
                 return [
@@ -202,9 +181,16 @@ class ReservationService
                     'message' => 'Reservation can only be updated if its status is "pending".',
                 ];
             }
-            // Parse and validate the start and end dates
-            $startDate = Carbon::parse($data['start_date']);
-            $endDate = Carbon::parse($data['end_date']);
+
+            // Handle optional date fields and ensure they are Carbon objects
+            $startDate = isset($data['start_date']) && !empty($data['start_date'])
+                ? Carbon::parse($data['start_date'])
+                : Carbon::parse($reservation->start_date);
+
+            $endDate = isset($data['end_date']) && !empty($data['end_date'])
+                ? Carbon::parse($data['end_date'])
+                : Carbon::parse($reservation->end_date);
+
             // Restrict updates to dates within the next two weeks
             if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
                 return [
@@ -212,6 +198,7 @@ class ReservationService
                     'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
                 ];
             }
+
             // Ensure the reservation duration does not exceed 6 hours and is on the same day
             if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
                 return [
@@ -219,24 +206,10 @@ class ReservationService
                     'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
                 ];
             }
-            // Find a suitable table for the reservation
-            $selectedTable = Table::when(isset($data['table_number']), function ($query) use ($data) {
-                return $query->where('table_number', $data['table_number']);
-            }, function ($query) use ($data) {
-                return $query->where('seat_count', '>=', $data['guest_count'])
-                    ->orderBy('seat_count', 'asc');
-            })
-                ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $reservationId) {
-                    $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                            $nestedQuery->where('start_date', '<', $startDate)
-                                ->where('end_date', '>', $endDate);
-                        })
-                        ->where('id', '!=', $reservationId);
-                })
-                ->select(['id', 'table_number', 'seat_count'])
-                ->first();
+
+            // Find a suitable table for the reservation using findAvailableTable
+            $selectedTable = $this->findAvailableTable($data, $startDate, $endDate, $reservationId);
+
             // Validate table seat count
             if ($selectedTable && $selectedTable->seat_count < $data['guest_count']) {
                 return [
@@ -244,6 +217,7 @@ class ReservationService
                     'message' => 'The selected table does not have enough seats for the number of guests.'
                 ];
             }
+
             // If no table is available, return a conflict response
             if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
                 return [
@@ -251,18 +225,14 @@ class ReservationService
                     'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
                 ];
             }
+
+            // If no suitable table found, get all reserved tables
             if (!$selectedTable) {
-                $reservedTables = Table::whereHas('reservations', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                            $nestedQuery->where('start_date', '<', $startDate)
-                                ->where('end_date', '>', $endDate);
-                        });
-                })
+                $reservedTables = Table::whereHas('reservations')
                     ->with('reservations')
-                    ->select(['id', 'table_number', 'location', 'seat_count', 'department_id'])
+                    ->select(['id', 'table_number', 'seat_count'])
                     ->get();
+
                 return [
                     'status_code' => 409,
                     'message' => isset($data['table_number'])
@@ -271,19 +241,22 @@ class ReservationService
                     'reserved_tables' => $reservedTables
                 ];
             }
+
             // Update reservation details
             $reservation->update([
                 'table_id' => $selectedTable->id,
-                'start_date' => $data['start_date'],
-                'end_date' => $data['end_date'],
-                'guest_count' => $data['guest_count'],
-                'services' => $data['services'] ?? null,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'guest_count' => $data['guest_count'] ?? $reservation->guest_count,
+                'services' => $data['services'] ?? $reservation->services,
             ]);
+
             // Clear relevant cache keys
             Cache::forget('tables_with_reservations_all');
             if (isset($data['status'])) {
                 Cache::forget('tables_with_reservations_' . $data['status']);
             }
+
             return [
                 'status_code' => 200,
                 'message' => 'Reservation updated successfully.',
@@ -297,6 +270,30 @@ class ReservationService
                 'message' => 'An unexpected error occurred.'
             ];
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    public function findAvailableTable(array $data, $startDate, $endDate, $excludeReservationId = null)
+    {
+        return Table::when(isset($data['table_number']), function ($query) use ($data) {
+            return $query->where('table_number', $data['table_number']);
+        }, function ($query) use ($data) {
+            return $query->where('seat_count', '>=', $data['guest_count'])
+                ->orderBy('seat_count', 'asc');
+        })
+        ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $excludeReservationId) {
+            $query->whereBetween('start_date', [$startDate, $endDate])
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                    $nestedQuery->where('start_date', '<', $startDate)
+                        ->where('end_date', '>', $endDate);
+                })
+                ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                    $query->where('id', '!=', $excludeReservationId);
+                });
+        })
+        ->select(['id', 'table_number', 'seat_count', 'department_id'])
+        ->first();
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**

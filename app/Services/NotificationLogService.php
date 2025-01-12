@@ -67,7 +67,7 @@ class NotificationLogService
      * Create a new notification log entry.
      *
      * @param int $user_id - The ID of the user for the notification log.
-     * @param string $notification_method - The type of notification 
+     * @param string $notification_method - The type of notification
      * @param string  $reason_notification_send  The reason of sending notification  (e.g., 'Event Creation').
      * @param string $description - A brief description of the notification action.
      * @return  NotificationLog - The created notification log instance.

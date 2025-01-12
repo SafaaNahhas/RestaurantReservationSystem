@@ -5,7 +5,6 @@ namespace App\Jobs;
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\EmailLog;
 use App\Models\Reservation;
 use App\Services\NotificationLogService;
 use Illuminate\Bus\Queueable;
@@ -78,7 +77,7 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
                         $message->to($manager->email)
                             ->subject('Daily Reservations Report for Your Department');
                     });
-
+                    $emailLog = "";
                     $emailLog = $this->notificationLogService->createNotificationLog(
                         user_id: $manager->id,
                         notification_method: 'mail',
@@ -87,10 +86,11 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
                     );
                 } catch (\Exception $e) {
                     Log::error('Error in sending email to manager ' . $manager->id . ': ' . $e->getMessage());
-                    $this->notificationLogService->updateNotificationLog(
-                        $emailLog,
-                        'Failed to send Daily Reservation Report to manager ' . $manager->id . ' at ' . now()
-                    );
+                    if ($emailLog != null)
+                        $this->notificationLogService->updateNotificationLog(
+                            $emailLog,
+                            'Failed to send Daily Reservation Report to manager ' . $manager->id . ' at ' . now()
+                        );
                 }
             }
 

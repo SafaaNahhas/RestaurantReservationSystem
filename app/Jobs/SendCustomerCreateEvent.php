@@ -4,9 +4,11 @@ namespace App\Jobs;
 
 use App\Enums\SendNotificationOptions;
 use App\Mail\EventMail;
+use App\Models\NotificationLog;
 use Illuminate\Bus\Queueable;
 use App\Services\NotificationLogService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -16,12 +18,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class SendCustomerCreateEvent implements ShouldQueue
-{ use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $event;
     public $customers;
     public $isUpdated;
     protected $notificationLogService;
+
 
     /**
      * Create a new job instance.
@@ -41,18 +45,17 @@ class SendCustomerCreateEvent implements ShouldQueue
         $this->isUpdated = $isUpdated;
     }
 
-     /**
+    /**
      * Execute the job.
      *
      * @return void
      */
-
     public function handle()
     {
         $botToken = env('TELEGRAM_BOT_TOKEN');
 
         foreach ($this->customers as $customer) {
-            if (!$customer->notificationSettings) {
+            if ($customer->notificationSettings) {
                 $notificationSettings = $customer->notificationSettings;
                 $send_notification_options = $notificationSettings->send_notification_options;
                 if (in_array(SendNotificationOptions::Events->value, $send_notification_options)) {
@@ -75,19 +78,20 @@ class SendCustomerCreateEvent implements ShouldQueue
                                 'chat_id' => $chatId,
                                 'text' => $telegramMessage,
                             ]);
-
+                            $telegramNotificationLog = "";
                             $telegramNotificationLog = $this->notificationLogService->createNotificationLog(
                                 user_id: $customer->id,
                                 notification_method: 'telegram',
                                 reason_notification_send: 'Event Creation',
                                 description: 'Event creation telegram notification  for event ID ' . $this->event->id . ' sent to ' . $customer->id
                             );
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             // Log the telegram failure
-                            $this->notificationLogService->updateNotificationLog(
-                                $telegramNotificationLog,
-                                'Event ID ' . $this->event->id . ' telegram notification failed to send to ' . $customer->id
-                            );
+                            if ($telegramNotificationLog != null)
+                                $this->notificationLogService->updateNotificationLog(
+                                    $telegramNotificationLog,
+                                    'Event ID ' . $this->event->id . ' telegram notification failed to send to ' . $customer->id
+                                );
                             // Log the exception
                             Log::error('Failed to send email.', [
                                 'event_id' => $this->event->id,
@@ -98,23 +102,24 @@ class SendCustomerCreateEvent implements ShouldQueue
                             ]);
                         }
                     } else {
-                        // Send the event email to the customer
-                        Mail::to($customer->email)->send(new EventMail($this->event, $this->isUpdated));
-
-                        // Log the sent email
-                        $mailNotificationLog = $this->notificationLogService->createNotificationLog(
-                            user_id: $customer->id                            ,
-                            notification_method: 'mail',
-                            reason_notification_send:'Event Creation',
-                            description:'Event creation email for event ID ' . $this->event->id . ' sent to ' . $customer->id
-                        );
                         try {
-                        } catch (\Exception $e) {
-                            // Log the email failure
-                            $this->notificationLogService->updateNotificationLog(
-                                $mailNotificationLog,
-                                'Event ID ' . $this->event->id . ' email failed to send to ' . $customer->id
+                            // Send the event email to the customer
+                            Mail::to($customer->email)->send(new EventMail($this->event, $this->isUpdated));
+                            $mailNotificationLog = "";
+                            // Log the sent email
+                            $mailNotificationLog = $this->notificationLogService->createNotificationLog(
+                                user_id: $customer->id,
+                                notification_method: 'mail',
+                                reason_notification_send: 'Event Creation',
+                                description: 'Event creation email for event ID ' . $this->event->id . ' sent to ' . $customer->id
                             );
+                        } catch (Exception $e) {
+                            // Log the email failure
+                            if ($mailNotificationLog != null)
+                                $this->notificationLogService->updateNotificationLog(
+                                    $mailNotificationLog,
+                                    'Event ID ' . $this->event->id . ' email failed to send to ' . $customer->id
+                                );
 
                             // Log the exception
                             Log::error('Failed to send email.', [

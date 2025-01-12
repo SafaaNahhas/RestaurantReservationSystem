@@ -78,7 +78,7 @@ class SendDailyReservationReportJob implements ShouldQueue
                             $message->to($user->email)
                                 ->subject('Daily Reservations Report');
                         });
-
+                        $emailLog = "";
                         $emailLog = $this->notificationLogService->createNotificationLog(
                             user_id: $user->id,
                             notification_method: 'mail',
@@ -87,10 +87,11 @@ class SendDailyReservationReportJob implements ShouldQueue
                         );
                     } catch (\Exception $e) {
                         Log::error('Error in sending email to user ' . $user->id . ': ' . $e->getMessage());
-                        $this->notificationLogService->updateNotificationLog(
-                            $emailLog,
-                            'Adminc Daily Reservation Report in ' . now()
-                        );
+                        if ($emailLog != null)
+                            $this->notificationLogService->updateNotificationLog(
+                                $emailLog,
+                                'Adminc Daily Reservation Report in ' . now()
+                            );
                     }
                 }
             } else {

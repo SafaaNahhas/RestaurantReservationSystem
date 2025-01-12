@@ -23,7 +23,7 @@ class SendEmergencyClosureJob implements ShouldQueue
     public $affectedReservations;
     protected NotificationLogService $notificationLogService;
 
-   /**
+    /**
      * Create a new job instance.
      */
     public function __construct($affectedReservations, NotificationLogService $notificationLogService)
@@ -32,7 +32,7 @@ class SendEmergencyClosureJob implements ShouldQueue
         $this->affectedReservations = $affectedReservations;
     }
 
-   /**
+    /**
      * Execute the job.
      */
     public function handle()
@@ -45,7 +45,7 @@ class SendEmergencyClosureJob implements ShouldQueue
         // Iterate over the collection of affected reservations
         foreach ($this->affectedReservations as $reservation) {
             // Send an email notification to the user associated with the reservation
-            if (!$reservation->user->notificationSettings) {
+            if ($reservation->user->notificationSettings) {
                 $notificationSettings = $reservation->user->notificationSettings;
                 if ($notificationSettings->method_send_notification == "telegram") {
                     try {
@@ -60,6 +60,8 @@ class SendEmergencyClosureJob implements ShouldQueue
                             'chat_id' => $chatId,
                             'text' => $telegramMessage,
                         ]);
+                        $telegramNotificationLog = "";
+
                         $telegramNotificationLog = $this->notificationLogService->createNotificationLog(
                             user_id: $reservation->user->id,
                             notification_method: 'telegram',
@@ -69,16 +71,18 @@ class SendEmergencyClosureJob implements ShouldQueue
                     } catch (\Exception $e) {
                         // Log the telegram failure
                         Log::error('Error sending email to user ' . $reservation->user->id . ': ' . $e->getMessage());
-                        $this->notificationLogService->updateNotificationLog(
-                            notificationLog: $telegramNotificationLog,
-                            description: 'Reservation in ' . $reservation->start_date
-                        );
+                        if ($telegramNotificationLog != null)
+                            $this->notificationLogService->updateNotificationLog(
+                                notificationLog: $telegramNotificationLog,
+                                description: 'Reservation in ' . $reservation->start_date
+                            );
                     }
                 } else {
                     try {
                         Mail::to($reservation->user->email)
                             ->send(new EmergencyClosureMail($restaurant, $reservation));
                         // Log the email success
+                        $mailNotificationLog = "";
                         $mailNotificationLog = $this->notificationLogService->createNotificationLog(
                             user_id: $reservation->user->id,
                             notification_method: 'mail',
@@ -88,10 +92,11 @@ class SendEmergencyClosureJob implements ShouldQueue
                     } catch (\Exception $e) {
                         // Log the email failure
                         Log::error('Error sending notification to user ' . $reservation->user->id . ': ' . $e->getMessage());
-                        $this->notificationLogService->updateNotificationLog(
-                            notificationLog: $mailNotificationLog,
-                            description: 'Reservation in ' . $reservation->start_date
-                        );
+                        if ($mailNotificationLog != null)
+                            $this->notificationLogService->updateNotificationLog(
+                                notificationLog: $mailNotificationLog,
+                                description: 'Reservation in ' . $reservation->start_date
+                            );
                     }
                 }
             } else {

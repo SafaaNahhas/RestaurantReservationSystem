@@ -148,12 +148,11 @@ Route::middleware(['auth:api'])->group(function () {
 });
 
 // ************ Event Routes *************************************
-Route::middleware(['auth:api', 'role:Admin'])->group(function () {
-    Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-    Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-    Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-    Route::apiResource('event', EventController::class)->except(['index', 'show']);
-});
+Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+Route::apiResource('event', EventController::class)->except(['index', 'show']);
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {});
 Route::middleware(['auth:api'])->group(function () {
     Route::get('event', [EventController::class, 'index']); // Get all departments
     Route::get('event/{id}', [EventController::class, 'show']); // Get a specific department

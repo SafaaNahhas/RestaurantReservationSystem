@@ -100,7 +100,7 @@ class NotificationLogService
      * @param string $description - The description to update the notification log with.
      * @throws HttpResponseException - If an error occurs during the update.
      */
-    public function updateNotificationLog(NotificationLog $notificationLog, $description)
+    public function updateNotificationLog($notificationLog, $description)
     {
         try {
             $notificationLog->update([
@@ -118,7 +118,6 @@ class NotificationLogService
 
     /**
      * Delete notification logs based on provided filters.
-     *
      * @param array $data - The filters for the notification logs (status, created_at, notification_method,reason_notification_send, user_id).
      * @throws HttpResponseException - If an error occurs during deletion.
      */

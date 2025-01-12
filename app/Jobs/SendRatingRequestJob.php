@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
 use App\Mail\RatingRequestMail;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -19,18 +19,18 @@ class SendRatingRequestJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $reservation;
-    protected $emailLogService;
-
+    protected $notificationLogService;
+    protected $notificationLog;
     /**
      * Create a new job instance.
      *
      * @param Reservation $reservation The reservation instance.
-     * @param EmailLogService $emailLogService The email log service instance.
+     * @param NotificationLogService $notificationLogService The notification log service instance.
      */
-    public function __construct(Reservation $reservation, EmailLogService $emailLogService)
+    public function __construct(Reservation $reservation, NotificationLogService $notificationLogService)
     {
         $this->reservation = $reservation;
-        $this->emailLogService = $emailLogService;
+        $this->notificationLogService = $notificationLogService;
     }
 
 
@@ -75,16 +75,23 @@ class SendRatingRequestJob implements ShouldQueue
                         'user_id' => $user->id,
                         'reservation_id' => $this->reservation->id,
                     ]);
+                    $this->notificationLog = $this->notificationLogService->createNotificationLog(
+                        user_id: $user->id,
+                        notification_method: 'telegram',
+                        reason_notification_send: 'Rating Creation',
+                        description: 'Rating creation email for reservation ID ' . $this->reservation->id
+                    );
                 } elseif ($notificationSettings->method_send_notification === 'mail') {
                     // Send rating request email
                     Mail::to($user->email)->send(new RatingRequestMail($ratingLink));
-                    $emailLog = $this->emailLogService->createEmailLog(
-                                    $user->id,
-                                    'Rating Creation',
-                                    'Rating creation email for reservation ID ' . $this->reservation->id
-                                );
+                    $this->notificationLog = $this->notificationLogService->createNotificationLog(
+                        user_id: $user->id,
+                        notification_method: 'mail',
+                        reason_notification_send: 'Rating Creation',
+                        description: 'Rating creation email for reservation ID ' . $this->reservation->id
+                    );
                     // Update reservation email_sent_at timestamp
-                            $this->reservation->update(['email_sent_at' => now()]);
+                    $this->reservation->update(['email_sent_at' => now()]);
                     Log::info('Rating request email sent successfully.', [
                         'user_id' => $user->id,
                         'reservation_id' => $this->reservation->id,
@@ -110,6 +117,12 @@ class SendRatingRequestJob implements ShouldQueue
                 'user_id' => $user->id,
                 'error_message' => $e->getMessage(),
             ]);
+            // Log the email failure
+            if ($this->notificationLog != null)
+                $this->notificationLogService->updateNotificationLog(
+                    notificationLog: $this->notificationLog,
+                    description: 'Rating creation email for reservation ID ' . $this->reservation->id
+                );
         }
     }
 }

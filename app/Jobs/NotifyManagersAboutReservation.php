@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Reservation;
 use App\Notifications\PendingReservationNotification;
-use App\Services\EmailLogService;
+use App\Services\NotificationLogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,19 +18,19 @@ class NotifyManagersAboutReservation implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Reservation $reservation;
-    protected EmailLogService $emailLogService;
+    protected NotificationLogService $notificationLogService;
     protected $emailLog; // Added this to hold the email log for access in failed()
 
     /**
      * Create a new job instance.
      *
      * @param Reservation $reservation The reservation that needs manager notification
-     * @param EmailLogService $emailLogService The service responsible for logging email notifications
+     * @param NotificationLogService $notificationLogService The service responsible for logging email notifications
      */
-    public function __construct(Reservation $reservation, EmailLogService $emailLogService)
+    public function __construct(Reservation $reservation, NotificationLogService $notificationLogService)
     {
         $this->reservation = $reservation;
-        $this->emailLogService = $emailLogService;  // Fixed missing assignment
+        $this->notificationLogService = $notificationLogService;  // Fixed missing assignment
     }
 
     /**
@@ -113,10 +113,11 @@ class NotifyManagersAboutReservation implements ShouldQueue
             $departmentManager->notify(new PendingReservationNotification($this->reservation));
 
             // Create an email log entry
-            $this->emailLog = $this->emailLogService->createEmailLog(
-                $departmentManager->id,
-                'Reservation notification',
-                "Reservation notification for " . $this->reservation->id
+            $this->emailLog = $this->notificationLogService->createNotificationLog(
+                user_id: $departmentManager->id,
+                notification_method: 'mail',
+                reason_notification_send: 'Reservation notification',
+                description: "Reservation notification for " . $this->reservation->id
             );
 
             // Update only the email_sent_at timestamp
@@ -155,7 +156,7 @@ class NotifyManagersAboutReservation implements ShouldQueue
 
         // Update the email log on failure
         if (isset($this->emailLog)) {  // Make sure $emailLog exists
-            $this->emailLogService->updateEmailLog(
+            $this->notificationLogService->updateNotificationLog(
                 $this->emailLog,
                 "Reservation notification for " . $this->reservation->id
             );

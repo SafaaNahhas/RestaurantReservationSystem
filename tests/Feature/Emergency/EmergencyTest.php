@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Emergency;
 
+use App\Enums\RoleUser;
 use App\Jobs\SendEmergencyClosureJob;
 use App\Models\Emergency;
 use App\Models\Reservation;
+use App\Models\User;
 use App\Services\EmergencyService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,23 +28,16 @@ use Tests\TestCase;
 class EmergencyTest extends TestCase
 {
     use DatabaseTransactions;
+    protected $admin;
 
-
-    /**
-     * Authenticate as an admin user and retrieve a valid token for requests.
-     *
-     * @return string The access token for authenticated requests.
-     */
-    protected function authenticateAs()
+    protected function setUp(): void
     {
-        $loginResponse = $this->postJson('/api/login', [
-            'email' => 'admin@example.com',
-            'password' => 'password123',
-        ]);
-        $token = $loginResponse->json('original.access_token');
-        $this->assertNotNull($token, 'Token should not be null');
-        return $token;
+        parent::setUp();
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole(RoleUser::Admin->value);  // Assign "admin" role to the admin user
+
     }
+
 
     /**
      * Test storing a new emergency and verifying that overlapping reservations are canceled.
@@ -55,24 +50,22 @@ class EmergencyTest extends TestCase
      */
     public function test_store_emergency_with_cancel_reservations()
     {
+
         // Create test reservations
         $reservation1 = Reservation::factory()->create([
-            'start_date' => "2025-01-30 10:00:00",
-            'end_date' => "2025-01-30 12:00:00",
+            'start_date' => now()->addDays(1)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(1)->format('Y-m-d H:i:s'),
             'status' => 'confirmed',
         ]);
         $reservation2 = Reservation::factory()->create([
-            'start_date' => "2025-01-09 10:00:00",
-            'end_date' => "2025-01-09 12:00:00",
+            'start_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
             'status' => 'confirmed',
         ]);
-        $token = $this->authenticateAs();
-        $response = $this->withToken(
-            $token
-        )->postJson('api/emergencies', [
+        $response = $this->actingAs($this->admin)->postJson('api/emergencies', [
             "name"       => "fire in kitchen",
-            "start_date" => "2025-01-09 10:00:00",
-            "end_date"   => "2025-01-11 10:00:00",
+            "start_date" => now()->addDays(4)->format('Y-m-d H:i:s'),
+            "end_date"   => now()->addDays(6)->format('Y-m-d H:i:s'),
         ]);
         $response->assertStatus(201);
         // Assert: Affected reservations are canceled
@@ -100,11 +93,7 @@ class EmergencyTest extends TestCase
     public function test_list_all_emergencies()
     {
         Emergency::factory()->count(3)->create();
-        $token = $this->authenticateAs();
-
-        $response = $this->withToken(
-            $token
-        )->getJson('/api/emergencies');
+        $response = $this->actingAs($this->admin)->getJson('/api/emergencies');
 
         $response->assertStatus(200)
             ->assertJson([
@@ -125,14 +114,10 @@ class EmergencyTest extends TestCase
     public function test_update_emergency()
     {
         $emergency = Emergency::factory()->create();
-
         $updatedData = [
             'description' => 'Updated description for emergency',
         ];
-        $token = $this->authenticateAs();
-        $response = $this->withToken(
-            $token
-        )->putJson("/api/emergencies/{$emergency->id}", $updatedData);
+        $response = $this->actingAs($this->admin)->putJson("/api/emergencies/{$emergency->id}", $updatedData);
 
         $response->assertStatus(200)
             ->assertJsonFragment($updatedData);
@@ -154,11 +139,8 @@ class EmergencyTest extends TestCase
     {
         $emergency = Emergency::factory()->create();
 
-        $token = $this->authenticateAs();
-        $response = $this->withToken(
-            $token
-        )->getJson("/api/emergencies/{$emergency->id}");
 
+        $response = $this->actingAs($this->admin)->getJson("/api/emergencies/{$emergency->id}");
         $response->assertStatus(200)
             ->assertJsonFragment([
                 "message" => "Emergency Retrieved Successfully",
@@ -177,12 +159,7 @@ class EmergencyTest extends TestCase
     public function test_delete_emergency()
     {
         $emergency = Emergency::factory()->create();
-
-        $token = $this->authenticateAs();
-        $response = $this->withToken(
-            $token
-        )->deleteJson("/api/emergencies/{$emergency->id}");
-
+        $response = $this->actingAs($this->admin)->deleteJson("/api/emergencies/{$emergency->id}");
         $response->assertStatus(200)
             ->assertJsonFragment([
                 "message" => "Emergency Deleted Successfully",

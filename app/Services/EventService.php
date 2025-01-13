@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCustomerCreateEvent;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
  * EventService - Provides functionality for managing events.
@@ -81,7 +82,14 @@ class EventService
             $event = Event::findOrFail($id); // Throws ModelNotFoundException if not found
             return $event;
         } catch (ModelNotFoundException $e) {
-            return self::error(null, 'event not found.', 404);
+            Log::error("error" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [   'status' => 'error',
+                    'message' => "we didn't find any thing",
+                ],
+                404
+            ));
         } catch (\Exception $e) {
             // Handle any other unexpected errors
             throw new \Exception("An error occurred while retrieving the event: " . $e->getMessage());
@@ -141,4 +149,104 @@ class EventService
             throw new \RuntimeException('Unable to delete event.');
         }
     }
+
+        /**
+     * Display a paginated listing of the trashed (soft deleted) resources.
+     */
+    public function trashedListEvent($perPage)
+    {
+        try {
+            $trashed_event=Event::onlyTrashed()->paginate($perPage);
+            return $trashed_event;
+        } catch (Exception $e) {
+            Log::error("error in display list of trashed Event" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
+        }
+    }
+
+     /**
+     * Restore a trashed (soft deleted) resource by its ID.
+     *
+     * @param  int  $id  The ID of the trashed Task to be restored.
+     * @return \App\Models\Event
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the Task with the given ID is not found.
+     * @throws \Exception If there is an error during the restore process.
+     */
+    public function restoreEvent($id)
+    {
+        try {
+            $event = Event::onlyTrashed()->findOrFail($id);
+            $event->restore();
+            return $event;
+        } catch (ModelNotFoundException $e) {
+            Log::error("error" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "we didn't find any thing",
+                ],
+                404
+            ));
+
+        } catch (Exception $e) {
+            Log::error("error in restore a Event" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
+        }
+    }
+
+      /**
+     * Permanently delete a trashed (soft deleted) resource by its ID.
+     *
+     * @param  int  $id  The ID of the trashed Task to be permanently deleted.
+     * @return void
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the Task with the given ID is not found.
+     * @throws \Exception If there is an error during the force delete process.
+     */
+    public function forceDeleteEvent($id)
+    {
+        try {
+            $event = Event::onlyTrashed()->findOrFail($id);
+
+            $event->forceDelete();
+        } catch (ModelNotFoundException $e) {
+            Log::error("error" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "we didn't find any thing",
+                ],
+                404
+            ));
+
+        } catch (Exception $e) {
+            Log::error("error  in forceDelete FoodCategory" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
+        }
+    }
+ 
 }

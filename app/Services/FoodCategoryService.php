@@ -251,9 +251,9 @@ class FoodCategoryService
     public function forceDeleteFoodCategory($id)
     {
         try {
-            $Task = FoodCategory::onlyTrashed()->findOrFail($id);
+            $food_category = FoodCategory::onlyTrashed()->findOrFail($id);
 
-            $Task->forceDelete();
+            $food_category->forceDelete();
         } catch (ModelNotFoundException $e) {
             Log::error("error" . $e->getMessage());
 

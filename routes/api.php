@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\Event\EventController;
 
 
 use App\Http\Controllers\Api\Rating\RatingController;
-use App\Http\Controllers\Api\Email\EmailLogController;
 // use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Favorite\FavoriteController;
@@ -39,7 +38,6 @@ Route::middleware('auth:api')->group(function () {
 
 // **********  Reservation Routes *************************
 Route::middleware(['auth:api'])->group(function () {
-
     Route::post('reservations', [ReservationController::class, 'storeReservation']);
     Route::put('/reservations/{id}', [ReservationController::class, 'updateReservation']);
     Route::post('/reservations/{id}/confirm', [ReservationController::class, 'confirmReservation']);
@@ -110,20 +108,19 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 });
 
 // ***********  NotificationLog Routes **********************
-Route::middleware(['auth:api'])->group(function () {
-    // Define API resource routes for notification log
-    Route::get('notificationLogs', [NotificationLogController::class, 'index']);
-    // Define a route for soft deleting notification logs
-    Route::get('notificationLogs/{notificationlogs}', [NotificationLogController::class, 'show']);
-    // Define a route for soft deleting notification logs
-    Route::delete('softDeleteNotificationLogs', [NotificationLogController::class, 'deleteNotificationLogs']);
-    // Define a route for retrieving deleted notification logs
-    Route::get('getDeletedNotificationLogs', [NotificationLogController::class, 'getDeletedNotificationLogs']);
-    // Define a route for permanently deleting a soft-deleted notification log
-    Route::delete('permanentlyDeleteNotificationLog/{notificationlogs}', [NotificationLogController::class, 'permanentlyDeleteNotificationLog']);
-    // Define a route for restoring a soft-deleted notification log
-    Route::post('restore/{notificationlogs}', [NotificationLogController::class, 'restoreNotificationLog']);
-});
+// Define API resource routes for notification log
+Route::get('notificationLogs', [NotificationLogController::class, 'index']);
+// Define a route for soft deleting notification logs
+Route::get('notificationLogs/{notificationlogs}', [NotificationLogController::class, 'show']);
+// Define a route for soft deleting notification logs
+Route::delete('softDeleteNotificationLogs/{notificationlogs}', [NotificationLogController::class, 'deleteNotificationLogs']);
+// Define a route for retrieving deleted notification logs
+Route::get('getDeletedNotificationLogs', [NotificationLogController::class, 'getDeletedNotificationLogs']);
+// Define a route for permanently deleting a soft-deleted notification log
+Route::delete('permanentlyDeleteNotificationLog/{notificationlogs}', [NotificationLogController::class, 'permanentlyDeleteNotificationLog']);
+// Define a route for restoring a soft-deleted notification log
+Route::post('restoreNotificationLog/{notificationlogs}', [NotificationLogController::class, 'restoreNotificationLog']);
+Route::middleware(['auth:api'])->group(function () {});
 
 
 // ********* Departments Routes ***********************************
@@ -148,11 +145,12 @@ Route::middleware(['auth:api'])->group(function () {
 });
 
 // ************ Event Routes *************************************
-Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
-Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
-Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
-Route::apiResource('event', EventController::class)->except(['index', 'show']);
-Route::middleware(['auth:api', 'role:Admin'])->group(function () {});
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::get('event/showDeleted', [EventController::class, 'showDeleted']);
+    Route::put('event/{id}/restore', [EventController::class, 'restoreDeleted']);
+    Route::delete('event/{id}/delete', [EventController::class, 'forceDeleted']);
+    Route::apiResource('event', EventController::class)->except(['index', 'show']);
+});
 Route::middleware(['auth:api'])->group(function () {
     Route::get('event', [EventController::class, 'index']); // Get all departments
     Route::get('event/{id}', [EventController::class, 'show']); // Get a specific department

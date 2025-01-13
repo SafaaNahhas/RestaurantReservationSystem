@@ -37,6 +37,7 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Reservation Permissions
         $storeReservation = Permission::create(['name' => 'store reservation']);
+        $cancleReservation = Permission::create(['name' => 'cancle reservation']);
         $updateReservation = Permission::create(['name' => 'update reservation']);
         $confirmReservation = Permission::create(['name' => 'confirm reservation']);
         $rejectReservation = Permission::create(['name' => 'reject reservation']);
@@ -46,23 +47,21 @@ class RoleAndPermissionSeeder extends Seeder
         $softDeleteReservation = Permission::create(['name' => 'soft delete reservation']);
         $restoreReservation = Permission::create(['name' => 'restorereservation']);
         $viewSoftDeletedReservations = Permission::create(['name' => 'view soft delete reservation']);
-        // $getAllTablesWithReservations = Permission::create(['name' => 'getAllTablesWithReservations']);
         $viewMostFrequentUser = Permission::create(['name' => 'viewMostFrequentUser']);
         $viewReservationsByManager = Permission::create(['name' => 'viewReservationsByManager']);
 
         // Assign Roles to Reservations Permissions
         $storeReservation->assignRole($customer);
         $updateReservation->assignRole($customer);
+        $cancleReservation->assignRole($customer);
         $confirmReservation->assignRole([$admin, $manager]);
         $rejectReservation->assignRole([$admin, $manager]);
         $startService->assignRole([$admin, $manager, $waiter]);
         $completeService->assignRole([$admin, $manager, $waiter]);
         $hardDeleteReservation->assignRole([$admin, $manager]);
-        $softDeleteReservation->assignRole([$admin, $manager]);
+        $softDeleteReservation->assignRole([$admin, $manager,$customer]);
         $restoreReservation->assignRole([$admin, $manager]);
         $viewSoftDeletedReservations->assignRole([$admin, $manager]);
-
-        // $getAllTablesWithReservations->assignRole($admin);
         $viewMostFrequentUser->assignRole($admin);
         $viewReservationsByManager->assignRole([$admin, $manager]);
 

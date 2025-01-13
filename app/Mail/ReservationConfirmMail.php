@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ReservationDetailsMail extends Mailable
+class ReservationConfirmMail extends Mailable
 {
     use Queueable, SerializesModels;
     /**
@@ -41,7 +41,7 @@ class ReservationDetailsMail extends Mailable
     public function build()
     {   Log::info("Reservation details in Mailable: ", $this->reservation->toArray());
         return $this->subject('Your Reservation Confirm ')
-                    ->view('emails.reservation_details')
+                    ->view('emails.reservation_confirm')
                     ->with(['reservation' => $this->reservation]);
     }
 }

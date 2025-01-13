@@ -43,7 +43,7 @@ class ReservationController extends Controller
      */
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
-        if ($request->user()->cannot('store', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('store reservation', Reservation::class)) {throw new UnauthorizedException(403);}
         $result = $this->reservationService->storeReservation($request->validated());
         // Handle the response based on the presence of reserved tables or reservation details
         return $result['status_code'] === 201
@@ -93,7 +93,7 @@ class ReservationController extends Controller
     public function confirmReservation(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
-        if ($request->user()->cannot('confirm', $reservation)){throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('confirm reservation', $reservation)){throw new UnauthorizedException(403);}
         // Call the confirm reservation logic from the service
         $result = $this->reservationService->confirmReservation($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
@@ -111,7 +111,7 @@ class ReservationController extends Controller
     public function rejectReservation(Request $request, $reservationId)
     {
         $reservation = Reservation::findOrFail($reservationId);
-        if ($request->user()->cannot('reject',  $reservation)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('reject reservation',  $reservation)) {throw new UnauthorizedException(403);}
         $rejectionReason = $request->input('rejection_reason');
         // Call the service to handle the reservation rejection
         $result = $this->reservationService->rejectReservation($reservationId, $rejectionReason);
@@ -132,7 +132,7 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::findOrFail($reservationId);
         // Fetch the reservation and check authorization
-        if ($request->user()->cannot('cancel',   $reservation )) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('cancle reservation',   $reservation )) {throw new UnauthorizedException(403);}
         // Call the cancel logic from the service
         $result = $this->reservationService->cancelReservation($reservationId, $request->validated()['cancellation_reason']);
         if ($result['error']) {return self::error(null, $result['message'], 422);}
@@ -147,7 +147,7 @@ class ReservationController extends Controller
      */
     public function startService(Request $request, $id)
     {
-        if ($request->user()->cannot('startService', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('start service', Reservation::class)) {throw new UnauthorizedException(403);}
         // Call the start service logic from the service
         $result = $this->reservationService->startService($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
@@ -162,7 +162,7 @@ class ReservationController extends Controller
      */
     public function completeService(Request $request, $id)
     {
-        if ($request->user()->cannot('completeService', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('complete service', Reservation::class)) {throw new UnauthorizedException(403);}
         // Call the complete service logic from the service
         $result = $this->reservationService->completeService($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}

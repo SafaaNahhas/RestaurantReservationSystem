@@ -10,7 +10,7 @@ use App\Services\NotificationLogService;
 use App\Jobs\SendRatingRequestJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Mail\ReservationDetailsMail;
+use App\Mail\ReservationConfirmMail;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationRejectedMail;
@@ -149,7 +149,7 @@ class ReservationService
             Log::error('Error storing reservation: ' . $e->getMessage());
             return [
                 'status_code' => 500,
-                'message' => 'An unexpected error occurred.'
+                'message' => 'An unexpected error occurred.'. $e->getMessage(),
             ];
         }
     }
@@ -374,7 +374,7 @@ class ReservationService
                 } elseif ($notificationSettings->method_send_notification === 'mail') {
                     // Send confirmation email
                     Mail::to($reservation->user->email)
-                        ->queue(new ReservationDetailsMail($reservation));
+                        ->queue(new ReservationConfirmMail($reservation));
                 }
                  else {
                     return [
@@ -513,10 +513,10 @@ class ReservationService
             // Find the reservation or throw an exception if not found
             $reservation = Reservation::with('user', 'table')->findOrFail($reservationId);
 
-            if ($reservation->status !== 'pending') {
+            if ($reservation->status !== 'confirmed') {
                 return [
                     'error' => true,
-                    'message' => 'Reservation must be in pending state to cancel',
+                    'message' => 'Reservation must be in confirm state to cancel',
                 ];
             }
 
@@ -578,20 +578,6 @@ class ReservationService
                         'message' => 'Invalid notification method in settings.',
                     ];
                 }
-            // } else {
-            //     return [
-            //         'error' => false,
-            //         'message' => 'Reservation cancelled successfully, but User has not opted for cancellation notifications.',
-            //         'data' => [
-            //             'reservation_id' => $reservation->id,
-            //             'table_number' => $reservation->table->table_number,
-            //             'start_date' => $reservation->start_date,
-            //             'end_date' => $reservation->end_date,
-            //             'cancellation_reason' => $cancellationReason,
-            //         ],
-            //     ];
-            // }
-
             // Send cancellation email to the manager (if any)
             $manager = $reservation->table->department->manager;
             if ($manager) {

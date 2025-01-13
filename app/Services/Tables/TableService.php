@@ -295,7 +295,7 @@ class TableService
     {
         try {
             Department::findOrFail($department_id);
-            $table = Table::findOrFail($table_id);
+            $table = Table::withTrashed()->findOrFail($table_id);
 
             $table->forceDelete();
         } catch (ModelNotFoundException $e) {

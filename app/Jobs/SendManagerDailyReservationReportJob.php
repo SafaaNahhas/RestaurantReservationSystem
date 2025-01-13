@@ -93,7 +93,6 @@ class SendManagerDailyReservationReportJob implements ShouldQueue
                         );
                 }
             }
-
             Log::info('GenerateDailyReservationReport job completed.');
         } catch (Exception $e) {
             Log::error('Error in GenerateDailyReservationReport job: ' . $e->getMessage());

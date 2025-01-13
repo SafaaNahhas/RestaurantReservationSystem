@@ -54,15 +54,15 @@ class EventService
      */
     public function createEvent(array $data)
     {
-        try {
-            $event = Event::create($data);
-            // get all email to customer
-            $customers = Role::findByName('Customer')->users;
-            // send email
+        $event = Event::create($data);
+        // get all email to customer
+        $customers = Role::findByName('Customer')->users;
+        // send email
 
-            $notificationLogService = new NotificationLogService();
-            SendCustomerCreateEvent::dispatch($event, $customers, false, $notificationLogService);
-            return $event;
+        $notificationLogService = new NotificationLogService();
+        SendCustomerCreateEvent::dispatch($event, $customers, false, $notificationLogService);
+        return $event;
+        try {
         } catch (Exception $e) {
             Log::error('Error creating event: ' . $e->getMessage());
             throw new \RuntimeException('Unable to create event.');

@@ -16,19 +16,18 @@ class NotificationLogService
      * Retrieve a paginated list of notification logs based on filters.
      *
      * @param array $data - The filters for the notification logs (status, created_at, notification_method,reason_notification_send, user_id).
-     * @return \Illuminate\Pagination\LengthAwarePaginator - A paginated list of notification logs.
+     * @return LengthAwarePaginator - A paginated list of notification logs.
      * @throws HttpResponseException - If an error occurs during the process.
      */
     public function getNotificationslog(array $data)
     {
         try {
-            $notificationLogs = NotificationLog::byStatus($data['status'] ?? null)
+            $notificationLogs = NotificationLog::query()->byStatus($data['status'] ?? null)
                 ->byCreated($data['created_at'] ?? null)
                 ->byNotificationMethod($data['notification_method'] ?? null)
                 ->byResonNotificationSend($data['reason_notification_send'] ?? null)
                 ->byUserId($data['user_id'] ?? null)
                 ->paginate(10);
-
             return $notificationLogs;
         } catch (Exception $e) {
             Log::error('Error getting notifications log: ' . $e->getMessage());
@@ -117,20 +116,21 @@ class NotificationLogService
     }
 
     /**
-     * Delete notification logs based on provided filters.
-     * @param array $data - The filters for the notification logs (status, created_at, notification_method,reason_notification_send, user_id).
+     * Delete notification logs 
+     * @param int $notificationLog_id
      * @throws HttpResponseException - If an error occurs during deletion.
      */
-    public function deleteNotificationLogs(array $data)
+    public function deleteNotificationLogs(int $notificationLog_id)
     {
         try {
-            $notificationLogs = NotificationLog::byStatus($data['status'] ?? null)
-                ->byCreated($data['created_at'] ?? null)
-                ->byNotificationMethod($data['notification_method'] ?? null)
-                ->byResonNotificationSend($data['reason_notification_send'] ?? null)
-                ->byUserId($data['user_id'] ?? null);
-
-            $notificationLogs->delete();
+            $notificationLog = NotificationLog::findOrFail($notificationLog_id);
+            $notificationLog->delete();
+        } catch (ModelNotFoundException $e) {
+            Log::error('notification log not found: ' . $e->getMessage());
+            throw new HttpResponseException(response()->json([
+                'status' => 'error',
+                'message' => 'notification log not found',
+            ], 404));
         } catch (Exception $e) {
             Log::error('Error deleting notification logs: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
@@ -157,7 +157,6 @@ class NotificationLogService
                 ->byUserId($data['user_id'] ?? null)
                 ->onlyTrashed()
                 ->paginate(10);
-
             return $notificationLogs;
         } catch (Exception $e) {
             Log::error('Error getting deleted notification logs: ' . $e->getMessage());
@@ -169,35 +168,24 @@ class NotificationLogService
     }
 
     /**
-     * Restore a soft-deleted notification log by its filters.
-     *
-     * @param array $data - The filters to identify the notification log.
-     * @return bool - True if the notification log was restored successfully.
+     * Restore a soft-deleted notification log 
+     * @param int $notificationLog_id 
+     * @retrun NotificationLogResource $notificationLog
      * @throws HttpResponseException - If an error occurs during restoration.
      */
-    public function restoreDeletedNotificationLog(array $data)
+    public function restoreDeletedNotificationLog(int $notificationLog_id)
     {
         try {
-            $notificationLogs = NotificationLog::byStatus($data['status'] ?? null)
-                ->byCreated($data['created_at'] ?? null)
-                ->byNotificationMethod($data['notification_method'] ?? null)
-                ->byResonNotificationSend($data['reason_notification_send'] ?? null)
-                ->byUserId($data['user_id'] ?? null)
-                ->byId($data['notificationlog_id'] ?? null)
-                ->onlyTrashed();
-
-            if ($notificationLogs->count() > 0) {
-                $notificationLogs->restore();
-                return true;
-            } else {
-                throw new ModelNotFoundException();
-            }
+            $notificationLog = NotificationLog::onlyTrashed()->findOrFail($notificationLog_id);
+            $notificationLog->restore();
+            $notificationLog = NotificationLogResource::make($notificationLog);
+            return $notificationLog;
         } catch (ModelNotFoundException $e) {
             Log::error('notification log not found: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
                 'message' => 'notification log not found',
-            ], 500));
+            ], 404));
         } catch (Exception $e) {
             Log::error('Error restoring notification log: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
@@ -208,35 +196,21 @@ class NotificationLogService
     }
 
     /**
-     * Permanently delete a soft-deleted notification log by its filters.
-     *
-     * @param array $data - The filters to identify the notification log.
-     * @return bool - True if the notification log was deleted permanently.
+     * Permanently delete a soft-deleted notification log 
+     * @paramint $notificationLog_id
      * @throws HttpResponseException - If an error occurs during deletion.
      */
-    public function permanentlyDeleteNotificationLog(array $data)
+    public function permanentlyDeleteNotificationLog(int $notificationLog_id)
     {
         try {
-            $notificationLogs = NotificationLog::byStatus($data['status'] ?? null)
-                ->byCreated($data['created_at'] ?? null)
-                ->byNotificationMethod($data['notification_method'] ?? null)
-                ->byResonNotificationSend($data['reason_notification_send'] ?? null)
-                ->byUserId($data['user_id'] ?? null)
-                ->byId($data['notificationlog_id'] ?? null)
-                ->onlyTrashed();
-
-            if ($notificationLogs->count() > 0) {
-                $notificationLogs->forceDelete();
-                return true;
-            } else {
-                throw new ModelNotFoundException();
-            }
+            $notificationLog = NotificationLog::withTrashed()->findOrFail($notificationLog_id);
+            $notificationLog->forceDelete();
         } catch (ModelNotFoundException $e) {
             Log::error('notification log not found: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([
                 'status' => 'error',
                 'message' => 'notification log not found',
-            ], 500));
+            ], 404));
         } catch (Exception $e) {
             Log::error('Error permanently deleting notification log: ' . $e->getMessage());
             throw new HttpResponseException(response()->json([

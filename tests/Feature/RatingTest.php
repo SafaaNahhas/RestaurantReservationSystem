@@ -258,11 +258,18 @@ class RatingTest extends TestCase
     //check if user can delete his rating
     public function user_can_delete_a_rating()
     {
+
+        $table = Table::create([
+            'table_number' => 'TBL-001',
+            'location' => 'Main Hall',
+            'seat_count' => 4,
+            'department_id' => null,
+        ]);
         // Create a reservation associated with users
         $reservation = Reservation::create([
             'user_id' => $this->customerUser->id,
             'manager_id' => $this->adminUser->id,
-            'table_id' => 6,
+            'table_id' => $table->id,
             'start_date' => now()->addDays(3),
             'end_date' => now()->addDays(3)->addHours(2),
             'guest_count' => 4,

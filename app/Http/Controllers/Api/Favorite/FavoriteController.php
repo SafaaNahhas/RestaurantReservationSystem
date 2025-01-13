@@ -125,53 +125,32 @@ class FavoriteController extends Controller
     public function getDeletedFavorite(Request $request)
     {
         $this->authorize('getDeleting', Favorite::class);
-
-        $deletedfavorite = $this->favoriteService->get_deleted_favorites();
-
-        if ($deletedfavorite) {
-            return $this->success($deletedfavorite, 'Deleted favorite retrieved successfully.');
-        } else {
-            return $this->error('Failed to retrieve deleted favorite.', 500);
-        }
+        $perPage = $request->input('per_page', 10);
+        $deletedfavorite = $this->favoriteService->get_deleted_favorites($perPage);
+        return $this->success($deletedfavorite);
     }
 
     //************************************************************************* */
 
-    /**
-     * Restore a deleted favorite.
-     * @param int $favoriteId
-     * @return \Illuminate\Http\JsonResponse
+      /**
+     * Restore a trashed (soft deleted) resource by its ID.
      */
-    public function restorefavorite($favoriteId)
+    public function restorefavorite($id)
     {
         $this->authorize('restore', Favorite::class);
-
-        $restored = $this->favoriteService->restore_favorite($favoriteId);
-
-        if ($restored) {
-            return $this->success($restored, 'favorite restored successfully.');
-        } else {
-            return $this->error('Failed to restore favorite.', 500);
-        }
+        $favorite = $this->favoriteService->restore_favorite($id);
+        return $this->success("favorite restored Successfully");
     }
 
     //*********************************************************** */
 
-    /**
-     * Permanently delete a favorite.
-     * @param int $favoriteId
-     * @return \Illuminate\Http\JsonResponse
+   /**
+     * Permanently delete a trashed (soft deleted) resource by its ID.
      */
     public function forceDeleteFavorite($favoriteId)
     {
         $this->authorize('forceDelete', Favorite::class);
-
-
-        $deleted = $this->favoriteService->force_delete_favorite($favoriteId);
-        if ($deleted) {
-            return $this->success($deleted, 'favorite permanently deleted.');
-        } else {
-            return $this->error('Failed to permanently delete rating.', 500);
-        }
+        $this->favoriteService->force_delete_favorite($favoriteId);
+        return $this->success(null, "FoodCategory deleted Permanently");
     }
 }

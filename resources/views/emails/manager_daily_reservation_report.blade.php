@@ -101,7 +101,7 @@
                                     <td style="border: 1px solid #e2e8f0; color: #2d3748;">{{ $reservation->table_id }}</td>
                                     <td style="border: 1px solid #e2e8f0; color: #2d3748;">{{ $reservation->guest_count }}</td>
                                     <td style="border: 1px solid #e2e8f0;">
-                                            <span style="color: {{ $statusColors[$reservation->status] }};">
+                                            <span :style="{ color: '{{ $statusColors[$reservation->status] }}'}">
                                                 {{ $reservation->status }}
                                             </span>
                                     </td>

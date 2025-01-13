@@ -9,9 +9,11 @@ use App\Models\FoodCategory;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Favorite\FavoriteResource;
+use Exception;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class FavoriteService
 {
@@ -112,58 +114,100 @@ class FavoriteService
             $deletedFavorite = Favorite::onlyTrashed()->get();
 
             return $deletedFavorite;
-        } catch (\Exception $e) {
-            Log::error('Error in favoriteService@get_deleted_favorites: ' . $e->getMessage());
-            return false;
+        } catch (Exception $e) {
+            Log::error("error in display list of trashed FoodCategory" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
 
 //********************************************************************* */
 
-    /**
-     * restore the favorite
-     * @param  $favoriteId
-     * @return \Illuminate\Http\JsonResponse
+     /**
+     * Restore a trashed (soft deleted) resource by its ID.
+     *
+     * @param  int  $id  The ID of the trashed Favourite to be restored.
+     * @return \App\Models\Favorite
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the Task with the given ID is not found.
+     * @throws \Exception If there is an error during the restore process.
      */
-
-    public function restore_favorite($favoriteId)
+    public function restore_favorite($id)
     {
         try {
-            // Find the soft-deleted favorite
-            $favorite = Favorite::onlyTrashed()->findOrFail($favoriteId);
-
-            // Restore the favorite
+            $favorite = Favorite::onlyTrashed()->findOrFail($id);
             $favorite->restore();
+            return $favorite;
+        } catch (ModelNotFoundException $e) {
+            Log::error("error" . $e->getMessage());
 
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Error in favoriteService@restore_favorite: ' . $e->getMessage());
-            return false;
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "we didn't find any thing",
+                ],
+                404
+            ));
+
+        } catch (Exception $e) {
+            Log::error("error in restore a Favorite" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 
 
+
 //********************************************************************** */
 
-    /**
-     * force_delete the favorite
-     * @param  $favoriteId
-     * @return \Illuminate\Http\JsonResponse
+   /**
+     * Permanently delete a trashed (soft deleted) resource by its ID.
+     *
+     * @param  int  $id  The ID of the trashed Task to be permanently deleted.
+     * @return void
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the Task with the given ID is not found.
+     * @throws \Exception If there is an error during the force delete process.
      */
     public function force_delete_favorite($favoriteId)
     {
         try {
-            // Find the soft-deleted favorite
             $favorite = Favorite::onlyTrashed()->findOrFail($favoriteId);
-
-            // Permanently delete the favorite
             $favorite->forceDelete();
+        } catch (ModelNotFoundException $e) {
+            Log::error("error" . $e->getMessage());
 
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Error in favoriteService@force_delete_favorite: ' . $e->getMessage());
-            return false;
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "we didn't find any thing",
+                ],
+                404
+            ));
+
+        } catch (Exception $e) {
+            Log::error("error  in forceDelete FoodCategory" . $e->getMessage());
+
+            throw new HttpResponseException(response()->json(
+                [
+                    'status' => 'error',
+                    'message' => "there is something wrong in server",
+                ],
+                500
+            ));
         }
     }
 }

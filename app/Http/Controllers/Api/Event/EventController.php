@@ -12,6 +12,7 @@ use App\Http\Resources\Event\EventResource;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 
 /**
  * EventController - Handles operations related to events.
@@ -122,68 +123,32 @@ class EventController extends Controller
     }
 
 
-    /**
-     * Retrieve a list of soft-deleted Event.
-     *
-     * @return JsonResponse
-     *
-     * @throws Exception
+     /**
+     * Display a paginated listing of the trashed (soft deleted) resources.
      */
-
-    public function showDeleted(): JsonResponse
+    public function showDeleted(Request $request)
     {
-        try {
-            $softDeleted = Event::onlyTrashed()->get();
-            if ($softDeleted->isEmpty()) {
-                return self::error(null, 'No deleted Event found.', 404);
-            }
-            return self::success($softDeleted, 'Soft-deleted Event retrieved successfully.');
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Error retrieving soft-deleted events: ' . $e->getMessage());
-            return self::error(null, 'An error occurred while retrieving deleted events.', 500);
-        }
+        $perPage = $request->input('per_page', 10);
+        $trashedevent = $this->eventService->trashedListEvent($perPage);
+        return $this->success($trashedevent);
+    }
+
+     /**
+     * Restore a trashed (soft deleted) resource by its ID.
+     */
+    public function restoreDeleted($id)
+    {
+        $event = $this->eventService->restoreEvent($id);
+        return $this->success("Event restored Successfully");
     }
 
     /**
-     * Restore a soft-deleted event.
-     *
-     * @param string $id
-     * @return JsonResponse
+     * Permanently delete a trashed (soft deleted) resource by its ID.
      */
-    public function restoreDeleted(string $id): JsonResponse
+    public function forceDeleted($id)
     {
-        try {
-            $event = Event::onlyTrashed()->findOrFail($id);
-            $event->restore();
-            return self::success($event, 'Event restored successfully.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return self::error(null, 'Event not found.', 404);
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Error restoring event: ' . $e->getMessage());
-            return self::error(null, 'An error occurred while restoring the event.', 500);
-        }
+        $this->eventService->forceDeleteEvent($id);
+        return $this->success(null, "Event deleted Permanently");
     }
 
-    /**
-     * Permanently delete a soft-deleted event.
-     *
-     * @param string $id
-     * @return JsonResponse
-     */
-    public function forceDeleted(string $id): JsonResponse
-    {
-        try {
-            $event = Event::onlyTrashed()->findOrFail($id);
-            $event->forceDelete();
-            return self::success(null, 'Event permanently deleted.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return self::error(null, 'Event not found.', 404);
-        } catch (Exception $e) {
-            // Log the error
-            Log::error('Error permanently deleting event: ' . $e->getMessage());
-            return self::error(null, 'An error occurred while permanently deleting the event.', 500);
-        }
-    }
 }

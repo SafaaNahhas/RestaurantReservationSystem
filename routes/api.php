@@ -108,19 +108,21 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
 });
 
 // ***********  NotificationLog Routes **********************
-// Define API resource routes for notification log
-Route::get('notificationLogs', [NotificationLogController::class, 'index']);
-// Define a route for soft deleting notification logs
-Route::get('notificationLogs/{notificationlogs}', [NotificationLogController::class, 'show']);
-// Define a route for soft deleting notification logs
-Route::delete('softDeleteNotificationLogs/{notificationlogs}', [NotificationLogController::class, 'deleteNotificationLogs']);
-// Define a route for retrieving deleted notification logs
-Route::get('getDeletedNotificationLogs', [NotificationLogController::class, 'getDeletedNotificationLogs']);
-// Define a route for permanently deleting a soft-deleted notification log
-Route::delete('permanentlyDeleteNotificationLog/{notificationlogs}', [NotificationLogController::class, 'permanentlyDeleteNotificationLog']);
-// Define a route for restoring a soft-deleted notification log
-Route::post('restoreNotificationLog/{notificationlogs}', [NotificationLogController::class, 'restoreNotificationLog']);
-Route::middleware(['auth:api'])->group(function () {});
+Route::middleware(['auth:api'])->group(function () {
+
+    // Define API resource routes for notification log
+    Route::get('notificationLogs', [NotificationLogController::class, 'index']);
+    // Define a route for soft deleting notification logs
+    Route::get('notificationLogs/{notificationlogs}', [NotificationLogController::class, 'show']);
+    // Define a route for soft deleting notification logs
+    Route::delete('softDeleteNotificationLogs/{notificationlogs}', [NotificationLogController::class, 'deleteNotificationLogs']);
+    // Define a route for retrieving deleted notification logs
+    Route::get('getDeletedNotificationLogs', [NotificationLogController::class, 'getDeletedNotificationLogs']);
+    // Define a route for permanently deleting a soft-deleted notification log
+    Route::delete('permanentlyDeleteNotificationLog/{notificationlogs}', [NotificationLogController::class, 'permanentlyDeleteNotificationLog']);
+    // Define a route for restoring a soft-deleted notification log
+    Route::post('restoreNotificationLog/{notificationlogs}', [NotificationLogController::class, 'restoreNotificationLog']);
+});
 
 
 // ********* Departments Routes ***********************************

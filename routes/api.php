@@ -196,7 +196,7 @@ Route::middleware(['auth:api', 'role:Admin'])->group(function () {
     Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
 });
 Route::middleware(['auth:api'])->group(function () {
-    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::put('users/{user}', [UserController::class, 'update']);
 });
 
 // ********** Emergency Routes *****************************

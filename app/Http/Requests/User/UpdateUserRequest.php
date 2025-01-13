@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
     public function authorize(): bool
     {
         // Check if the authenticated user's ID matches the specific condition
-        return auth()->check() && auth()->id() === $this->route('id');
+        return auth()->check() && auth()->id() === $this->route('user')->id;
     }
 
     /**
@@ -49,15 +49,15 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|string|max:255',    // Optional name update
+            'name' => 'nullable|string|max:255',    // Optional name update
             'email' => [                             // Optional email update
-                'sometimes',
+                'nullable',
                 'string',
                 'email',
                 'max:255',
                 Rule::unique('users')->ignore($this->route('user'))  // Ignore current user's email
             ],
-            'password' => 'sometimes|string|min:8|confirmed',  // Optional password update
+            'password' => 'nullable|string|min:8|confirmed',  // Optional password update
             'phone' => 'nullable|string|regex:/^([0-9]{10})$/',  // Optional phone update
             'is_active' => 'nullable|boolean',       // Optional status update
         ];

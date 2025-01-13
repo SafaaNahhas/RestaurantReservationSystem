@@ -59,11 +59,11 @@ class Handler extends ExceptionHandler
                 ], 403); // 403 Forbidden
             }
 
-            if ($exception instanceof ModelNotFoundException) {
-                return response()->json([
-                    'message' => 'The requested resource was not found.',
-                ], 404);
-            }
+            // if ($exception instanceof ModelNotFoundException) {
+            //     return response()->json([
+            //         'message' => 'The requested resource was not found.',
+            //     ], 404);
+            // }
 
             if ($exception instanceof RelationNotFoundException) {
                 return response()->json([

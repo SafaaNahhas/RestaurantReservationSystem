@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\NotificationLog;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +31,6 @@ class NotificationLogRequest extends FormRequest
             'notification_method' => 'nullable|string|max:255',
             'reason_notification_send' => 'nullable|string|max:255',
             'user_id' => 'nullable|integer|exists:users,id',
-            'notificationlog_id' => 'nullable|integer|exists:notification_logs,id',
         ];
     }
 

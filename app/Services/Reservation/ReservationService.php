@@ -56,8 +56,8 @@ class ReservationService
                     'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
                 ];
             }
-          // Use findAvailableTable to find a suitable table
-          $selectedTable = $this->findAvailableTable($data, $startDate, $endDate);
+            // Use findAvailableTable to find a suitable table
+            $selectedTable = $this->findAvailableTable($data, $startDate, $endDate);
 
             // Handle table availability and department/manager validations
             if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
@@ -281,19 +281,19 @@ class ReservationService
             return $query->where('seat_count', '>=', $data['guest_count'])
                 ->orderBy('seat_count', 'asc');
         })
-        ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $excludeReservationId) {
-            $query->whereBetween('start_date', [$startDate, $endDate])
-                ->orWhereBetween('end_date', [$startDate, $endDate])
-                ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                    $nestedQuery->where('start_date', '<', $startDate)
-                        ->where('end_date', '>', $endDate);
-                })
-                ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
-                    $query->where('id', '!=', $excludeReservationId);
-                });
-        })
-        ->select(['id', 'table_number', 'seat_count', 'department_id'])
-        ->first();
+            ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $excludeReservationId) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                        $nestedQuery->where('start_date', '<', $startDate)
+                            ->where('end_date', '>', $endDate);
+                    })
+                    ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                        $query->where('id', '!=', $excludeReservationId);
+                    });
+            })
+            ->select(['id', 'table_number', 'seat_count', 'department_id'])
+            ->first();
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -446,30 +446,30 @@ class ReservationService
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             Log::info("Reservation ID {$reservation->id} rejected by User ID {$reservation->user_id}. Reason: {$rejectionReason}");
             $notificationSettings = $reservation->user->notificationSettings;
-                $botToken = env('TELEGRAM_BOT_TOKEN');
-                $chatId = $notificationSettings->telegram_chat_id;
-                $message = "❌ Reservation Rejected!\n\n";
-                $message .= "📅 Date: " . $reservation->start_date . "\n";
-                $message .= "🍽️ Table Number: " . ($reservation->table->table_number ?? 'Not Available') . "\n";
-                $message .= "⚠️ Rejection Reason: " . $rejectionReason . "\n\n";
-                $message .= "We hope to see you again. Thank you for your understanding. 🙏";
-                // Send notification based on the user's selected method
-                if ($notificationSettings->method_send_notification === 'telegram' && $chatId) {
-                    // Send Telegram message
-                    Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
-                        'chat_id' => $chatId,
-                        'text' => $message,
-                    ]);
-                } elseif ($notificationSettings->method_send_notification === 'mail') {
-                    // Send rejection email
-                    Mail::to($reservation->user->email)
-                        ->queue(new ReservationRejectedMail($reservation));
-                } else {
-                    return [
-                        'error' => true,
-                        'message' => 'Invalid notification method in settings.',
-                    ];
-                }
+            $botToken = env('TELEGRAM_BOT_TOKEN');
+            $chatId = $notificationSettings->telegram_chat_id;
+            $message = "❌ Reservation Rejected!\n\n";
+            $message .= "📅 Date: " . $reservation->start_date . "\n";
+            $message .= "🍽️ Table Number: " . ($reservation->table->table_number ?? 'Not Available') . "\n";
+            $message .= "⚠️ Rejection Reason: " . $rejectionReason . "\n\n";
+            $message .= "We hope to see you again. Thank you for your understanding. 🙏";
+            // Send notification based on the user's selected method
+            if ($notificationSettings->method_send_notification === 'telegram' && $chatId) {
+                // Send Telegram message
+                Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                ]);
+            } elseif ($notificationSettings->method_send_notification === 'mail') {
+                // Send rejection email
+                Mail::to($reservation->user->email)
+                    ->queue(new ReservationRejectedMail($reservation));
+            } else {
+                return [
+                    'error' => true,
+                    'message' => 'Invalid notification method in settings.',
+                ];
+            }
             // Return response with notification status included
             return [
                 'error' => false,
@@ -553,13 +553,13 @@ class ReservationService
             $notificationSettings = $reservation->user->notificationSettings;
 
             // if ($notificationSettings && in_array('cancel', $notificationSettings->send_notification_options)) {
-                $botToken = env('TELEGRAM_BOT_TOKEN');
-                $chatId = $notificationSettings->telegram_chat_id;
-                $message = "❌ Reservation Cancelled!\n\n";
-                $message .= "📅 Date: " . $reservation->start_date . "\n";
-                $message .= "🍽️ Table Number: " . ($reservation->table->table_number ?? 'Not Available') . "\n";
-                $message .= "⚠️ Cancellation Reason: " . $cancellationReason . "\n\n";
-                $message .= "We hope to see you again. Thank you for your understanding. 🙏";
+            $botToken = env('TELEGRAM_BOT_TOKEN');
+            $chatId = $notificationSettings->telegram_chat_id;
+            $message = "❌ Reservation Cancelled!\n\n";
+            $message .= "📅 Date: " . $reservation->start_date . "\n";
+            $message .= "🍽️ Table Number: " . ($reservation->table->table_number ?? 'Not Available') . "\n";
+            $message .= "⚠️ Cancellation Reason: " . $cancellationReason . "\n\n";
+            $message .= "We hope to see you again. Thank you for your understanding. 🙏";
 
                 // Send notification based on the user's selected method
                 if ($notificationSettings->method_send_notification === 'telegram' && $chatId) {
@@ -657,32 +657,32 @@ class ReservationService
      */
     public function completeService($reservationId)
     {
-        try {
-            $reservation = Reservation::find($reservationId);
-            if (!$reservation) {
-                return ['error' => true, 'message' => "No reservation found with ID {$reservationId}"];
-            }
-            // Ensure the reservation is in service before completing it
-            if ($reservation->status !== 'in_service') {
-                return ['error' => true, 'message' => 'Reservation must be in service to complete'];
-            }
-            // Complete the service
-            $reservation->update([
-                'status' => 'completed',
-                'completed_at' => now(),
-            ]);
-            // Clear cache for related reservation data
-            if ($reservation->status === 'pending') {
-                Cache::forget('tables_with_reservations_pending');
-            }
-            Cache::forget('tables_with_reservations_all');
-            // Dispatch job to send a rating request email
-            $notificationLogService = new NotificationLogService();
-            SendRatingRequestJob::dispatch($reservation, $notificationLogService);
-            return [
-                'error' => false,
-                'reservation' => $reservation,
-            ];
+           try {
+     $reservation = Reservation::find($reservationId);
+        if (!$reservation) {
+            return ['error' => true, 'message' => "No reservation found with ID {$reservationId}"];
+        }
+        // Ensure the reservation is in service before completing it
+        if ($reservation->status !== 'in_service') {
+            return ['error' => true, 'message' => 'Reservation must be in service to complete'];
+        }
+        // Complete the service
+        $reservation->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+        // Clear cache for related reservation data
+        if ($reservation->status === 'pending') {
+            Cache::forget('tables_with_reservations_pending');
+        }
+        Cache::forget('tables_with_reservations_all');
+        // Dispatch job to send a rating request email
+        $notificationLogService = new NotificationLogService();
+        SendRatingRequestJob::dispatch($reservation, $notificationLogService);
+        return [
+            'error' => false,
+            'reservation' => $reservation,
+        ];
         } catch (Exception $e) {
             // Log any errors and return an error message
             Log::error('Error completing service: ' . $e->getMessage());

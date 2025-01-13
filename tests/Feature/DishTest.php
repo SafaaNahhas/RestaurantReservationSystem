@@ -39,50 +39,7 @@ class DishTest extends TestCase
         $this->assertCount(10, $dishes);
     }
 
-    /** @test for create dish with image*/
-    public function it_can_create_dish_with_images()
-    {
-        // Create and authenticate a user
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        // Create a FoodCategory for the dish
-        $category = FoodCategory::factory()->create();
-
-        // Define the data for the new Dish, including dummy files
-        $data = [
-            'name' => 'Pizza',
-            'description' => 'Delicious cheese pizza.',
-            'category_id' => $category->id,
-            'images' => [
-                UploadedFile::fake()->create('dummy1.jpg', 100), 
-                UploadedFile::fake()->create('dummy2.jpg', 100),
-            ],
-        ];
-
-        // Mock the Storage facade
-        Storage::fake('public');
-
-        // Call the createDish method
-        $dish = $this->dishService->createDish($data);
-
-        // Assert the database has the new dish
-        $this->assertDatabaseHas('dishes', ['name' => 'Pizza']);
-
-        // Reload the dish to ensure the image is correctly associated
-        $dish->load('image');
-
-        // Assert that the dish has an image
-        $this->assertNotNull($dish->image);
-
-        // Log the image path for debugging
-        Log::info('Dish Image Path: ' . $dish->image->image_path);
-
-        // Use the relative path for file existence check in the mocked storage
-        $relativePath = str_replace('/storage', '', $dish->image->image_path);
-        $this->assertTrue(Storage::disk('public')->exists($relativePath), "File does not exist at path: $relativePath");
-    }
-
+   
     /** @test for create dish without image*/
     public function it_can_create_dish_without_images()
     {

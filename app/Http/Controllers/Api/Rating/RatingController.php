@@ -29,28 +29,14 @@ class RatingController extends Controller
      */
     public function index(Request $request)
     {
-        // Read the number of items per page from the request, with a default value of 10
-        $perPage = $request->input('per_page', 10);
-
-        $ratingValue = $request->input('rating');
-
-        // Create a cache key based on the number of items per page and the rating value
-        $cacheKey = "ratings.index.per_page_{$perPage}.rating_" . ($ratingValue ?? 'all');
-
-        // Attempt to retrieve data from the cache or store it if not available
-        $ratings = Cache::remember($cacheKey, 60, function () use ($ratingValue, $perPage) {
-            return Rating::query()
-                // Apply the filterByRating scope if a rating value is provided
-                ->when($ratingValue, fn($query) => $query->filterByRating($ratingValue))
-                // Apply pagination based on the specified per-page value
-                ->paginate($perPage);
-        });
-
-        return $this->paginated($ratings, RatingResource::class, 'Ratings fetched successfully', 200);
+        $data = [
+            'perPage' => $request->input('per_page', 10),
+            'ratingValue' => $request->input('rating')
+        ];
+        $ratings = $this->ratingService->getRating($data);
+        return self::success($ratings, 'Ratings fetched successfully');
     }
-
-
-//************************************************************************************************** */
+    //************************************************************************************************** */
 
 
     /**
@@ -61,28 +47,18 @@ class RatingController extends Controller
     public function store(StoreRatingRequest $request)
     {
 
+        $validationdata = $request->validated();
         $reservationId = $request->input('reservation_id');
-
         $userId = $request->query('user_id');
-
         if ($request->user()->cannot('create', [Rating::class, $userId, $reservationId])) {
             throw new UnauthorizedException(403, "You can only rate your own reservations.");
         }
-
-
-        $validationdata = $request->validated();
         $response = $this->ratingService->create_rating($validationdata, $reservationId, $userId);
-        if (!$response) {
+        return $this->success($response, 'Rating created successfully', 201);
 
-            Cache::forget('ratings.index.rating_all');
-
-            return $this->error();
-        } else {
-            return $this->success($response, 'rating created successfully', 201);
-        }
     }
 
-//**************************************************************** */
+    //**************************************************************** */
 
     /**
      * Display the specified rating.
@@ -92,21 +68,11 @@ class RatingController extends Controller
     public function show(Rating $rating)
     {
         $this->authorize('show', $rating);
+        $rating= $this->ratingService->showRating($rating);
+        return self::success(new RatingResource($rating), 'rating  data ', 200);
 
-        try {
-
-            // $rating = Rating::select('user_id', 'rating', 'comment')->first();
-            return new RatingResource($rating);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-            return response()->json([
-                'error' => true,
-                'message' => "You don't have permission to perform this action."
-            ], 403);
-        }
     }
-
-
-//************************************************************** */
+    //************************************************************** */
 
     /**
      * Update the specified resource in storage.
@@ -120,18 +86,12 @@ class RatingController extends Controller
             throw new UnauthorizedException(403, "You can only update your own ratings.");
         }
         $validatedRequest = $request->validated();
+        $result = $this->ratingService->update_rating($rating, $validatedRequest);
 
-        $resault = $this->ratingService->update_rating($rating, $validatedRequest);
-
-        if (!$resault) {
-            Cache::forget('ratings.index.rating_all');
-            return $this->error();
-        } else {
-            return $this->success($resault, 'rating updated successfully', 200);
-        }
+        return $this->success($result, 'Rating updated successfully', 200);
     }
 
-//************************************************************************** */
+    //************************************************************************** */
 
 
     /**
@@ -139,41 +99,38 @@ class RatingController extends Controller
      * @param Rating $rating
      * @return \Illuminate\Http\JsonResponse
      */
+
+
     public function destroy(Request $request, Rating $rating)
     {
         if ($request->user()->cannot('delete', $rating)) {
             throw new UnauthorizedException(403, "You can only delete your own ratings.");
         }
-        $rating->delete();
+        $this->ratingService->forcedeleterating($rating);
+        return $this->success(null, 'Rating deleted successfully', 200);
 
-        Cache::forget('ratings.index.rating_all');
-
-        return $this->success(null,'Rating deleted successfully',200);
     }
 
-
-//********************************************************************* */
+    //********************************************************************* */
 
     /**
      * Get deleted ratings.
      * @return \Illuminate\Http\JsonResponse
      */
+
+
     public function getDeletedRatings()
     {
 
-        $this->authorize('get_deleting', Rating::class);
-
+        $this->authorize('get_deleted', Rating::class);
         $deletedRatings = $this->ratingService->get_deleted_ratings();
+        return $this->success($deletedRatings, 'Deleted ratings retrieved successfully.');
 
-        if ($deletedRatings) {
-            return $this->success($deletedRatings, 'Deleted ratings retrieved successfully.');
-        } else {
-            return $this->error('Failed to retrieve deleted ratings.', 500);
-        }
     }
 
 
-//******************************************************************************* */
+
+    //******************************************************************************* */
     /**
      * Restore a deleted rating.
      * @param int $ratingId
@@ -185,15 +142,11 @@ class RatingController extends Controller
 
         $restored = $this->ratingService->restore_rating($ratingId);
 
-        if ($restored) {
-            return $this->success($restored, 'Rating restored successfully.');
-        } else {
-            return $this->error('Failed to restore rating.', 500);
-        }
+        return $this->success($restored, 'Rating restored successfully.');
     }
 
 
-//******************************************************** */
+    //******************************************************** */
 
     /**
      * Permanently delete a rating.
@@ -204,11 +157,9 @@ class RatingController extends Controller
     {
         $this->authorize('forceDelete', Rating::class);
 
-        $deleted = $this->ratingService->force_delete_rating($ratingId);
-        if ($deleted) {
-            return $this->success('Rating permanently deleted.');
-        } else {
-            return $this->error('Failed to permanently delete rating.', 500);
-        }
+        $deleted = $this->ratingService->permanentlyDeleteRating($ratingId);
+
+        return $this->success('Rating permanently deleted.');
+
     }
 }

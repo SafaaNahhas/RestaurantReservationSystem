@@ -26,20 +26,13 @@ class FavoriteController extends Controller
      * @param \Illuminate\Http\Request $request The incoming HTTP request containing query parameters.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllFavorites(Request $request)
+    public function getAllFavorites(Request $request): JsonResponse
     {
         $this->authorize('showAllFavorite', Favorite::class);
-
-        $type = $request->input('type');
-
-        $perPage = $request->input('per_page', 10);
-
-        // Fetching data with filtering and pagination application
-        $favorites = Favorite::when($type, function ($query, $type) {
-            return $query->byType($type);
-        })->paginate($perPage);
-
+        $data = $request->input('type', 'per_page');
+        $favorites = $this->favoriteService->getAllFavorites($data);
         return $this->paginated($favorites, FavoriteResource::class, 'Favorite fetched successfully', 200);
+
     }
 
 
@@ -55,64 +48,21 @@ class FavoriteController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $data = $this->favoriteService->addToFavorites($user, $request->type, $request->id);
-
-
-
-        if ($data['status'] === 'exists') {
-            Cache::forget('favorite_all');
-
-            return $this->error(null, $data['message'], 409);
-        }
-
-        if ($data['status'] === 'error') {
-            Cache::forget('favorite_all');
-
-            return $this->error(null, $data['message'], 500);
-        }
-
-        return $this->success(null, $data['message'], 201);
+        return self::success($data, "Added to favorites successfully");
     }
-
-
 
     //************************************************************ */
 
     /**
      * Display a listing of the favorite.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function getFavorites(): JsonResponse
     {
-
         $user = JWTAuth::parseToken()->authenticate();
         $favorites = $this->favoriteService->getFavorites($user);
-
-        return response()->json($favorites);
-    }
-
-    /**
-     * remove a favorite (table or food category) from the storage.
-     * @param AddToFavoritesRequest $request
-     *  @return \Illuminate\Http\JsonResponse
-     */
-    public function removeFromFavorites(AddToFavoritesRequest $request): JsonResponse
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-        $data = $this->favoriteService->removeFromFavorites($user, $request->type, $request->id);
-
-        if ($data['status'] === 'exists') {
-            Cache::forget('favorite_all');
-
-            return $this->error(null, $data['message'], 404);
-        }
-
-        if ($data['status'] === 'error') {
-            Cache::forget('favorite_all');
-
-            return $this->error(null, $data['message'], 500);
-        }
-
-        return $this->success(null, $data['message'], 200);
+        return $this->paginated($favorites, FavoriteResource::class, 'user\'s favorites', 200);
     }
 
 
@@ -125,32 +75,51 @@ class FavoriteController extends Controller
     public function getDeletedFavorite(Request $request)
     {
         $this->authorize('getDeleting', Favorite::class);
-        $perPage = $request->input('per_page', 10);
-        $deletedfavorite = $this->favoriteService->get_deleted_favorites($perPage);
-        return $this->success($deletedfavorite);
+
+        $deletedFavorite = $this->favoriteService->get_deleted_favorites();
+        return $this->success($deletedFavorite, 'Deleted favorite retrieved successfully.');
+    }
+
+    //************************************************************************* */
+    /**
+     * remove a favorite (table or food category) from the storage.
+     * @param AddToFavoritesRequest $request
+     *  @return \Illuminate\Http\JsonResponse
+     */
+    public function removeFromFavorites(AddToFavoritesRequest $request): JsonResponse
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $data = $this->favoriteService->removeFromFavorites($user, $request->type, $request->id);
+        return $this->success(null, 'success', 'Item Removed successfully', 200);
     }
 
     //************************************************************************* */
 
-      /**
-     * Restore a trashed (soft deleted) resource by its ID.
+    /**
+     * Restore a deleted favorite.
+     * @param int $favoriteId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function restorefavorite($id)
+    public function restorefavorite($favoriteId)
     {
         $this->authorize('restore', Favorite::class);
-        $favorite = $this->favoriteService->restore_favorite($id);
-        return $this->success("favorite restored Successfully");
+        $restored = $this->favoriteService->restore_favorite($favoriteId);
+        return $this->success($restored, 'favorite restored successfully.');
+
     }
 
     //*********************************************************** */
 
-   /**
-     * Permanently delete a trashed (soft deleted) resource by its ID.
+    /**
+     * Permanently delete a favorite.
+     * @param int $favoriteId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function forceDeleteFavorite($favoriteId)
+    public function permanentlyDeleteFavorite($favoriteId)
     {
         $this->authorize('forceDelete', Favorite::class);
-        $this->favoriteService->force_delete_favorite($favoriteId);
-        return $this->success(null, "FoodCategory deleted Permanently");
+        $deleted = $this->favoriteService->permanently_delete_favorite($favoriteId);
+        return $this->success($deleted, 'favorite permanently deleted.');
+
     }
 }

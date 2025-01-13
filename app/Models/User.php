@@ -147,8 +147,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(ReservationLog::class, 'changed_by');
     }
 
-
-    public function notificationSettings()
+    /**
+     * Relationship: A user has one notification settings record.
+     *
+     * @return HasOne
+     */
+    public function notificationSettings(): HasOne
     {
         return $this->hasOne(NotificationSettings::class);
     }

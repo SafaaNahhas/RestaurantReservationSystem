@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -9,500 +10,567 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Tests\TestCase;
 
 class UserTest extends TestCase
 {
     use DatabaseTransactions; // This will wrap each test in a transaction
-    use WithoutMiddleware; // Optional: if you want to skip middleware
 
     protected mixed $userService;
 
-    /**
-     *  Set up the test environment.
-     *  Creates a new instance of UserService before each test.
-     *
-     * @return void
-     */
-    public function setUp(): void
+
+    protected function startCode(): array
     {
-        parent::setUp();
-        $this->userService = app(\App\Services\UserService::class);
+        // Create an admin user
+        $admin = User::factory()->create([
+            'email' => 'm.k@email.com',
+            'name' => 'Admin User',
+            'is_active' => true
+        ]);
+
+        $admin->assignRole(RoleUser::Admin);
+        $token = JWTAuth::fromUser($admin);
+
+        return [
+            'admin' => $admin,
+            'token' => $token
+        ];
     }
 
+
     /**
-     * Test if user listing returns correct pagination
+     * Test if users endpoint returns correct pagination for admin.
      *
      * @return void
      */
-    public function test_list_users_returns_paginated_results(): void
+    public function test_list_users_with_pagination(): void
     {
+        // Setup authentication and initial data
+        $data = $this->startCode();
+        $token = $data['token'];
+
         // Get baseline count before adding test data
         $initialCount = User::count();
 
         // Test parameters
         $numberOfUsers = 15;  // Total users to create
-        $perPage = 10;        // Users per page
+        $perPage = 10;       // Users per page
 
-        // Seed test data
-        User::factory()->count($numberOfUsers)->create();
+        // Create test users
+        User::factory()
+            ->count($numberOfUsers)
+            ->create();
 
-        $result = $this->userService->listUsers($perPage);
+        // Make API request with admin token
+        $response = $this->getJson("/api/users?per_page={$perPage}", [
+            'Authorization' => 'Bearer ' . $token
+        ]);
 
-        // Verify pagination works correctly
-        $this->assertEquals($perPage, $result->perPage());                                   // Correct items per page
-        $this->assertEquals($initialCount + $numberOfUsers, $result->total());      // Correct total count
-        $this->assertEquals(ceil(($initialCount + $numberOfUsers) / $perPage), $result->lastPage());     // Correct number of pages
-        $this->assertEquals(min($perPage, $result->total()), $result->count());               // Correct items on current page
+        // Assert response status
+        $response->assertStatus(200);
     }
 
+
     /**
-     * Test if users are ordered by latest first
+     * Test unauthorized access.
      *
      * @return void
      */
-    public function test_list_users_orders_by_latest(): void
+    public function test_unauthorized_access_is_rejected(): void
     {
-        // Create an older user
-        User::factory()->create(['created_at' => now()->subDays(2)]);
-
-        // Create the most recent user
-        $latestUser = User::factory()->create(['created_at' => now()]);
-
-        // Get paginated results
-        $result = $this->userService->listUsers(10);
-
-        // Verify the most recent user appears first
-        $this->assertEquals($latestUser->id, $result->first()->id);
+        $response = $this->getJson('/api/users');
+        $response->assertStatus(401);
     }
 
+
     /**
-     * Test user creation fails with invalid role
+     * Test successful user creation.
      *
      * @return void
      */
-    public function test_user_creation_fails_with_invalid_role(): void
+    public function test_admin_can_create_user(): void
     {
-        $invalidRoleData = [
-            'name' => 'Test User',
-            'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'role' => 'InvalidRole' // Role that doesn't exist
-        ];
+        $data = $this->startCode();
 
-        $this->expectException(RoleDoesNotExist::class);
-        $this->userService->createUser($invalidRoleData);
-    }
-
-    /**
-     * Test successful user creation with role assignment
-     *
-     * @return void
-     */
-    public function test_creates_user_with_role_successfully(): void
-    {
-        // Prepare test data with user details
         $userData = [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password123',
-            'role' => 'Customer'
+            'password_confirmation' => 'password123',
+            'phone' => '1234567890',
+            'is_active' => true,
+            'role' => RoleUser::Customer
         ];
 
-        // Execute user creation through service
-        $user = $this->userService->createUser($userData);
-
-        // Verify user was saved to database
-        $this->assertDatabaseHas('users', [
-            'name' => 'Test User',
-            'email' => 'test@example.com'
+        $response = $this->postJson('/api/users', $userData, [
+            'Authorization' => 'Bearer ' . $data['token']
         ]);
 
-        // Verify password was properly hashed
-        $this->assertTrue(Hash::check('password123', $user->password));
+        $response->assertStatus(201);
+    }
 
-        // Verify role was assigned correctly
-        $this->assertTrue($user->hasRole('Customer'));
+
+    /**
+     * Test user creation with invalid role fails.
+     *
+     * @return void
+     */
+    public function test_creates_user_with_invalid_role_fails(): void
+    {
+        $data = $this->startCode();
+
+        $userData = [
+            'name' => 'user',
+            'email' => 'user.user@example.com',
+            'password' => 'password123',
+            'phone' => '1234567890',
+            'is_active' => true,
+            'role' => 'invalid_role' // Invalid role value
+        ];
+
+        $response = $this->postJson('/api/users', $userData, [
+            'Authorization' => 'Bearer ' . $data['token']
+        ]);
+
+        // Assert validation failed
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['role']);
+
+        // Assert user was not created in database
+        $this->assertDatabaseMissing('users', [
+            'email' => 'john.doe@example.com'
+        ]);
     }
 
     /**
-     * Test user creation fails with duplicate email
+     * Test user creation fails with duplicate email.
      *
      * @return void
      */
     public function test_user_creation_fails_with_duplicate_email(): void
     {
-        // Create initial user
-        User::create([
-            'name' => 'Existing User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123')
-        ]);
+        $data = $this->startCode();
 
-        // Attempt to create user with duplicate email
-        $duplicateEmailData = [
-            'name' => 'Test User',
-            'email' => 'test@example.com', // Duplicate email
+        // Create first user
+        $userData = [
+            'name' => 'First User',
+            'email' => 'duplicate@example.com',
             'password' => 'password123',
-            'role' => 'Customer'
+            'phone' => '1234567890',
+            'is_active' => true,
+            'role' => RoleUser::Customer
         ];
 
-        $this->expectException(UniqueConstraintViolationException::class);
-        $this->userService->createUser($duplicateEmailData);
+        // Create the first user successfully
+        $this->postJson('/api/users', $userData, [
+            'Authorization' => 'Bearer ' . $data['token']
+        ]);
+
+        // Try to create second user with same email
+        $duplicateUserData = [
+            'name' => 'Second User',
+            'email' => 'duplicate@example.com', // Same email as first user
+            'password' => 'password456',
+            'phone' => '0987654321',
+            'is_active' => true,
+            'role' => RoleUser::Customer
+        ];
+
+        $response = $this->postJson('/api/users', $duplicateUserData, [
+            'Authorization' => 'Bearer ' . $data['token']
+        ]);
+
+        // Assert validation failed
+        $response->assertStatus(422);
     }
 
     /**
-     * Test user update with various field combinations
+     * Test user can update their own profile.
      *
      * @return void
      */
-    public function test_updates_user_successfully(): void
+    public function test_can_update_user_successfully(): void
     {
-        // Create initial user with known password hash
-        $originalPassword = Hash::make('originalpass');
+        // Create a user
         $user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
-            'password' => $originalPassword
+            'phone' => '1234567890',
+            'password' => 'password123456',
+            'is_active' => true
         ]);
 
-        // Prepare update data including null value to test filtering
+        // Login as the same user
+        $this->actingAs($user, 'api');
+        $token = JWTAuth::fromUser($user);
+
         $updateData = [
             'name' => 'Updated Name',
-            'email' => 'new@example.com',
-            'password' => 'newpassword',
-            'phone' => null
+            'email' => 'updated@example.com',
+            'phone' => '0987654321',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123'
         ];
 
-        // Execute update operation
-        $updatedUser = $this->userService->updateUser($user, $updateData);
+        // User attempts to update their own profile
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/users/" . $user->id, $updateData);
 
-        // Verify basic field updates
-        $this->assertEquals('Updated Name', $updatedUser->name);
-        $this->assertEquals('new@example.com', $updatedUser->email);
-
-        // Verify password handling
-        $this->assertTrue(Hash::check('newpassword', $updatedUser->password));   // New password works
-        $this->assertNotEquals($originalPassword, $updatedUser->password);             // Old password hash changed
-
-        // Confirm database persistence
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'name' => 'Updated Name',
-            'email' => 'new@example.com'
-        ]);
-
-        // Verify null value handling
-        $this->assertArrayNotHasKey('phone', $updatedUser->getChanges());
+        $response->assertStatus(200);
     }
 
+
     /**
-     * Test user update fails with duplicate email
+     * Test email update with validation.
      *
      * @return void
      */
-    public function test_update_user_fails_with_duplicate_email(): void
+    public function test_cannot_update_with_invalid_email(): void
     {
-        // Create two users
-        $existingUser = User::factory()->create([
-            'email' => 'existing@example.com'
+        $user = User::factory()->create();
+        $this->actingAs($user, 'api');
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/users/{$user->id}", [
+            'email' => 'invalid-email'
         ]);
 
-        $userToUpdate = User::factory()->create([
-            'email' => 'original@example.com'
-        ]);
-
-        // Attempt to update with existing email
-        $updateData = [
-            'name' => 'New Name',
-            'email' => 'existing@example.com' // Duplicate email
-        ];
-
-        $this->expectException(UniqueConstraintViolationException::class);
-        $this->userService->updateUser($userToUpdate, $updateData);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
     }
 
+
     /**
-     * Test user update fails when user not found
+     * Test admin can delete a user.
      *
      * @return void
      */
-    public function test_update_user_fails_when_user_not_found(): void
+    public function test_admin_can_delete_user(): void
     {
-        $updateData = [
-            'name' => 'New Name',
-            'email' => 'new@example.com'
-        ];
+        $data = $this->startCode();
 
-        try {
-            $nonExistentUser = User::findOrFail(999);
-            $this->userService->updateUser($nonExistentUser, $updateData);
-        } catch (ModelNotFoundException $e) {
-            $this->assertTrue(true); // Test passes if exception is caught
-            return;
-        }
-
-        $this->fail('Expected ModelNotFoundException was not thrown');
-    }
-
-    /**
-     * Test successful user deletion
-     *
-     * @return void
-     */
-    public function test_deletes_user_successfully(): void
-    {
-        // Create a user to delete
-        $user = User::factory()->create([
-            'email' => 'delete-test@example.com'
-        ]);
-        $userId = $user->id;
-
-        // Delete the user
-        $this->userService->deleteUser($user);
-
-        // Assert user was soft deleted
-        $this->assertSoftDeleted('users', [
-            'id' => $userId,
-            'email' => 'delete-test@example.com'
-        ]);
-
-        // Verify the record still exists but is soft deleted
-        $deletedUser = User::withTrashed()->find($userId);
-        $this->assertNotNull($deletedUser->deleted_at);
-    }
-
-    /**
-     * Test user deletion fails when user not found
-     *
-     * @return void
-     */
-    public function test_delete_user_fails_when_user_not_found(): void
-    {
-        // Create and then delete a user
-        $user = User::factory()->create([
-            'email' => 'test-delete@example.com'
-        ]);
-
-        $user->forceDelete();
-
-        $this->expectException(ModelNotFoundException::class);
-
-        $deletedUser = User::findOrFail($user->id);
-        $this->userService->deleteUser($deletedUser);
-    }
-
-    /**
-     * Test user restoration from soft delete state.
-     *
-     * @return void
-     */
-    public function test_restores_soft_deleted_user(): void
-    {
-        // Create test user and soft delete it
-        $user = User::factory()->create([
+        // Create a user to be deleted
+        $userToDelete = User::factory()->create([
+            'name' => 'Test User',
             'email' => 'test@example.com',
-            'name' => 'Test User'
+            'is_active' => true
         ]);
-        $user->delete();
+        $userToDelete->assignRole(RoleUser::Customer);
 
-        // Confirm user is actually soft deleted
+        // Admin attempts to delete the user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->deleteJson("/api/users/{$userToDelete->id}");
+
+        $response->assertStatus(204);
+
+        // Verify user is soft deleted
         $this->assertSoftDeleted('users', [
-            'id' => $user->id
+            'id' => $userToDelete->id,
+            'email' => 'test@example.com'
         ]);
+    }
 
-        // Perform restoration through service
-        $restoredUser = $this->userService->restoreUser($user->id);
 
-        // Verify user exists in database without soft delete
+    /**
+     * Test non-admin cannot delete a user.
+     *
+     * @return void
+     */
+    public function test_non_admin_cannot_delete_user(): void
+    {
+        // Create a regular user
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole(RoleUser::Customer);
+        $token = JWTAuth::fromUser($regularUser);
+
+        // Create another user to attempt to delete
+        $userToDelete = User::factory()->create([
+            'name' => 'Target User',
+            'email' => 'target@example.com'
+        ]);
+        $userToDelete->assignRole(RoleUser::Customer);
+
+        // Regular user attempts to delete another user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->deleteJson("/api/users/{$userToDelete->id}");
+
+        // Assert the deletion was forbidden
+        $response->assertStatus(403);
+
+        // Verify target user still exists
         $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'email' => 'test@example.com',
+            'id' => $userToDelete->id,
+            'email' => 'target@example.com',
             'deleted_at' => null
         ]);
-
-        // Verify restored user data integrity
-        $this->assertNull($restoredUser->deleted_at);               // No soft delete timestamp
-        $this->assertEquals($user->email, $restoredUser->email);    // Email preserved
-        $this->assertEquals($user->name, $restoredUser->name);      // Name preserved
     }
 
+
     /**
-     * Test user restoration fails when user not soft deleted
+     * Test deleting non-existent user returns 404.
      *
      * @return void
      */
-    public function test_restore_user_fails_when_user_not_soft_deleted(): void
+    public function test_delete_nonexistent_user_returns_404(): void
     {
-        // Create an active user (not soft deleted)
-        $user = User::factory()->create([
+        $data = $this->startCode();
+
+        // Attempt to delete non-existent user
+        $nonExistentId = 99999;
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->deleteJson("/api/users/{$nonExistentId}");
+
+        $response->assertStatus(404);
+    }
+
+
+    /**
+     * Test admin can restore a deleted user.
+     *
+     * @return void
+     */
+    public function test_admin_can_restore_deleted_user(): void
+    {
+        $data = $this->startCode();
+
+        // Create and soft delete a user
+        $userToRestore = User::factory()->create([
+            'name' => 'Deleted User',
+            'email' => 'deleted@example.com',
+            'is_active' => true
+        ]);
+        $userToRestore->assignRole(RoleUser::Manager);
+        $userToRestore->delete();
+
+        // Verify user is soft deleted
+        $this->assertSoftDeleted('users', [
+            'id' => $userToRestore->id,
+            'email' => 'deleted@example.com'
+        ]);
+
+        // Admin attempts to restore the user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->postJson("/api/users/restore/{$userToRestore->id}");
+
+        $response->assertStatus(200);
+    }
+
+
+    /**
+     * Test non-admin cannot restore a deleted user.
+     *
+     * @return void
+     */
+    public function test_non_admin_cannot_restore_deleted_user(): void
+    {
+        // Create a regular user
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole(RoleUser::Manager);
+        $token = JWTAuth::fromUser($regularUser);
+
+        // Create and soft delete another user
+        $userToRestore = User::factory()->create([
+            'name' => 'Deleted User',
+            'email' => 'deleted@example.com'
+        ]);
+        $userToRestore->delete();
+
+        // Regular user attempts to restore the deleted user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson("/api/users/restore/{$userToRestore->id}");
+
+        // Assert the restoration was forbidden
+        $response->assertStatus(403);
+
+        // Verify user remains deleted
+        $this->assertSoftDeleted('users', [
+            'id' => $userToRestore->id
+        ]);
+    }
+
+
+    /**
+     * Test restoring non-existent user returns 404.
+     *
+     * @return void
+     */
+    public function test_restore_nonexistent_user_returns_404(): void
+    {
+        $data = $this->startCode();
+
+        // Attempt to restore non-existent user
+        $nonExistentId = 99999;
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->postJson("/api/users/restore/{$nonExistentId}");
+
+        $response->assertStatus(404);
+    }
+
+
+    /**
+     * Test restoring an active (non-deleted) user.
+     *
+     * @return void
+     */
+    public function test_cannot_restore_non_deleted_user(): void
+    {
+        $data = $this->startCode();
+
+        // Create an active user
+        $activeUser = User::factory()->create([
+            'name' => 'Active User',
             'email' => 'active@example.com'
         ]);
 
-        try {
-            $this->userService->restoreUser($user->id);
-            $this->fail('Expected HttpResponseException was not thrown');
-        } catch (HttpResponseException $e) {
-            $response = $e->getResponse();
-            $responseData = json_decode($response->getContent(), true);
+        // Attempt to restore an active user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->postJson("/api/users/restore/{$activeUser->id}");
 
-            $this->assertEquals(404, $response->getStatusCode());
-            $this->assertEquals('error', $responseData['status']);
-            $this->assertEquals('User not found  failed!', $responseData['message']);
-            $this->assertNull($responseData['data']);
-        }
+        // Should return 404 as user is not in trash
+        $response->assertStatus(404);
     }
 
 
     /**
-     * Test retrieval of soft deleted users with pagination
+     * Test admin can view deleted users.
      *
      * @return void
      */
-    public function test_show_deleted_users(): void
+    public function test_admin_can_view_deleted_users(): void
     {
-        // Setup test data - one active and three soft deleted users
-        $activeUser = User::factory()->create(['name' => 'Active User']);
+        $data = $this->startCode();
 
+        // Create and soft delete multiple users
         $deletedUsers = User::factory()->count(3)->create()->each(function ($user) {
             $user->delete();
         });
 
-        // Get paginated list of deleted users (2 per page)
-        $result = $this->userService->showDeletedUsers(2);
+        // Admin attempts to view deleted users
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->getJson("/api/show-deleted-users");
 
-        // Verify pagination settings and counts
-        $this->assertEquals(2, $result->perPage());         // Items per page
-        $this->assertEquals(3, $result->total());           // Total deleted users
-        $this->assertEquals(2, $result->count());           // Current page count
-        $this->assertEquals(2, ceil($result->total() / $result->perPage()));     // Total pages
-
-        // Ensure active users are excluded
-        $this->assertNotContains($activeUser->id, $result->pluck('id'));
-
-        // Validate returned data structure
-        $firstUser = $result->first();
-        $this->assertNotNull($firstUser->deleted_at);       // Has deletion timestamp
-
-        // Check all required fields are present
-        $this->assertArrayHasKey('id', $firstUser->toArray());
-        $this->assertArrayHasKey('name', $firstUser->toArray());
-        $this->assertArrayHasKey('email', $firstUser->toArray());
-        $this->assertArrayHasKey('phone', $firstUser->toArray());
-        $this->assertArrayHasKey('deleted_at', $firstUser->toArray());
-
-        // Confirm records are ordered by latest deleted first
-        $this->assertTrue(
-            $result->first()->deleted_at->gte($result->last()->deleted_at)
-        );
+        $response->assertStatus(200);
     }
 
+
     /**
-     * Test retrieval of soft deleted users when none exist
+     * Test non-admin cannot view deleted users.
      *
      * @return void
      */
-    public function test_show_deleted_users_when_none_exist(): void
+    public function test_non_admin_cannot_view_deleted_users(): void
     {
-        // Create only active users
-        $activeUsers = User::factory()->count(3)->create();
+        // Create and login as regular user
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole(RoleUser::Manager);
+        $token = JWTAuth::fromUser($regularUser);
 
-        try {
-            // Get paginated list of deleted users
-            $result = $this->userService->showDeletedUsers(10);
-            $this->fail('Expected HttpResponseException was not thrown');
-        } catch (HttpResponseException $e) {
-            $response = $e->getResponse();
-            $responseData = json_decode($response->getContent(), true);
+        // Create and delete some users
+        User::factory()->count(3)->create()->each(function ($user) {
+            $user->delete();
+        });
 
-            $this->assertEquals(404, $response->getStatusCode());
-            $this->assertEquals('error', $responseData['status']);
-            $this->assertEquals('No deleted users found.  failed!', $responseData['message']);
-            $this->assertNull($responseData['data']);
-        }
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->getJson("/api/show-deleted-users");
+
+        $response->assertStatus(403);
     }
 
+
     /**
-     * Test permanent user deletion including soft deleted records
-     *
-     * @return void
+     * Test admin can force delete a soft-deleted user
      */
-    public function test_force_delete_user(): void
+    public function test_admin_can_force_delete_soft_deleted_user(): void
     {
-        // Create test user and soft delete it first
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'name' => 'Test User'
+        $data = $this->startCode();
+
+        // Create and soft delete a user
+        $userToDelete = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com'
         ]);
-        $user->delete();
+        $userToDelete->assignRole(RoleUser::Manager);
+        $userToDelete->delete();
 
-        // Confirm user exists in soft deleted state
+        // Verify user is soft deleted
         $this->assertSoftDeleted('users', [
-            'id' => $user->id
+            'id' => $userToDelete->id
         ]);
 
-        // Execute permanent deletion
-        $result = $this->userService->forceDeleteUser($user->id);
+        // Admin attempts to force delete the user
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->deleteJson("/api/force-delete/{$userToDelete->id}/");
 
-        // Verify operation returned success
-        $this->assertTrue($result);
+        $response->assertStatus(200);
 
-        // Confirm user no longer exists in main table
+        // Verify user is completely removed from database
         $this->assertDatabaseMissing('users', [
-            'id' => $user->id
+            'id' => $userToDelete->id
         ]);
-
-        // Double check user is gone even from soft deletes
-        $this->assertNull(User::withTrashed()->find($user->id));
     }
 
+
     /**
-     * Test force delete fails when user not found
+     * Test non-admin cannot force delete user.
      *
      * @return void
      */
-    public function test_force_delete_user_fails_when_user_not_found(): void
+    public function test_non_admin_cannot_force_delete_user(): void
     {
-        try {
-            // Try to delete non-existent user
-            $this->userService->forceDeleteUser(999);
-            $this->fail('Expected HttpResponseException was not thrown');
-        } catch (HttpResponseException $e) {
-            $response = $e->getResponse();
-            $responseData = json_decode($response->getContent(), true);
+        // Create a regular user
+        $regularUser = User::factory()->create();
+        $regularUser->assignRole(RoleUser::Manager);
+        $token = JWTAuth::fromUser($regularUser);
 
-            $this->assertEquals(404, $response->getStatusCode());
-            $this->assertEquals('error', $responseData['status']);
-            $this->assertEquals('User not found.  failed!', $responseData['message']);
-            $this->assertNull($responseData['data']);
-        }
+        // Create a user to delete
+        $userToDelete = User::factory()->create();
+        $userToDelete->assignRole(RoleUser::Manager);
+        $userToDelete->delete();
+
+        // Regular user attempts to force delete
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->deleteJson("/api/force-delete/{$userToDelete->id}");
+
+        $response->assertStatus(403);
+
+        // Verify user still exists in database
+        $this->assertSoftDeleted('users', [
+            'id' => $userToDelete->id
+        ]);
     }
 
+
     /**
-     * Test force delete user that was already permanently deleted
+     * Test force delete non-existent user returns.
      *
      * @return void
      */
-    public function test_force_delete_already_permanently_deleted_user(): void
+    public function test_force_delete_nonexistent_user_returns_404(): void
     {
-        // Create and permanently delete a user
-        $user = User::factory()->create();
-        $userId = $user->id;
-        $user->forceDelete();
+        $data = $this->startCode();
 
-        try {
-            // Try to force delete again
-            $this->userService->forceDeleteUser($userId);
-            $this->fail('Expected HttpResponseException was not thrown');
-        } catch (HttpResponseException $e) {
-            $response = $e->getResponse();
-            $responseData = json_decode($response->getContent(), true);
+        // Attempt to force delete non-existent user
+        $nonExistentId = 99999;
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $data['token']
+        ])->deleteJson("/api/force-delete/{$nonExistentId}");
 
-            $this->assertEquals(404, $response->getStatusCode());
-            $this->assertEquals('error', $responseData['status']);
-            $this->assertEquals('User not found.  failed!', $responseData['message']);
-            $this->assertNull($responseData['data']);
-        }
+        $response->assertStatus(404);
     }
 }

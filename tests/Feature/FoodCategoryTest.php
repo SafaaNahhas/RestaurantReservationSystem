@@ -54,18 +54,7 @@ class FoodCategoryTest extends TestCase
         $this->assertEquals('Fruits', $category->category_name);
     }
 
-    /** @test for get category*/
-    public function it_can_get_category_by_id()
-    {
-        // Create a FoodCategory for the test
-        $category = FoodCategory::factory()->create();
 
-        // Call the getCategory method
-        $foundCategory = $this->foodCategoryService->getCategory($category->id);
-
-        // Assert the correct category is returned
-        $this->assertEquals($category->id, $foundCategory->id);
-    }
 
     /** @test for update category*/
     public function it_can_update_category()

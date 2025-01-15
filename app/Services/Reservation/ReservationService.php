@@ -774,7 +774,7 @@ class ReservationService
         try {
             $user = auth()->user();
             $reservation = Reservation::with('table.department.manager')->findOrFail($reservationId);
-            if ($user->hasRole('customer')) {
+            if ($user->hasRole('Customer')) {
                 if ($reservation->user_id !== $user->id) {
                     return [
                         'error' => true,
@@ -788,7 +788,7 @@ class ReservationService
                     ];
                 }
             }
-            if ($user->hasRole('manager')) {
+            if ($user->hasRole('Manager')) {
                 $managerDepartment = $user->department;
                 if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
                     return [
@@ -803,7 +803,7 @@ class ReservationService
                     ];
                 }
             }
-            if ($user->hasRole('admin')) {
+            if ($user->hasRole('Admin')) {
                 if (!in_array($reservation->status, ['completed', 'rejected', 'cancelled'])) {
                     return [
                         'error' => true,

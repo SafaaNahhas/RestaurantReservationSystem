@@ -62,7 +62,7 @@ Route::post('/checkEmail', [ForgetPasswordController::class, 'checkEmail']);
 Route::post('/checkCode', [ForgetPasswordController::class, 'checkCode']);
 
 //  ********* Rating Routes    *****************************
-Route::middleware(['auth:api'])->group(function () {
+Route::middleware(['auth:api', 'role:Customer'])->group(function () {
     Route::apiResource('ratings', RatingController::class)->except(['index']);
     Route::get('/rating_deleted', [RatingController::class, 'getDeletedRatings']); // Get deleted ratings
     Route::patch('rating/restore/{id}', [RatingController::class, 'restoreRating']); // Restore a deleted rating
@@ -179,7 +179,7 @@ Route::get('restaurant/{id}', [RestaurantController::class, 'show']);
 // **********  Favorites Routes ***********************
 
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'role:Customer'])->group(function () {
     Route::get('/all_favorites', [FavoriteController::class, 'getAllFavorites']);
     Route::post('/favorites', [FavoriteController::class, 'addToFavorites']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
@@ -225,5 +225,8 @@ Route::middleware(['auth:api'])->group(function () {
 });
 //*********** payment route**********************************
 
-Route::post('/process-payment', [PaymentController::class, 'processPayment']);
-Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('/process-payment', [PaymentController::class, 'processPayment']);
+    Route::post('/addprocess-payment', [PaymentController::class, 'addprocessPayment']);
+    Route::get('user/reservations/in_service', [ReservationController::class, 'getInServiceReservations'])->middleware('auth');
+});

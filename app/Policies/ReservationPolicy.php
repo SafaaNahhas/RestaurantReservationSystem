@@ -39,17 +39,14 @@ class ReservationPolicy
     {
         // Check if the user has permission and if the user is a manager of the department
         return $user->hasPermissionTo('reject reservation') &&
-            ($reservation->table && $reservation->table->department->manager_id == $user->id);
+            ($reservation->table && $reservation->manager_id == $user->id);
     }
 
 
     public function cancel(User $user, Reservation $reservation)
     {
-
-        return $user->hasPermissionTo('cancle reservation') &&$reservation->user_id === $user->id;
-        ;
+        return $user->hasPermissionTo('cancle reservation') && $reservation->user_id === $user->id;
     }
-
     public function startService(User $user)
     {
         return $user->hasPermissionTo('start service');

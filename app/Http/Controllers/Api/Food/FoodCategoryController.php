@@ -6,7 +6,7 @@ use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Services\FoodCategoryService as FoodCategoryService ;
+use App\Services\Food\FoodCategoryService;
 use App\Http\Requests\FoodCategoryRequest\StoreFoodCategoryRequest;
 use App\Http\Requests\FoodCategoryRequest\UpdateFoodCategoryRequest;
 

@@ -23,19 +23,22 @@ class FavoriteService
      * @param array $data
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getAllFavorites($data)
+    public function getAllFavorites(array $data)
     {
         try {
-            $favorites = Favorite::when($data["type"], function ($query, $type) {
-                return $query->byType($type);
-            })->paginate($data["perPage"] ?? 10);
+            // جلب المفضلات بناءً على النوع إذا تم توفيره
+            $favorites = Favorite::when(!empty($data['type']), function ($query) use ($data) {
+                return $query->byType($data['type']);
+            })->paginate($data['perPage']);
 
             return $favorites;
         } catch (Exception $e) {
-            Log::error('Cannot restore deleted rating data ' . $e->getMessage());
-            throw new HttpException(500, 'Cannot restore deleted rating data');
+            // تسجيل الخطأ وإرجاع استثناء HTTP
+            Log::error('Error fetching favorite data: ' . $e->getMessage());
+            throw new HttpException(500, 'Error fetching favorite data');
         }
     }
+
 
     //************************************************************ */
 
@@ -61,7 +64,7 @@ class FavoriteService
 
             // Check if the item is already in the user's favorites
             if ($user->favorites()->where('favorable_type', $model)->where('favorable_id', $id)->exists()) {
-                throw new HttpException(409, 'Item already in favorites');
+                throw new \Exception('Item already in favorites', 409);
             }
 
             // Create a new favorite record
@@ -69,10 +72,12 @@ class FavoriteService
                 'favorable_type' => $model,
                 'favorable_id' => $item->id,
             ]);
-            // Clear the cache
-            Cache::forget('favorite_all');
+
             return $data;
         } catch (\Exception $e) {
+            if ($e->getCode() === 409) {
+                throw new HttpException(409, $e->getMessage());
+            }
             Log::error('Error in favoriteService@addToFavorites: ' . $e->getMessage());
             throw new HttpException(500, 'An unexpected error occurred');
         }
@@ -84,7 +89,7 @@ class FavoriteService
      * Fetch the list of favorites for a user
      *
      * @param $user
-  * @return \Illuminate\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
     public function getFavorites($user)
     {
@@ -92,7 +97,6 @@ class FavoriteService
 
             $favorites = $user->favorites()->with('favorable')->paginate(10);
             return $favorites;
-
         } catch (\Exception $e) {
             Log::error("Error in getting user's favorites: " . $e->getMessage());
             throw new HttpException(500, "Error in getting user's favorites");
@@ -127,8 +131,6 @@ class FavoriteService
             if (!$favorite) {
                 throw new HttpException(404, "Item Not Found");
             }
-            // Clear the cache
-            Cache::forget('favorite_all');
 
             // Delete the favorite item
             $favorite->delete();
@@ -174,8 +176,6 @@ class FavoriteService
 
             // Restore the favorite
             $favorite->restore();
-            // Clear the cache
-            Cache::forget('favorite_all');
 
             return true;
         } catch (\Exception $e) {
@@ -200,8 +200,6 @@ class FavoriteService
 
             // Permanently delete the favorite
             $favorite->forceDelete();
-            // Clear the cache
-            Cache::forget('favorite_all');
 
             return true;
         } catch (\Exception $e) {

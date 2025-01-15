@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\RoleAndPermission;
 
 use App\Enums\RoleUser;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;

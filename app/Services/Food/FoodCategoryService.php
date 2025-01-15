@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Food;
 
 
 use App\Models\Category;
@@ -71,8 +71,9 @@ class FoodCategoryService
     {
         try {
             // Find the Category by ID or fail with a 404 error if not found
-            return FoodCategory::findOrFail($id);
+            $category= FoodCategory::with('dishes')->findOrFail($id);
 
+            return $category;
         } catch (ModelNotFoundException $e) {
             Log::error("error in get a FoodCategory" . $e->getMessage());
 

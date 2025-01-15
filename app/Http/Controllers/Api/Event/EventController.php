@@ -5,31 +5,31 @@ namespace App\Http\Controllers\Api\Event;
 
 use Exception;
 use App\Models\Event;
-use App\Services\EventService;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Services\Event\EventService;
 use App\Http\Resources\Event\EventResource;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
 
-/**
- * EventController - Handles operations related to events.
+//
+ /* EventController - Handles operations related to events.
  *
  * This controller provides the basic functions for managing events such as displaying all events,
  * creating a new event, showing event details, updating an event, and deleting an event.
  */
 class EventController extends Controller
 {
-    /**
+       /**
      * Event service instance.
      *
-     * @var EventService
+    * @var EventService
      */
     protected $eventService;
 
-    /**
+        /**
      * Initialize the controller with the event service.
      *
      * @param EventService $eventService
@@ -39,7 +39,7 @@ class EventController extends Controller
         $this->eventService = $eventService;
     }
 
-    /**
+      /**
      * Display a listing of all events.
      *
      * Retrieves all events from the database using the event service.
@@ -54,7 +54,7 @@ class EventController extends Controller
         return self::paginated($events, EventResource::class, 'Events retrieved successfully.', 200);
     }
 
-    /**
+       /**
      * Store a newly created event.
      *
      * This method handles creating a new event using the provided data from the request.
@@ -72,7 +72,7 @@ class EventController extends Controller
         return self::success(new EventResource($event), 'Event created successfully.', 201);
     }
 
-    /**
+       /**
      * Display a specific event by its ID.
      *
      * Fetches the event details using its ID and includes the related reservation data.
@@ -86,7 +86,7 @@ class EventController extends Controller
         $event = $this->eventService->getEventById($id);
         return self::success(new EventResource($event), 'Event retrieved successfully.');
     }
-    /**
+      /**
      * Update the specified event.
      *
      * This method handles updating the event data using the provided validated data from the request.
@@ -105,7 +105,7 @@ class EventController extends Controller
         return self::success(new EventResource($updatedEvent), 'Event updated successfully.');
     }
 
-    /**
+       /**
      * Delete the specified event.
      *
      * This method handles deleting the event using its ID.
@@ -122,8 +122,7 @@ class EventController extends Controller
         return self::success(null, 'Event deleted successfully.');
     }
 
-
-     /**
+    /**
      * Display a paginated listing of the trashed (soft deleted) resources.
      */
     public function showDeleted(Request $request)
@@ -133,13 +132,13 @@ class EventController extends Controller
         return $this->success($trashedevent);
     }
 
-     /**
+         /**
      * Restore a trashed (soft deleted) resource by its ID.
      */
     public function restoreDeleted($id)
     {
         $event = $this->eventService->restoreEvent($id);
-        return $this->success("Event restored Successfully");
+        return $this->success("Event restored successfully.");
     }
 
     /**
@@ -148,7 +147,7 @@ class EventController extends Controller
     public function forceDeleted($id)
     {
         $this->eventService->forceDeleteEvent($id);
-        return $this->success(null, "Event deleted Permanently");
+        return $this->success(null, "Event permanently deleted.");
     }
 
 }

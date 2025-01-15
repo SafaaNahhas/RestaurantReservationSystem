@@ -16,7 +16,7 @@ class ForgetPasswordService
 {
     /**
      * check if email  exists and send the code
-     * @param string  $email 
+     * @param string  $email
      * @return array status + message
      */
     public function checkEmail($email)
@@ -29,7 +29,7 @@ class ForgetPasswordService
                 ];
             }
             $code = Cache::remember($email, 3600, function () {
-                return random_int(000000, 999999);
+                return  random_int(100000, 999999);
             });
             Mail::to($email)->send(new SendForgetPasswordCodeMail($code));
             return  [
@@ -50,8 +50,8 @@ class ForgetPasswordService
     }
     /**
      * check if the code is correct
-     * @param string  $email 
-     * @param string  $code 
+     * @param string  $email
+     * @param string  $code
      *  @return array status + message
      */
     public function checkCode($email, $code)
@@ -89,8 +89,8 @@ class ForgetPasswordService
     }
     /**
      * change the password
-     * @param string  $email 
-     * @param string  $password 
+     * @param string  $email
+     * @param string  $password
      */
     public function changePassword($email, $password)
     {

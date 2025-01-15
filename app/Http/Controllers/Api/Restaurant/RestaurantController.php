@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\Restaurant;
 
+use Exception;
 use App\Models\Email;
 use App\Models\Restaurant;
 use App\Models\PhoneNumber;
 use Illuminate\Http\Request;
-use App\Services\RestaurantService;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRatingRequest;
+use App\Services\Restaurant\RestaurantService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\RestaurantRequest\StoreRestaurantRequest;
 use App\Http\Requests\RestaurantRequest\UpdatRestaurantRequest;
-use Exception;
-use Illuminate\Support\Facades\Log;
 
 class RestaurantController extends Controller
 {

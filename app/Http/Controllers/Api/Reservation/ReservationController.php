@@ -50,6 +50,7 @@ class ReservationController extends Controller
             ? self::success(new TableReservationResource($result['reservation']),  $result['message'], $result['status_code'])
             : self::error(isset($result['reserved_tables'])  ? FaildTableReservationResource::collection($result['reserved_tables'])    : null,   $result['message'], $result['status_code']);
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////
      /**
      * Update an existing reservation and return the response as JSON.
@@ -77,12 +78,19 @@ class ReservationController extends Controller
      */
     public function getAllTablesWithReservations(Request $request): JsonResponse
     {
-        // if ($request->user()->cannot('getAllTablesWithReservations', Reservation::class)) {throw new UnauthorizedException(403);}
+        $user = $request->user();
         $status = $request->input('status');
-        $tables = $this->reservationService->getAllTablesWithReservations(['status' => $status,]);
-        if ($tables->isEmpty()) {return self::error([], 'No tables found with the specified reservation status.', 200);}
-        return self::success( ShowTableReservationResource::collection($tables), 'Tables with reservations retrieved successfully.',200);
+        $tables = $this->reservationService->getAllTablesWithReservations(['status' => $status], $user);
+        if ($tables->isEmpty()) {
+            return self::error([], 'No tables found with the specified reservation status.', 200);
+        }
+        return self::success(
+            ShowTableReservationResource::collection($tables),
+            'Tables with reservations retrieved successfully.',
+            200
+        );
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Confirm a reservation.
@@ -110,6 +118,8 @@ class ReservationController extends Controller
      */
     public function rejectReservation(Request $request, $reservationId)
     {
+        if (!$request->has('rejection_reason') || empty($request->input('rejection_reason'))) {
+          return self::error(null, 'Rejection reason is required.', 422);}
         $reservation = Reservation::findOrFail($reservationId);
         if ($request->user()->cannot('reject reservation',  $reservation)) {throw new UnauthorizedException(403);}
         $rejectionReason = $request->input('rejection_reason');

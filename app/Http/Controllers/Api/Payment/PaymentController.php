@@ -24,16 +24,38 @@ class PaymentController extends Controller
      * @return IlluminateHttpJsonResponse The response indicating the status of the payment.
      */
 
-    public function processPayment(ProcessPaymentRequest $request)
+     public function processPayment(ProcessPaymentRequest $request)
+     {
+         $response = $this->paymentService->processPayment($request->validated());
+
+         if ($response['status'] === 'error') {
+             return response()->json(['status' => 'error', 'message' => $response['message']], 500);
+         }
+
+         $chargeId = isset($response['charge']) ? $response['charge']->id : null;
+
+         return response()->json([
+             'status' => 'success',
+             'message' => 'The payment was made successfully',
+             'charge_id' => $chargeId,
+         ], 200);
+     }
+
+    /**
+     *  Adding an amount to a previous payment
+     *
+     * @param ProcessPaymentRequest $request The request containing payment details.
+     * @return IlluminateHttpJsonResponse The response indicating the status of the payment.
+     */
+
+    public function addprocessPayment(ProcessPaymentRequest $request)
     {
-        // Calling the service for payment processing
-        $charge = $this->paymentService->processPayment($request->validated());
+        $response = $this->paymentService->addprocessPayment($request->validated());
 
-        if (!$charge) {
-            return response()->json(['status' => 'error', 'message' => 'Payment failed'], 500);
+        if ($response['status'] === 'error') {
+            return response()->json(['status' => 'error', 'message' => $response['message']], 500);
         } else {
-
-            return response()->json(['status' => 'success', 'message' => 'The payment was made successfully', 'charge_id' => $charge->id], 200);
+            return response()->json(['status' => 'success', 'message' => 'The payment was made successfully', 'charge_id' => $response['charge']->id], 200);
         }
     }
 }

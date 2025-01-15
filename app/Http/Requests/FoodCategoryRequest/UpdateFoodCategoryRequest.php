@@ -26,7 +26,7 @@ class UpdateFoodCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_name' => 'sometimes|string|max:50|not_regex:/^[\s]*$/',
+            'category_name' => 'sometimes|string|max:50|unique:food_categories|not_regex:/^[\s]*$/',
             'description' => 'nullable|string|max:255',
             'user_id' => 'sometimes|exists:users,id|integer',
         ];

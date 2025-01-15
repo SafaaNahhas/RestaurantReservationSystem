@@ -4,9 +4,9 @@ namespace App\Services\Reservation;
 
 use Exception;
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Table;
 use App\Models\Reservation;
-use App\Services\NotificationLogService;
 use App\Jobs\SendRatingRequestJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationRejectedMail;
 use Illuminate\Support\Facades\Cache;
 use App\Mail\ReservationCancelledMail;
+use App\Services\NotificationLogService;
 use App\Jobs\NotifyManagersAboutReservation;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -30,13 +31,11 @@ class ReservationService
     /**
      * Store a new reservation.
      *
-     * This method handles the logic for storing a reservation, validating the
-     * reservation times, checking for table availability, and saving the reservation.
-     * If the table is not available or the reservation duration exceeds the limit,
-     * the method will return a corresponding error response.
+     * Handles validation, table availability, and reservation creation.
+     * Returns an appropriate response for success or failure.
      *
-     * @param array $data Reservation data, including the start and end date, table number, and guest count.
-     * @return array The result of the reservation operation, including status code and message.
+     * @param array $data Reservation details (e.g., dates, table number, guest count).
+     * @return array Response with status, message, and additional data if applicable.
      */
     public function storeReservation(array $data)
     {
@@ -79,6 +78,27 @@ class ReservationService
                     'reserved_tables' => $reservedTables
                 ];
             }
+            if (!$selectedTable) {
+                $conflictingReservations = Reservation::where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                ->whereIn('status', ['pending', 'reserved', 'in_service'])
+                ->with('table')
+                ->get();
+
+                return [
+                    'status_code' => 409,
+                    'message' => isset($data['table_number'])
+                        ? 'Selected table is not available for the selected time.'
+                        : 'No available tables for the selected time.',
+                    'conflicting_reservations' => $conflictingReservations,
+                ];
+            }
             // Ensure the table has a department and a manager
             if (!$selectedTable->department) {
                 return [
@@ -102,8 +122,6 @@ class ReservationService
                     'message' => 'Notification settings must be configured before making a reservation.'
                 ];
             }
-
-
             // Create the reservation
             $reservation = Reservation::create([
                 'user_id' => auth()->id(),
@@ -131,7 +149,6 @@ class ReservationService
                 'manager_name' => $manager->name,
                 'manager_email' => $manager->email,
             ]);
-
             // Return success response
             return [
                 'status_code' => 201,
@@ -161,118 +178,129 @@ class ReservationService
      * @param int $reservationId The ID of the reservation to update.
      * @return array Response with status, message, and additional data if applicable.
      */
-    public function updateReservation(array $data, $reservationId)
-    {
-        try {
-            // Find the reservation by ID
-            $reservation = Reservation::find($reservationId);
-            // Check if the reservation exists
-            if (!$reservation) {
+        public function updateReservation(array $data, $reservationId)
+        {
+            try {
+                // Find the reservation by ID
+                $reservation = Reservation::find($reservationId);
+                if (!$reservation) {
+                    return [
+                        'status_code' => 404,
+                        'message' => 'Reservation not found.',
+                    ];
+                }
+                // Ensure the reservation is in "pending" state before allowing updates
+                if ($reservation->status !== 'pending') {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'Reservation can only be updated if its status is "pending".',
+                    ];
+                }
+                $startDate = isset($data['start_date']) && !empty($data['start_date'])
+                    ? Carbon::parse($data['start_date'])
+                    : Carbon::parse($reservation->start_date);
+                $endDate = isset($data['end_date']) && !empty($data['end_date'])
+                    ? Carbon::parse($data['end_date'])
+                    : Carbon::parse($reservation->end_date);
+                // Restrict updates to dates within the next two weeks
+                if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
+                    ];
+                }
+                // Ensure the reservation duration does not exceed 6 hours and is on the same day
+                if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
+                    ];
+                }
+                // Step 4: Ensure guest_count is set or use the reservation value
+                $guestCount = $data['guest_count'] ?? $reservation->guest_count;
+                // Handle table availability
+                $selectedTable = $this->AvailableTable($data, $startDate,
+                $endDate, $reservationId);
+                if (!$selectedTable) {
+                    $reservedTables = Table::whereHas('reservations')
+                        ->with('reservations')
+                        ->select(['id', 'table_number', 'seat_count'])
+                        ->get();
+                    return [
+                        'status_code' => 409,
+                        'message' => isset($data['table_number'])
+                            ? 'Selected table is not available for the selected time.'
+                            : 'No available tables for the selected time.',
+                        'reserved_tables' => $reservedTables
+                    ];
+                }
+                if ($selectedTable && $selectedTable->seat_count < $guestCount) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'The selected table does not have enough seats for the number of guests.',
+                    ];
+                }
+                if (!$selectedTable && Table::where('seat_count', '>=', $guestCount)->doesntExist()) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
+                    ];
+                }
+                if (!$selectedTable->department) {
+                    return [
+                        'status_code' => 422,
+                        'message' => 'The table does not belong to any department.',
+                    ];
+                }
+
+                if (!$selectedTable->department->manager) {
+                    Log::warning('No manager found for department.', ['start_date' => $startDate, 'end_date' => $endDate]);
+                    return [
+                        'status_code' => 422,
+                        'message' => 'The department does not have a manager.',
+                    ];
+                }
+
+                // Update reservation details
+                $reservation->update([
+                    'table_id' => $selectedTable->id,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'guest_count' => $guestCount,
+                    'services' => $data['services'] ?? $reservation->services,
+                ]);
+
+
+                Cache::forget('tables_with_reservations_all');
+                if (isset($data['status'])) {
+                    Cache::forget('tables_with_reservations_' . $data['status']);
+                }
+
                 return [
-                    'status_code' => 404,
-                    'message' => 'Reservation not found.'
+                    'status_code' => 200,
+                    'message' => 'Reservation updated successfully.',
+                    'reservation' => $reservation
+                ];
+            } catch (Exception $e) {
+                // Log unexpected errors
+                Log::error('Error updating reservation: ' . $e->getMessage());
+                return [
+                    'status_code' => 500,
+                    'message' => 'An unexpected error occurred.'
                 ];
             }
-
-            // Ensure the reservation is in "pending" state before allowing updates
-            if ($reservation->status !== 'pending') {
-                return [
-                    'status_code' => 422,
-                    'message' => 'Reservation can only be updated if its status is "pending".',
-                ];
-            }
-
-            // Handle optional date fields and ensure they are Carbon objects
-            $startDate = isset($data['start_date']) && !empty($data['start_date'])
-                ? Carbon::parse($data['start_date'])
-                : Carbon::parse($reservation->start_date);
-
-            $endDate = isset($data['end_date']) && !empty($data['end_date'])
-                ? Carbon::parse($data['end_date'])
-                : Carbon::parse($reservation->end_date);
-
-            // Restrict updates to dates within the next two weeks
-            if ($startDate->greaterThan(Carbon::now()->addWeeks(2))) {
-                return [
-                    'status_code' => 422,
-                    'message' => 'Reservations cannot be updated for dates more than two weeks from today.'
-                ];
-            }
-
-            // Ensure the reservation duration does not exceed 6 hours and is on the same day
-            if ($startDate->diffInHours($endDate) > 6 || !$startDate->isSameDay($endDate)) {
-                return [
-                    'status_code' => 422,
-                    'message' => 'Reservations must not exceed 6 hours and must be within the same day.'
-                ];
-            }
-
-            // Find a suitable table for the reservation using findAvailableTable
-            $selectedTable = $this->findAvailableTable($data, $startDate, $endDate, $reservationId);
-
-            // Validate table seat count
-            if ($selectedTable && $selectedTable->seat_count < $data['guest_count']) {
-                return [
-                    'status_code' => 422,
-                    'message' => 'The selected table does not have enough seats for the number of guests.'
-                ];
-            }
-
-            // If no table is available, return a conflict response
-            if (!$selectedTable && Table::where('seat_count', '>=', $data['guest_count'])->doesntExist()) {
-                return [
-                    'status_code' => 422,
-                    'message' => 'No tables are available to accommodate the required number of guests reserved. Consider booking multiple tables to accommodate your group.',
-                ];
-            }
-
-            // If no suitable table found, get all reserved tables
-            if (!$selectedTable) {
-                $reservedTables = Table::whereHas('reservations')
-                    ->with('reservations')
-                    ->select(['id', 'table_number', 'seat_count'])
-                    ->get();
-
-                return [
-                    'status_code' => 409,
-                    'message' => isset($data['table_number'])
-                        ? 'Selected table is not available for the selected time.'
-                        : 'No available tables for the selected time.',
-                    'reserved_tables' => $reservedTables
-                ];
-            }
-
-            // Update reservation details
-            $reservation->update([
-                'table_id' => $selectedTable->id,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'guest_count' => $data['guest_count'] ?? $reservation->guest_count,
-                'services' => $data['services'] ?? $reservation->services,
-            ]);
-
-            // Clear relevant cache keys
-            Cache::forget('tables_with_reservations_all');
-            if (isset($data['status'])) {
-                Cache::forget('tables_with_reservations_' . $data['status']);
-            }
-
-            return [
-                'status_code' => 200,
-                'message' => 'Reservation updated successfully.',
-                'reservation' => $reservation
-            ];
-        } catch (Exception $e) {
-            // Log unexpected errors
-            Log::error('Error updating reservation: ' . $e->getMessage());
-            return [
-                'status_code' => 500,
-                'message' => 'An unexpected error occurred.'
-            ];
         }
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Find an available table for the specified reservation details.
+     *
+     * @param array $data Reservation data including table number and guest count.
+     * @param Carbon $startDate Start date and time of the reservation.
+     * @param Carbon $endDate End date and time of the reservation.
+     * @param int|null $excludeReservationId Reservation ID to exclude from conflict checks.
+     * @return Table|null The available table or null if none found.
+     */
     public function findAvailableTable(array $data, $startDate, $endDate, $excludeReservationId = null)
     {
         return Table::when(isset($data['table_number']), function ($query) use ($data) {
@@ -282,15 +310,54 @@ class ReservationService
                 ->orderBy('seat_count', 'asc');
         })
             ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $excludeReservationId) {
-                $query->whereBetween('start_date', [$startDate, $endDate])
-                    ->orWhereBetween('end_date', [$startDate, $endDate])
-                    ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
-                        $nestedQuery->where('start_date', '<', $startDate)
-                            ->where('end_date', '>', $endDate);
-                    })
-                    ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
-                        $query->where('id', '!=', $excludeReservationId);
-                    });
+                $query->where(function ($reservationQuery) use ($startDate, $endDate) {
+                    $reservationQuery->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                    $query->where('id', '!=', $excludeReservationId);
+                })
+                ->whereIn('status', ['pending', 'reserved', 'in_service']);
+            })
+            ->select(['id', 'table_number', 'seat_count', 'department_id'])
+            ->first();
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Check for an available table that meets the reservation criteria.
+     *
+     * @param array $data Reservation data including table number and guest count.
+     * @param Carbon $startDate Start date and time of the reservation.
+     * @param Carbon $endDate End date and time of the reservation.
+     * @param int|null $excludeReservationId Reservation ID to exclude from conflict checks.
+     * @return Table|null The available table or null if none found.
+     */
+    public function AvailableTable(array $data, $startDate, $endDate, $excludeReservationId = null)
+    {
+        return Table::when(isset($data['table_number']), function ($query) use ($data) {
+            return $query->where('table_number', $data['table_number']);
+        }, function ($query) use ($data) {
+            return $query->where('seat_count', '>=', 'guest_count')
+                ->orderBy('seat_count', 'asc');
+        })
+            ->whereDoesntHave('reservations', function ($query) use ($startDate, $endDate, $excludeReservationId) {
+                $query->where(function ($reservationQuery) use ($startDate, $endDate) {
+                    $reservationQuery->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                    $query->where('id', '!=', $excludeReservationId);
+                })
+                ->whereIn('status', ['pending', 'reserved', 'in_service']);
             })
             ->select(['id', 'table_number', 'seat_count', 'department_id'])
             ->first();
@@ -301,31 +368,44 @@ class ReservationService
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllTablesWithReservations(array $filter = [])
+    public function getAllTablesWithReservations(array $filter = [], User $user)
     {
         try {
-            $cacheKey = 'tables_with_reservations_' . md5(json_encode($filter));
+            $cacheKey = 'tables_with_reservations_' . md5(json_encode($filter) . $user->id);
             $cacheTTL = 600;
 
-            return Cache::remember($cacheKey, $cacheTTL, function () use ($filter) {
-                return Table::whereHas('reservations', function ($query) use ($filter) {
+            return Cache::remember($cacheKey, $cacheTTL, function () use ($filter, $user) {
+                $query = Table::query();
+
+                if ($user->hasRole('manager')) {
+                    $query->whereHas('department', function ($departmentQuery) use ($user) {
+                        $departmentQuery->where('manager_id', $user->id);
+                    });
+                }
+
+                if ($user->hasRole('customer')) {
+                    $query->whereHas('reservations', function ($reservationQuery) {
+                        $reservationQuery->whereIn('status', ['cancelled', 'completed']);
+                    });
+                }
+
+                $query->whereHas('reservations', function ($reservationQuery) use ($filter) {
                     if (isset($filter['status'])) {
-                        $query->where('status', $filter['status']);
+                        $reservationQuery->where('status', $filter['status']);
                     }
-                })->with(['reservations' => function ($query) use ($filter) {
+                });
+
+                return $query->with(['reservations' => function ($reservationQuery) use ($filter) {
                     if (isset($filter['status'])) {
-                        $query->where('status', $filter['status']);
+                        $reservationQuery->where('status', $filter['status']);
                     }
                 }])->get();
             });
         } catch (Exception $e) {
-            // Log the exception for debugging purposes
             Log::error('Error fetching tables with reservations: ' . $e->getMessage());
-            // Return an empty collection or handle the error as needed
             return collect([]);
         }
     }
-
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Service method to confirm a reservation.
@@ -419,6 +499,7 @@ class ReservationService
     public function rejectReservation($reservationId, string $rejectionReason): array
     {
         try {
+
             // Find the reservation or throw an exception if not found
             $reservation = Reservation::with('user', 'table', 'user.notificationSettings:id,user_id,method_send_notification,telegram_chat_id,send_notification_options')
                 ->findOrFail($reservationId);
@@ -496,9 +577,6 @@ class ReservationService
             ];
         }
     }
-
-
-
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Cancel a reservation.
@@ -536,11 +614,9 @@ class ReservationService
                 'cancelled_at' => now(),
                 'cancellation_reason' => $cancellationReason,
             ]);
-
             // Clear cache for all reservations
             Cache::forget('tables_with_reservations_all');
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
-
             // Log the cancellation
             Log::info("Reservation ID {$reservation->id} cancelled by User ID {$reservation->user_id}. Reason: {$cancellationReason}");
             // Send cancellation email to the manager (if any)
@@ -552,7 +628,6 @@ class ReservationService
             // Send cancellation notification to the user if they opted for it
             $notificationSettings = $reservation->user->notificationSettings;
 
-            // if ($notificationSettings && in_array('cancel', $notificationSettings->send_notification_options)) {
             $botToken = env('TELEGRAM_BOT_TOKEN');
             $chatId = $notificationSettings->telegram_chat_id;
             $message = "❌ Reservation Cancelled!\n\n";
@@ -699,20 +774,47 @@ class ReservationService
     public function softDeleteReservation($reservationId)
     {
         try {
-            // Retrieve the reservation
-            $reservation = Reservation::findOrFail($reservationId);
-            // Ensure the reservation meets the conditions for soft deletion
-            if (!in_array($reservation->status, ['completed', 'rejected', 'cancelled'])) {
-                return [
-                    'error' => true,
-                    'message' => 'Soft delete is only allowed for completed, rejected,cancelled or past reservations.',
-                ];
+            $user = auth()->user();
+            $reservation = Reservation::with('table.department.manager')->findOrFail($reservationId);
+            if ($user->hasRole('customer')) {
+                if ($reservation->user_id !== $user->id) {
+                    return [
+                        'error' => true,
+                        'message' => 'You are not authorized to delete this reservation.',
+                    ];
+                }
+                if ($reservation->status !== 'pending') {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only delete reservations with a pending status.',
+                    ];
+                }
             }
-            // Perform the soft delete
+            if ($user->hasRole('manager')) {
+                $managerDepartment = $user->department;
+                if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only delete reservations within your department.',
+                    ];
+                }
+                if (!in_array($reservation->status, ['completed', 'rejected', 'cancelled'])) {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only delete reservations with statuses completed, rejected, or cancelled.',
+                    ];
+                }
+            }
+            if ($user->hasRole('admin')) {
+                if (!in_array($reservation->status, ['completed', 'rejected', 'cancelled'])) {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only delete reservations with statuses completed, rejected, or cancelled.',
+                    ];
+                }
+            }
             $reservation->delete();
-            // Cache::forget('tables_with_reservations_all');
-            // Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
-            Log::info("Reservation with ID {$reservationId} has been soft deleted.");
+            Log::info("Reservation with ID {$reservationId} has been soft deleted by user {$user->id}.");
             return [
                 'error' => false,
                 'message' => 'Reservation soft deleted successfully',
@@ -742,20 +844,27 @@ class ReservationService
     public function forceDeleteReservation($reservationId)
     {
         try {
-            // Retrieve the soft-deleted reservation
-            $reservation = Reservation::withTrashed()->findOrFail($reservationId);
-            // Ensure the reservation is soft deleted
+            $user = auth()->user();
+            $reservation = Reservation::withTrashed()->with('table.department.manager')->findOrFail($reservationId);
             if (!$reservation->trashed()) {
                 return [
                     'error' => true,
                     'message' => 'Force delete is only allowed for soft-deleted reservations.',
                 ];
             }
-            // Perform the force delete
+            if ($user->hasRole('manager')) {
+                $managerDepartment = $user->department;
+                if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only force delete reservations within your department.',
+                    ];
+                }
+            }
             $reservation->forceDelete();
             Cache::forget('tables_with_reservations_all');
             Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
-            Log::info("Reservation with ID {$reservationId} has been force deleted.");
+            Log::info("Reservation with ID {$reservationId} has been force deleted by user {$user->id}.");
             return [
                 'error' => false,
                 'message' => 'Reservation force deleted successfully',
@@ -767,10 +876,9 @@ class ReservationService
             ];
         } catch (Exception $e) {
             Log::error('An unexpected error occurred: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
             return [
                 'error' => true,
-                'message' => 'An unexpected error occurred. ' . $e->getMessage(),
+                'message' => 'An unexpected error occurred.',
             ];
         }
     }
@@ -784,12 +892,40 @@ class ReservationService
     public function restoreReservation($reservationId)
     {
         try {
-            // Retrieve the soft-deleted reservation
-            $reservation = Reservation::onlyTrashed()->findOrFail($reservationId);
-            // Restore the reservation
+            $user = auth()->user();
+            $reservation = Reservation::onlyTrashed()->with('table.department.manager')->findOrFail($reservationId);
+            if ($user->hasRole('manager')) {
+                $managerDepartment = $user->department;
+                if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
+                    return [
+                        'error' => true,
+                        'message' => 'You can only restore reservations within your department.',
+                    ];
+                }
+            }
+            $table = $reservation->table;
+            $startDate = Carbon::parse($reservation->start_date);
+            $endDate = Carbon::parse($reservation->end_date);
+            $conflictingReservation = Reservation::where('table_id', $table->id)
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                            $nestedQuery->where('start_date', '<', $startDate)
+                                ->where('end_date', '>', $endDate);
+                        });
+                })
+                ->whereNotIn('status', ['cancelled', 'completed']) // Exclude cancelled and completed
+                ->exists();
+            if ($conflictingReservation) {
+                return [
+                    'error' => true,
+                    'message' => 'Conflict found with another reservation for the selected table and date range.',
+                ];
+            }
             $reservation->restore();
-            // Cache::forget('tables_with_reservations_all');
-            // Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
+            Cache::forget('tables_with_reservations_all');
+            Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
             return [
                 'error' => false,
                 'message' => 'Reservation restored successfully',
@@ -815,11 +951,24 @@ class ReservationService
     public function getSoftDeletedReservations()
     {
         try {
-            // Cache::forget('tables_with_reservations_all');
-            // Cache::forget('tables_with_reservations_' . md5(json_encode(['status' => 'pending'])));
+            $user = auth()->user();
+            if ($user->hasRole('manager')) {
+                $managerDepartment = $user->department;
+                if (!$managerDepartment) {
+                    return [
+                        'error' => true,
+                        'message' => 'You do not have a department assigned to manage.',
+                    ];
+                }
+                $reservations = Reservation::onlyTrashed()
+                    ->whereHas('table.department', function ($query) use ($managerDepartment) {
+                        $query->where('id', $managerDepartment->id);
+                    })
+                    ->get();
+            } else {
+                $reservations = Reservation::onlyTrashed()->get();
+            }
 
-            // Retrieve all soft-deleted reservations
-            $reservations = Reservation::onlyTrashed()->get();
             return [
                 'error' => false,
                 'reservations' => $reservations,

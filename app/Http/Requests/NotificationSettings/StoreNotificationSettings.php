@@ -33,7 +33,7 @@ class StoreNotificationSettings extends FormRequest
         return [
             'method_send_notification' => ['required', 'string', new CheckMethodSendNotification],
             'telegram_chat_id' => ['sometimes', 'nullable', 'integer'],
-            'send_notification_options' => ['required', 'array', new CheckSendNotificationOptions],
+            'send_notification_options' => ['nullable', 'array', new CheckSendNotificationOptions],
         ];
     }
 

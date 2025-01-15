@@ -16,12 +16,12 @@ class FavoriteSeeder extends Seeder
         $favorites = [
             [
                 'user_id' => 3,
-                'favorable_type' => Restaurant::class,
+                'favorable_type' => Table::class,
                 'favorable_id' => 1
             ],
             [
                 'user_id' => 4,
-                'favorable_type' => Dish::class,
+                'favorable_type' => FoodCategory::class,
                 'favorable_id' => 1
             ],
         ];

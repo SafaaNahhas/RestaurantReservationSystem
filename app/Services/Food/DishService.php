@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Food;
 
 use Exception;
 use App\Models\Dish;
@@ -293,7 +293,7 @@ class DishService
             ));
         }
     }
-    
+
 
     /**
      * Permanently delete a trashed (soft deleted) resource by its ID.

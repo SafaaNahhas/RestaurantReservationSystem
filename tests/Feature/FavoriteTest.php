@@ -32,7 +32,7 @@ class FavoriteTest extends TestCase
         Role::firstOrCreate(['name' => RoleUser::Admin->value]);
         Role::firstOrCreate(['name' => RoleUser::Customer->value]);
 
-        // Inject the rating service
+        // Inject the favorite service
         $this->favoriteService = app(FavoriteService::class);
 
         // Create admin and customer users using factories
@@ -71,13 +71,11 @@ class FavoriteTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ])->postJson('/api/favorites', [
 
-            'type' => 'food',
+            'type' => 'food_categories',
             'id' => $foodCategory->id,
 
         ]);
 
-        // Use the favoriteService to add the item to the user's favorites.
-        $response = $this->favoriteService->addToFavorites($this->customerUser, 'food', $foodCategory->id);
 
         // Assert that the response indicates a successful operation.
         $this->assertEquals('success', $response['status']);
@@ -127,6 +125,7 @@ class FavoriteTest extends TestCase
             ]
         );
 
+
         $this->assertEquals('Item Removed successfully', $response['message']);
     }
 
@@ -157,26 +156,11 @@ class FavoriteTest extends TestCase
         $response = $this->actingAs($this->adminUser)->getJson(
             'api/all_favorites',
         );
-        //    $token = JWTAuth::fromUser($this->customerUser);
 
 
-        // Submit the request to permanently remove the favorite item
-        //    $response = $this->withHeaders([
-        //        'Authorization' => 'Bearer ' . $token,
-        //    ])->deleteJson(
-        //        'api/favorites',
-        //        [
-        //            'type' => 'food_categories',
-        //            'id' => $foodCategory->id,
-        //        ]
-        //    );
-        // Assert the response status and structure
         $response->assertStatus(200);
-        // $response->assertJsonStructure([
-        //     'data' => [
-        //         '*' => ['user_name', 'rating', 'comment']
-        //     ]
-        // ]);
+
+
     }
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++

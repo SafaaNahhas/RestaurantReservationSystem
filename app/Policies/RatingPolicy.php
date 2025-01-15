@@ -57,7 +57,9 @@ class RatingPolicy
 
         return $user->hasRole(RoleUser::Admin->value);
     }
-    public function get_deleting(User $user)
+
+
+    public function get_deleting (User $user)
     {
         // Allow only Admin can do the restore the deleting rating
 

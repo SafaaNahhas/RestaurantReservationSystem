@@ -186,7 +186,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/favorites', [FavoriteController::class, 'removeFromFavorites']);
     Route::get('/favorite_deleted', [FavoriteController::class, 'getDeletedFavorite']); // Get deleted favorites
     Route::patch('favorite/restore/{id}', [FavoriteController::class, 'restorefavorite']); // Restore a deleted favorite
-    Route::delete('favorite/force-delete/{id}', [FavoriteController::class, 'forceDeletefavorite']); // Permanently delete favorite});
+    Route::delete('favorite/force-delete/{id}', [FavoriteController::class, 'permanentlyDeleteFavorite']); // Permanently delete favorite
 });
 // *********  Users Routes  **************************************
 Route::middleware(['auth:api', 'role:Admin'])->group(function () {
@@ -223,7 +223,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('checkIfNotificationSettingsExsits', [NotificationSettingsController::class, 'checkIfNotificationSettingsExsits']);
     Route::post('resetNotificationSettings', [NotificationSettingsController::class, 'resetNotificationSettings']);
 });
-Route::apiResource('notificationSettings', NotificationSettingsController::class)->only('store', 'update');
 //*********** payment route**********************************
 
 Route::post('/process-payment', [PaymentController::class, 'processPayment']);

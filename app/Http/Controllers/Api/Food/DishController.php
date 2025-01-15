@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Food;
 use App\Models\Dish;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Services\Food\DishService;
 use App\Http\Controllers\Controller;
-use App\Services\DishService as DishService ;
 use App\Http\Requests\DishRequest\StoreDishRequest;
 use App\Http\Requests\DishRequest\UpdateDishRequest;
 

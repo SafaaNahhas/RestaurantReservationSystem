@@ -147,7 +147,7 @@ class ForgatePasswordTest extends TestCase
             "/api/checkCode",
             [
                 'email' => $email,
-                'code' => strval($code + 1)
+                'code' => strval($code - 1)
             ],
         );
         Cache::clear();

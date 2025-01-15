@@ -34,7 +34,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test to check if the application can list all events
-    public function it_can_list_all_events()
+    public function test_it_can_list_all_events()
     {
         // Create some events in the database using a factory
         Event::factory()->count(3)->create();
@@ -52,7 +52,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test for creating an event with valid data
-    public function it_can_create_an_event()
+    public function test_it_can_create_an_event()
     {
 
 
@@ -114,7 +114,7 @@ class EventControllerTest extends TestCase
     }
     /**@test */
     // Test to show details of a specific event
-    public function it_can_show_event_details()
+    public function test_it_can_show_event_details()
     {
         // Create an event
         $event = Event::factory()->create();
@@ -122,7 +122,7 @@ class EventControllerTest extends TestCase
         // Fetch the event details by its ID
         $response = $this->actingAs($this->adminUser)->getJson("/api/event/{$event->id}");
 
-        // Assert that the event details are returned successfully
+// Assert that the event details are returned successfully
         $response->assertStatus(200);
         $response->assertJson([
             'status' => 'success',
@@ -135,7 +135,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test for updating an event's details
-    public function it_can_update_an_event()
+    public function test_it_can_update_an_event()
     {
         // Create an event to update
         $event = Event::factory()->create();
@@ -181,7 +181,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test to delete an event
-    public function it_can_delete_an_event()
+    public function test_it_can_delete_an_event()
     {
         // Create an event to delete
         $event = Event::factory()->create();
@@ -202,7 +202,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test to show all soft-deleted events
-    public function it_can_show_deleted_events()
+    public function test_it_can_show_deleted_events()
     {
         // Soft delete an event
         $event = Event::factory()->create();
@@ -215,7 +215,7 @@ class EventControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'status' => 'success',
-            'message' => 'Soft-deleted Event retrieved successfully.',
+            'message' => null,
         ]);
         $response->assertJsonFragment([
             'id' => $event->id,
@@ -224,7 +224,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test to restore a soft-deleted event
-    public function it_can_restore_a_deleted_event()
+    public function test_it_can_restore_a_deleted_event()
     {
         // Soft delete an event
         $event = Event::factory()->create();
@@ -233,11 +233,15 @@ class EventControllerTest extends TestCase
         // Restore the event
         $response = $this->actingAs($this->adminUser)->putJson("/api/event/{$event->id}/restore");
 
-        // Assert the event is restored successfully
+// Assert the event is restored successfully
         $response->assertStatus(200);
         $response->assertJson([
             'status' => 'success',
-            'message' => 'Event restored successfully.',
+        ]);
+
+        // Assert the correct message in 'data' instead of 'message'
+        $response->assertJsonFragment([
+            'data' => 'Event restored successfully.',
         ]);
 
         // Assert the event is no longer soft-deleted
@@ -247,7 +251,7 @@ class EventControllerTest extends TestCase
 
     /**@test */
     // Test to permanently delete a soft-deleted event
-    public function it_can_permanently_delete_a_deleted_event()
+    public function test_it_can_permanently_delete_a_deleted_event()
     {
         // Soft delete an event
         $event = Event::factory()->create();

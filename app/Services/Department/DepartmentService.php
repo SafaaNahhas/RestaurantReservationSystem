@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Department;
 
 use Exception;
 use App\Models\User;
@@ -43,7 +43,7 @@ class DepartmentService
             throw new \RuntimeException('Unable to fetch departments.');
         }
     }
-    
+
 
     /**
      * Create a new department.
@@ -108,8 +108,8 @@ class DepartmentService
     {
         try {
             // Attempt to find the department
-        $department = Department::findOrFail($id); 
-        
+        $department = Department::findOrFail($id);
+
         // Load related image, tables, and manager
         $department->load('image', 'tables', 'manager');
         if (!$department) {

@@ -2,18 +2,19 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Eloquent\RelationNotFoundException;
-use Illuminate\Validation\ValidationException;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Validation\ValidationException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -56,14 +57,18 @@ class Handler extends ExceptionHandler
             if ($exception instanceof UnauthorizedHttpException) {
                 return response()->json([
                     'message' => 'User does not have the right roles.'
-                ], 403); // 403 Forbidden
+                ], 403);
             }
-
-            // if ($exception instanceof ModelNotFoundException) {
-            //     return response()->json([
-            //         'message' => 'The requested resource was not found.',
-            //     ], 404);
-            // }
+            if ($exception instanceof UnauthorizedException) {
+                return response()->json([
+                    'message' => 'User does not have the right roles.'
+                ], 403);
+            }
+            if ($exception instanceof ModelNotFoundException) {
+                return response()->json([
+                    'message' => 'The requested resource was not found.',
+                ], 404);
+            }
 
             if ($exception instanceof RelationNotFoundException) {
                 return response()->json([

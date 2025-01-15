@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Event;
 
 use Exception;
 use App\Models\Event;
@@ -248,5 +248,5 @@ class EventService
             ));
         }
     }
- 
+
 }

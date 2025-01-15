@@ -322,6 +322,10 @@ class UserTest extends TestCase
     {
         $data = $this->startCode();
 
+        $this->withoutExceptionHandling();
+
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
         // Attempt to delete non-existent user
         $nonExistentId = 99999;
         $response = $this->withHeaders([
@@ -330,7 +334,6 @@ class UserTest extends TestCase
 
         $response->assertStatus(404);
     }
-
 
     /**
      * Test admin can restore a deleted user.

@@ -34,7 +34,7 @@ class UpdateNotificationSettings extends FormRequest
         return [
             'method_send_notification' => ['sometimes', 'string', new CheckMethodSendNotification],
             'telegram_chat_id' => ['sometimes', 'nullable', 'integer'],
-            'send_notification_options' => ['sometimes', 'array', new CheckSendNotificationOptions],
+            'send_notification_options' => ['sometimes','nullable', 'array', new CheckSendNotificationOptions],
         ];
     }
 

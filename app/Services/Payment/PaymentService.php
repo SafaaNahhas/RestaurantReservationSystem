@@ -27,6 +27,14 @@ class PaymentService
             //Set stripe secret key
             Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
             $reservation = Reservation::find($data['reservation_id']);
+
+            if (!$reservation) {
+                return ['status' => 'error', 'message' => 'Reservation not found.'];
+            }
+
+            if ($reservation->user_id !== auth()->id()) {
+                return ['status' => 'error', 'message' => 'You do not have permission to pay for this reservation.'];
+            }
             // Update the reservation with the payment value
             if ($reservation) {
                 $reservation->payment_value = $data['amount'];
@@ -34,14 +42,52 @@ class PaymentService
             }
 
             // Payment processing
-            return Charge::create([
-                'amount' => $data['amount'] * 100, // Convert dollars to cents
-                'currency' => 'usd', // Currency
-                'source' => $data['stripeToken'], // Tokens sent by the client
+            $charge = Charge::create([
+                'amount' => $data['amount'] * 100,
+                'currency' => 'usd',
+                'source' => $data['stripeToken'],
                 'description' => 'API Payment Example',
             ]);
+
+            return ['status' => 'success', 'charge' => $charge];
+
         } catch (\Exception $e) {
             Log::error('Error in paymentService@processPayment: ' . $e->getMessage());
+            return ['status' => 'error', 'message' => 'An unexpected error occurred'];
+        }
+    }
+
+    public function addprocessPayment(array $data)
+    {
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
+            $reservation = Reservation::find($data['reservation_id']);
+
+            if (!$reservation) {
+                return ['status' => 'error', 'message' => 'Reservation not found.'];
+            }
+
+            if ($reservation->user_id !== auth()->id()) {
+                return ['status' => 'error', 'message' => 'You do not have permission to pay for this reservation.'];
+            }
+
+            if ($reservation->payment_value == null) {
+                return ['status' => 'error', 'message' => 'This invoice has not been paid.'];
+            }
+
+            $reservation->payment_value = $reservation->payment_value + $data['amount'];
+            $reservation->save();
+
+            $charge = Charge::create([
+                'amount' => $data['amount'] * 100,
+                'currency' => 'usd',
+                'source' => $data['stripeToken'],
+                'description' => 'API Payment Example',
+            ]);
+
+            return ['status' => 'success', 'charge' => $charge];
+        } catch (\Exception $e) {
+            Log::error('Error in paymentService@addprocessPayment: ' . $e->getMessage());
             return ['status' => 'error', 'message' => 'An unexpected error occurred'];
         }
     }

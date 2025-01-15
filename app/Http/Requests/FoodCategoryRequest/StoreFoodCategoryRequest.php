@@ -27,7 +27,7 @@ class StoreFoodCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_name' => 'required|string|max:50|not_regex:/^[\s]*$/',
+            'category_name' => 'required|string|unique:food_categories|max:50|not_regex:/^[\s]*$/',
             'description' => 'nullable|string|max:255',
             'user_id' => 'required|exists:users,id|integer',
         ];

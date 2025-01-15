@@ -116,7 +116,7 @@ class NotificationLogService
     }
 
     /**
-     * Delete notification logs 
+     * Delete notification logs
      * @param int $notificationLog_id
      * @throws HttpResponseException - If an error occurs during deletion.
      */
@@ -168,8 +168,8 @@ class NotificationLogService
     }
 
     /**
-     * Restore a soft-deleted notification log 
-     * @param int $notificationLog_id 
+     * Restore a soft-deleted notification log
+     * @param int $notificationLog_id
      * @retrun NotificationLogResource $notificationLog
      * @throws HttpResponseException - If an error occurs during restoration.
      */
@@ -196,7 +196,7 @@ class NotificationLogService
     }
 
     /**
-     * Permanently delete a soft-deleted notification log 
+     * Permanently delete a soft-deleted notification log
      * @paramint $notificationLog_id
      * @throws HttpResponseException - If an error occurs during deletion.
      */

@@ -29,11 +29,17 @@ class FavoriteController extends Controller
     public function getAllFavorites(Request $request): JsonResponse
     {
         $this->authorize('showAllFavorite', Favorite::class);
-        $data = $request->input('type', 'per_page');
-        $favorites = $this->favoriteService->getAllFavorites($data);
-        return $this->paginated($favorites, FavoriteResource::class, 'Favorite fetched successfully', 200);
 
+        $data = [
+            'type' => $request->input('type'),
+            'perPage' => $request->input('per_page', 10)
+        ];
+
+        $favorites = $this->favoriteService->getAllFavorites($data);
+
+        return $this->paginated($favorites, FavoriteResource::class, 'Favorites fetched successfully', 200);
     }
+
 
 
 
@@ -48,7 +54,7 @@ class FavoriteController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $data = $this->favoriteService->addToFavorites($user, $request->type, $request->id);
-        return self::success($data, "Added to favorites successfully");
+        return self::success(null, "Added to favorites successfully");
     }
 
     //************************************************************ */
@@ -90,7 +96,7 @@ class FavoriteController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $data = $this->favoriteService->removeFromFavorites($user, $request->type, $request->id);
-        return $this->success(null, 'success', 'Item Removed successfully', 200);
+        return $this->success(null, 'Item Removed successfully', 200);
     }
 
     //************************************************************************* */

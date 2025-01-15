@@ -34,7 +34,7 @@ class RatingController extends Controller
             'ratingValue' => $request->input('rating')
         ];
         $ratings = $this->ratingService->getRating($data);
-        return self::success($ratings, 'Ratings fetched successfully');
+        return $this->paginated($ratings, RatingResource::class, 'Ratings fetched successfully', 200);
     }
     //************************************************************************************************** */
 
@@ -122,7 +122,7 @@ class RatingController extends Controller
     public function getDeletedRatings()
     {
 
-        $this->authorize('get_deleted', Rating::class);
+        $this->authorize('get_deleting', Rating::class);
         $deletedRatings = $this->ratingService->get_deleted_ratings();
         return $this->success($deletedRatings, 'Deleted ratings retrieved successfully.');
 
@@ -159,7 +159,7 @@ class RatingController extends Controller
 
         $deleted = $this->ratingService->permanentlyDeleteRating($ratingId);
 
-        return $this->success('Rating permanently deleted.');
+        return $this->success(null,'Rating permanently deleted.');
 
     }
 }

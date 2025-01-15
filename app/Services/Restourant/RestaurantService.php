@@ -1,5 +1,5 @@
 <?php
-namespace App\Services;
+namespace App\Services\Restaurant;
 
 use Exception;
 use App\Models\Email;

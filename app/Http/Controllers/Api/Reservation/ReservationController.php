@@ -43,7 +43,7 @@ class ReservationController extends Controller
      */
     public function storeReservation(StoreReservationRequest $request): JsonResponse
     {
-        if ($request->user()->cannot('store reservation', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('store', Reservation::class)) {throw new UnauthorizedException(403);}
         $result = $this->reservationService->storeReservation($request->validated());
         // Handle the response based on the presence of reserved tables or reservation details
         return $result['status_code'] === 201
@@ -62,7 +62,7 @@ class ReservationController extends Controller
     public function updateReservation(UpdateReservationRequest $request, $id): JsonResponse
     {
         // Check if the user has permission to update the reservation
-        if ($request->user()->cannot('update reservation', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('update', Reservation::class)) {throw new UnauthorizedException(403);}
         // Call the service to update the reservation
         $result = $this->reservationService->updateReservation($request->validated(), $id);
        // Return the response based on the result
@@ -101,8 +101,9 @@ class ReservationController extends Controller
     public function confirmReservation(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
-        if ($request->user()->cannot('confirm reservation', $reservation)){throw new UnauthorizedException(403);}
-        // Call the confirm reservation logic from the service
+        if ($request->user()->cannot('confirm', $reservation)) {
+            throw new UnauthorizedException(403);
+        }        // Call the confirm reservation logic from the service
         $result = $this->reservationService->confirmReservation($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
         return self::success($result['data'], $result['message'], 200);
@@ -121,8 +122,9 @@ class ReservationController extends Controller
         if (!$request->has('rejection_reason') || empty($request->input('rejection_reason'))) {
           return self::error(null, 'Rejection reason is required.', 422);}
         $reservation = Reservation::findOrFail($reservationId);
-        if ($request->user()->cannot('reject reservation',  $reservation)) {throw new UnauthorizedException(403);}
-        $rejectionReason = $request->input('rejection_reason');
+        if ($request->user()->cannot('reject', $reservation)) {
+            throw new UnauthorizedException(403);
+        }        $rejectionReason = $request->input('rejection_reason');
         // Call the service to handle the reservation rejection
         $result = $this->reservationService->rejectReservation($reservationId, $rejectionReason);
         // If there is an error, return a 400 response with the error message
@@ -142,8 +144,9 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::findOrFail($reservationId);
         // Fetch the reservation and check authorization
-        if ($request->user()->cannot('cancle reservation',   $reservation )) {throw new UnauthorizedException(403);}
-        // Call the cancel logic from the service
+        if ($request->user()->cannot('cancel', $reservation)) {
+            throw new UnauthorizedException(403);
+        }        // Call the cancel logic from the service
         $result = $this->reservationService->cancelReservation($reservationId, $request->validated()['cancellation_reason']);
         if ($result['error']) {return self::error(null, $result['message'], 422);}
         return self::success($result['data'], $result['message'], 200);
@@ -157,7 +160,7 @@ class ReservationController extends Controller
      */
     public function startService(Request $request, $id)
     {
-        if ($request->user()->cannot('start service', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('startService', Reservation::class)) {throw new UnauthorizedException(403);}
         // Call the start service logic from the service
         $result = $this->reservationService->startService($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
@@ -172,7 +175,7 @@ class ReservationController extends Controller
      */
     public function completeService(Request $request, $id)
     {
-        if ($request->user()->cannot('complete service', Reservation::class)) {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('completeService', Reservation::class)) {throw new UnauthorizedException(403);}
         // Call the complete service logic from the service
         $result = $this->reservationService->completeService($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
@@ -190,7 +193,7 @@ class ReservationController extends Controller
      */
     public function softDeleteReservation(Request $request, $id)
     {
-        if ($request->user()->cannot('soft delete reservation', Reservation::class))  {throw new UnauthorizedException(403);}
+        if ($request->user()->cannot('softDeleteReservation', Reservation::class))  {throw new UnauthorizedException(403);}
         $result = $this->reservationService->softDeleteReservation($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
         return self::success(null, $result['message'], 200);
@@ -205,7 +208,7 @@ class ReservationController extends Controller
      */
     public function forceDeleteReservation(Request $request, $id)
     {
-        if (!$request->user()->can('hard delete reservation'))  {throw new UnauthorizedException(403);}
+        if (!$request->user()->can('forceDeleteReservation'))  {throw new UnauthorizedException(403);}
         $result = $this->reservationService->forceDeleteReservation($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
         return self::success(null, $result['message'], 200);
@@ -220,7 +223,7 @@ class ReservationController extends Controller
      */
     public function restoreReservation(Request $request, $id)
     {
-        if (!$request->user()->can('restorereservation')){throw new UnauthorizedException(403);}
+        if (!$request->user()->can('restoreReservation')){throw new UnauthorizedException(403);}
         $result = $this->reservationService->restoreReservation($id);
         if ($result['error']) {return self::error(null, $result['message'], 400);}
         return self::success(null, $result['message'], 200);
@@ -234,7 +237,7 @@ class ReservationController extends Controller
      */
     public function getSoftDeletedReservations(Request $request)
     {
-        if (!$request->user()->can('view soft delete reservation')){throw new UnauthorizedException(403);}
+        if (!$request->user()->can('viewSoftDeletedReservations')){throw new UnauthorizedException(403);}
         $result = $this->reservationService->getSoftDeletedReservations();
         if ($result['error']) {return self::error(null, $result['message'], 400);}
         return self::success($result['reservations'], 'Soft deleted reservations retrieved successfully', 200);

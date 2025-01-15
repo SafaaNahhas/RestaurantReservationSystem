@@ -28,25 +28,26 @@ class ReservationPolicy
         return $user->hasPermissionTo('update reservation') && $reservation->user_id === $user->id;
     }
 
-
-        public function confirm(User $user, Reservation $reservation)
+    public function confirm(User $user, Reservation $reservation)
     {
         // Check if the user has permission and if the user is a manager of the department
-        return $user->hasPermissionTo('confirm reservation') ||
-            ($reservation->table && $reservation->table->department->manager->manager_id == $user->id);
+        return $user->hasPermissionTo('confirm reservation') &&
+            ($reservation->table && $reservation->manager_id == $user->id);
     }
 
     public function reject(User $user, Reservation $reservation)
     {
         // Check if the user has permission and if the user is a manager of the department
-        return $user->hasPermissionTo('reject reservation') ||
-        ($reservation->table && $reservation->table->department->manager->manager_id == $user->id);
+        return $user->hasPermissionTo('reject reservation') &&
+            ($reservation->table && $reservation->table->department->manager_id == $user->id);
     }
 
 
     public function cancel(User $user, Reservation $reservation)
     {
-        return $user->hasPermissionTo('cancle reservation') && $reservation->user->user_id === $user->id;
+
+        return $user->hasPermissionTo('cancle reservation') &&$reservation->user_id === $user->id;
+        ;
     }
 
     public function startService(User $user)

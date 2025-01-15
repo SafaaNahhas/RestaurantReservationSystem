@@ -9,15 +9,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Class Table
+ *
+ * Represents a table in a restaurant, including its number, location, seat count, and associated department.
+ * It supports relationships with reservations and can also be favorited by users.
+ *
+ * @package App\Models
+ *
+ *
+ * */
 class Table extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    // Mass-assignable attributes
-    protected $fillable = ['table_number', 'location', 'seat_count',  'department_id'];
     /**
-     * Relationship: A table belongs to a department.
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = ['table_number', 'location', 'seat_count',  'department_id'];
+
+    /**
+     * Get the department that the table belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function department()
     {
@@ -25,13 +42,22 @@ class Table extends Model
     }
 
     /**
-     * Relationship: A table has many reservations.
+     * Get the reservations associated with the table.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
 
+    /**
+     * Scope to filter tables by table number.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $table_number
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByTableNumber(Builder $query, $table_number)
     {
         if ($table_number)
@@ -39,6 +65,14 @@ class Table extends Model
         else
             return $query;
     }
+
+    /**
+     * Scope to filter tables by seat count.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int|null $seat_count
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeBySeatCount(Builder $query, $seat_count)
     {
         if ($seat_count)
@@ -47,6 +81,13 @@ class Table extends Model
             return $query;
     }
 
+    /**
+     * Scope to filter tables by location.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $location
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeByLocation(Builder $query, $location)
     {
         if ($location)
@@ -54,6 +95,12 @@ class Table extends Model
         else
             return $query;
     }
+
+    /**
+     * Get the favorite records associated with the table.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
     public function favorites()
     {
         return $this->morphMany(Favorite::class, 'favorable');

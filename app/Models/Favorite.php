@@ -8,25 +8,45 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * Class Favorite
+ *
+ * Represents a polymorphic favorite entity in the application, allowing users to mark different types of entities as favorites.
+ *
+ * @package App\Models
+ */
 class Favorite extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
 
-    // Mass-assignable attributes
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = ['user_id', 'favorable_type', 'favorable_id'];
 
-/**
- * morph ralation to linke  with tables & food_category
- */
+
+    /**
+     * Morph relationship to link with different models such as tables and food categories.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
     public function favorable()
     {
         return $this->morphTo();
     }
 
+
     /**
      * Scope to filter favorites by type.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $type
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByType($query, $type)
     {

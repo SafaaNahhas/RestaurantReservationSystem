@@ -12,15 +12,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
+/**
+ * Class Reservation
+ *
+ * Represents a reservation made by a user for a table, including start and end times, guest count, and services.
+ *
+ * @package App\Models
+ *
+ * */
 class Reservation extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    // Mass-assignable attributes
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = ['user_id', 'manager_id', 'table_id', 'start_date', 'end_date', 'guest_count', 'services', 'status', 'email_sent_at'];
 
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
@@ -28,48 +46,70 @@ class Reservation extends Model
         'email_sent_at' => 'datetime'
     ];
 
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
     protected $dates = [
         'start_date',
         'end_date',
     ];
 
+
     /**
      * Relationship: A reservation belongs to a user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     /**
      * Relationship: A reservation belongs to a manager.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
     }
+
     /**
      * Relationship: A reservation belongs to a table.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function table()
     {
         return $this->belongsTo(Table::class);
     }
+
     /**
      * Relationship: A reservation has many logs.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function reservationLogs()
     {
         return $this->hasMany(ReservationLog::class);
     }
+
+
     /**
      * Relationship: A reservation has many events.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function events()
     {
         return $this->hasMany(Event::class);
     }
+
     /**
-     * Get the rating associated with the reservation.
+     * Relationship: A reservation has one rating.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -79,7 +119,7 @@ class Reservation extends Model
     }
 
     /**
-     * Get the details of the reservation.
+     * Relationship: A reservation has one reservation detail.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -88,8 +128,12 @@ class Reservation extends Model
         return $this->hasOne(ReservationDetail::class); // One-to-one relationship with ReservationDetail
     }
 
-
-
+    /**
+     * Boot method to check for conflicting emergencies before creating a reservation.
+     *
+     * @return void
+     * @throws \Exception if there's a conflicting emergency.
+     */
     protected static function booted()
     {
         // Hook into the "creating" event of the model
@@ -170,7 +214,12 @@ class Reservation extends Model
         return $value ? Carbon::parse($value)->format('Y-m-d H:i') : null;
     }
 
-
+    /**
+     * Get all "in-service" reservations for a user.
+     *
+     * @param int $userId The user ID
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public static function getInServiceReservationsForUser($userId)
     {
         return self::where('user_id', $userId)->where('status', 'in_service')->get();

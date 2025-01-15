@@ -16,6 +16,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * Class User
+ *
+ * Represents a user in the system, managing various relationships such as reservations,
+ * food categories, email logs, favorites, and more. Implements JWT authentication for API access.
+ *
+ * @package App\Models
+ *
+ * */
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -35,6 +44,11 @@ class User extends Authenticatable implements JWTSubject
         'is_active',
     ];
 
+    /**
+     * The attributes that should be treated as date instances.
+     *
+     * @var array<string>
+     */
     protected array $dates = ['deleted_at'];
 
     /**
@@ -48,7 +62,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
      * @var array<string, string>
      */

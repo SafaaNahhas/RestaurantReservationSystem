@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\FoodCategory;
 use App\Models\User;
-use App\Services\FoodCategoryService;
+use App\Models\FoodCategory;
+use Illuminate\Support\Facades\Log;
+use App\Services\Food\FoodCategoryService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Log;
 
 class FoodCategoryTest extends TestCase
 {
@@ -40,7 +40,7 @@ class FoodCategoryTest extends TestCase
     public function it_can_create_category()
     {
         // Create and authenticate a user
-        $user = User::factory()->create(); 
+        $user = User::factory()->create();
         $this->actingAs($user);
         // Define the data for the new FoodCategory
         $data = [

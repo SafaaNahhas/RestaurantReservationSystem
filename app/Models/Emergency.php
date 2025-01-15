@@ -12,7 +12,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Emergency extends Model
 {
     use HasFactory;
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'name',
         'start_date',
@@ -20,7 +24,11 @@ class Emergency extends Model
         'description',
         'is_active'
     ];
-
+    /**
+     * Boot the model and handle emergency-related actions on creation.
+     *
+     * Wraps the logic in a transaction to ensure consistency.
+     */
     protected static function booted()
     {
         // Wrap the static boot logic inside a database transaction
@@ -34,8 +42,8 @@ class Emergency extends Model
                     'start_date',
                     [$emergency->start_date, $emergency->end_date]
                 )
-                    ->where('status', '!=', 'cancelled') // Excluding previously canceled reservations
-                    ->get();
+                ->whereNotIn('status', ['cancelled', 'completed'])
+                ->get();
 
                 // Loop through each affected reservation
                 foreach ($affectedReservations as $reservation) {

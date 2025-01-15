@@ -4,15 +4,15 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\Dish;
-use App\Models\FoodCategory;
 use App\Models\User;
-use App\Services\DishService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use App\Models\FoodCategory;
 use Illuminate\Http\UploadedFile;
+use App\Services\Food\DishService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DishTest extends TestCase
 {
@@ -39,7 +39,7 @@ class DishTest extends TestCase
         $this->assertCount(10, $dishes);
     }
 
-   
+
     /** @test for create dish without image*/
     public function it_can_create_dish_without_images()
     {

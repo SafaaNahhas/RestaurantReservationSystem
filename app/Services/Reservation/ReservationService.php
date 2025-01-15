@@ -751,9 +751,7 @@ class ReservationService
             Cache::forget('tables_with_reservations_pending');
         }
         Cache::forget('tables_with_reservations_all');
-        // Dispatch job to send a rating request email
-        $notificationLogService = new NotificationLogService();
-        SendRatingRequestJob::dispatch($reservation, $notificationLogService);
+
         return [
             'error' => false,
             'reservation' => $reservation,

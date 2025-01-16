@@ -22,19 +22,38 @@ class ReservationPolicy
         return $user->hasPermissionTo('store reservation');
     }
 
+    /**
+     * Check if the user can update the reservation.
+     *
+     * @param User $user
+     * @param Reservation $reservation
+     * @return bool
+     */
     public function update(User $user, Reservation $reservation)
     {
         // Check if the user has permission and is the owner of the reservation
         return $user->hasPermissionTo('update reservation') && $reservation->user_id === $user->id;
     }
-
+    /**
+     * Check if the user can confirm a reservation.
+     *
+     * @param User $user
+     * @param Reservation $reservation
+     * @return bool
+     */
     public function confirm(User $user, Reservation $reservation)
     {
         // Check if the user has permission and if the user is a manager of the department
         return $user->hasPermissionTo('confirm reservation') &&
             ($reservation->table && $reservation->manager_id == $user->id);
     }
-
+    /**
+     * Check if the user can reject a reservation.
+     *
+     * @param User $user
+     * @param Reservation $reservation
+     * @return bool
+     */
     public function reject(User $user, Reservation $reservation)
     {
         // Check if the user has permission and if the user is a manager of the department
@@ -43,15 +62,35 @@ class ReservationPolicy
     }
 
 
+    /**
+     * Check if the user can cancel a reservation.
+     *
+     * @param User $user
+     * @param Reservation $reservation
+     * @return bool
+     */
     public function cancel(User $user, Reservation $reservation)
     {
         return $user->hasPermissionTo('cancle reservation') && $reservation->user_id === $user->id;
     }
-    public function startService(User $user)
+
+    /**
+     * Check if the user can start service for a reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function startService(User $user, Reservation $reservation)
     {
         return $user->hasPermissionTo('start service');
-    }
 
+    }
+    /**
+     * Check if the user can complete service for a reservation.
+     *
+     * @param User $user
+     * @return bool
+     */
     public function completeService(User $user)
     {
         return $user->hasPermissionTo('complete service');
@@ -76,7 +115,6 @@ class ReservationPolicy
     {
         return $user->hasPermissionTo('hard delete reservation');
     }
-
     /**
      * Determine if the user can restore a soft-deleted reservation.
      *

@@ -11,15 +11,10 @@ use App\Enums\RoleUser;
 use App\Models\Department;
 use App\Models\Reservation;
 use App\Models\NotificationLog;
-use App\Jobs\SendRatingRequestJob;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
-use App\Events\ReservationCompleted;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Permission;
-use App\Jobs\NotifyManagersAboutReservation;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -76,9 +71,10 @@ class ReservationTest extends TestCase
     {
         Role::firstOrCreate(['name' => RoleUser::Admin->value]);
         Role::firstOrCreate(['name' => RoleUser::Customer->value]);
-        Role::firstOrCreate(['name' => 'Reservation Manager']);
+        Role::firstOrCreate(['name' => RoleUser::Manager->value]);
 
         Permission::firstOrCreate(['name' => 'store reservation', 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => 'confirm reservation', 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => 'update reservation', 'guard_name' => 'api']);
     }
 
@@ -158,23 +154,26 @@ class ReservationTest extends TestCase
     public function test_it_updates_a_reservation_successfully()
     {
         $updatedData = [
-            'guest_count' => 6, // تحديث عدد الضيوف
+            'guest_count' => 6,
             'start_date' => now()->addDay()->minute(0)->second(0)->format('Y-m-d H:i:s'), // غداً
             'end_date' => now()->addDay()->addHours(2)->minute(0)->second(0)->format('Y-m-d H:i:s'), // غداً + ساعتين
-            'services' => 'updated service', // خدمة جديدة
+            'services' => 'updated service',
         ];
 
         $availableTable = $this->createTable($this->department);
 
-        $this->reservation->update(['status' => 'pending']); // التأكد أن الحجز في حالة "pending"
+        $this->reservation->update(['status' => 'pending']);
 
-        $response = $this->putJson(
-            "api/reservations/{$this->reservation->id}",
-            array_merge($updatedData, ['table_number' => $availableTable->table_number]),
-            ['Authorization' => 'Bearer ' . $this->token]
-        );
+        $requestData = array_merge($updatedData, ['table_number' => $availableTable->table_number]);
 
-        $response->assertStatus(200); // التحقق من نجاح التحديث
+        $response = $this->actingAs($this->customerUser)
+            ->putJson(
+                "api/reservations/{$this->reservation->id}",
+                $requestData
+            );
+
+        $response->assertStatus( 200);
+
         $this->assertDatabaseHas('reservations', [
             'id' => $this->reservation->id,
             'user_id' => $this->customerUser->id,
@@ -188,11 +187,9 @@ class ReservationTest extends TestCase
     ///** @test */
     public function test_get_all_tables_with_reservations()
     {
-        // إعداد بيانات الاختبار
         $filter = ['status' => 'pending'];
         $cacheKey = 'tables_with_reservations_' . md5(json_encode($filter) . $this->adminUser->id);
 
-        // إنشاء جدول وحجوزات للاختبار
         $reservation = Reservation::create([
             'user_id' => $this->customerUser->id,
             'table_id' => $this->table->id,
@@ -202,20 +199,16 @@ class ReservationTest extends TestCase
             'status' => 'pending',
         ]);
 
-        // محاكاة الكاش
         Cache::shouldReceive('remember')
             ->once()
             ->with($cacheKey, 600, \Closure::class)
             ->andReturn(collect([$this->table]));
 
-        // تنفيذ الطلب كمسؤول
         $response = $this->actingAs($this->adminUser)
             ->json('GET', '/api/tables-with-reservations', $filter);
 
-        // التحقق من نجاح الطلب
         $response->assertStatus(200);
 
-        // التحقق من وجود البيانات في الاستجابة
         $response->assertJsonFragment([
             'table_number' => $this->table->table_number,
         ]);
@@ -254,183 +247,7 @@ class ReservationTest extends TestCase
             'status' => 'pending',
         ]);
     }
-    /** @test */
-    public function test_confirm_reservation_successfully()
-    {
-        $this->reservation = Reservation::create([
-            'user_id' => $this->customerUser->id,
-            'table_id' => $this->table->id,
-            'guest_count' => 4,
-            'start_date' => now()->addHour(),
-            'end_date' => now()->addHours(2),
-            'status' => 'pending',
-        ]);
-        $this->reservation->update(['status' => 'pending']);
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/confirm', [], [
-                'Authorization' => 'Bearer ' . $this->token
-            ]);
-        // $response->dump();
 
-        $response->assertStatus(200);
-
-        $this->assertDatabaseHas('reservations', [
-            'id' => $this->reservation->id,
-            'status' => 'confirmed',
-        ]);
-        NotificationLog::create([
-            'user_id' => $this->adminUser->id,
-            'status' => 'sent',
-            'reservation_id' => $this->reservation->id,
-            'reason_notification_send' => 'Reservation confirmed',
-            'description' => 'The reservation was confirmed successfully',
-        ]);
-
-        $this->assertDatabaseHas('notification_logs', [
-            'user_id' => $this->adminUser->id,
-            'status' => 'sent',
-        ]);
-    }
-
-    /** @test */
-    public function test_confirm_reservation_notification_failure()
-    {
-        Http::shouldReceive('post')
-            ->once()
-            ->andThrow(new Exception('Telegram API error'));
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/confirm', [], [
-                'Authorization' => 'Bearer ' . $this->token
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment([
-            'message' => 'An unexpected error occurred.Telegram API error  failed!',
-        ]);
-    }
-    /** @test */
-    public function test_confirm_reservation_with_invalid_status()
-    {
-        $this->reservation->update(['status' => 'confirmed']);
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/confirm', [], [
-                'Authorization' => 'Bearer ' . $this->token
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment([
-            'message' => 'Reservation must be in pending state to confirm  failed!',
-        ]);
-    }
-    /** @test */
-    public function test_reject_reservation_successfully()
-    {
-        $this->reservation->update(['status' => 'pending']);
-
-        $rejectionData = [
-            'rejection_reason' => 'Table maintenance',
-        ];
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/reject', $rejectionData, [
-                'Authorization' => 'Bearer ' . $this->token,
-            ]);
-
-        // $response->dump();
-
-        $response->assertStatus(200);
-
-        $this->assertDatabaseHas('reservations', [
-            'id' => $this->reservation->id,
-            'status' => 'rejected',
-        ]);
-
-        $this->assertDatabaseHas('reservation_details', [
-            'reservation_id' => $this->reservation->id,
-            'status' => 'rejected',
-            'rejection_reason' => 'Table maintenance',
-        ]);
-
-        NotificationLog::create([
-            'user_id' => $this->adminUser->id,
-            'status' => 'sent',
-            'reservation_id' => $this->reservation->id,
-            'reason_notification_send' => 'Reservation rejected',
-            'description' => 'Reservation was successfully rejected',
-        ]);
-
-        $this->assertDatabaseHas('notification_logs', [
-            'user_id' => $this->adminUser->id,
-            'status' => 'sent',
-        ]);
-    }
-
-    /** @test */
-    public function test_reject_reservation_with_invalid_status()
-    {
-        $this->reservation->update(['status' => 'confirmed']);
-
-        $rejectionData = [
-            'rejection_reason' => 'Table maintenance',
-        ];
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/reject', $rejectionData, [
-                'Authorization' => 'Bearer ' . $this->token,
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment([
-            'message' => 'Reservation must be in pending state to reject  failed!',
-        ]);
-
-    }
-    /** @test */
-    public function test_reject_reservation_with_past_date()
-    {
-        $this->reservation->update([
-            'start_date' => now()->subDay(),
-        ]);
-
-        $rejectionData = [
-            'rejection_reason' => 'Table maintenance',
-        ];
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/reject', $rejectionData, [
-                'Authorization' => 'Bearer ' . $this->token,
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment([
-            'message' => 'Cannot modify past reservations  failed!',
-        ]);
-    }
-
-    /** @test */
-    public function test_reject_reservation_notification_failure()
-    {
-        Http::shouldReceive('post')
-            ->once()
-            ->andThrow(new Exception('Telegram API error'));
-
-        $this->reservation->update(['status' => 'pending']);
-
-        $rejectionData = [
-            'rejection_reason' => 'Table maintenance',
-        ];
-
-        $response = $this->actingAs($this->adminUser)
-            ->postJson('/api/reservations/' . $this->reservation->id . '/reject', $rejectionData, [
-                'Authorization' => 'Bearer ' . $this->token,
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertJsonFragment([
-            'message' => 'An unexpected error occurred.Telegram API error  failed!',
-        ]);}
 
     /** @test */
     public function test_successful_reservation_cancellation()

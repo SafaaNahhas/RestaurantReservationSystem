@@ -789,8 +789,7 @@ class ReservationService
                 }
             }
             if ($user->hasRole('Manager')) {
-                $managerDepartment = $user->department;
-                if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
+                if (!$reservation->table || $reservation->manager_id != $user->id) {
                     return [
                         'error' => true,
                         'message' => 'You can only delete reservations within your department.',
@@ -850,12 +849,11 @@ class ReservationService
                     'message' => 'Force delete is only allowed for soft-deleted reservations.',
                 ];
             }
-            if ($user->hasRole('manager')) {
-                $managerDepartment = $user->department;
-                if (!$managerDepartment || $reservation->table->department->id !== $managerDepartment->id) {
+            if ($user->hasRole('Manager')) {
+                if (!$reservation->table || $reservation->manager_id != $user->id) {
                     return [
                         'error' => true,
-                        'message' => 'You can only force delete reservations within your department.',
+                        'message' => 'You can only force delete reservations assigned to you.',
                     ];
                 }
             }

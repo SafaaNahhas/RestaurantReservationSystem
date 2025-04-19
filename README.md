@@ -205,7 +205,7 @@ Users can choose their preferred notification method (email or Telegram notifica
 ### **Team Members**:
 
 -   [Safaa Nahaas (Team Leader)](https://github.com/SafaaNahhas)
--   [Haider Rayya](https://github.com/HaidarRayya)
+-   [Haider Rayya (Assistant Team Leader)](https://github.com/HaidarRayya)
 -   [Hiba Altabal](https://github.com/hiba-altabbal95)
 -   [Hussein Hamda](https://github.com/HusseinIte)
 -   [Khatoon Badre](https://github.com/KhatoonBadrea)
